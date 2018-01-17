@@ -1,0 +1,80 @@
+InitialObjectDescriptor {
+	objectDescriptorID 100
+	audioProfileLevelIndication 255
+	visualProfileLevelIndication 254
+	sceneProfileLevelIndication 1
+	graphicsProfileLevelIndication 1
+	ODProfileLevelIndication 1
+	esDescr [
+		ES_Descriptor {
+			ES_ID 1
+			decConfigDescr DecoderConfigDescriptor {
+				streamType 3
+				decSpecificInfo BIFSConfig {
+					useNames true
+					isCommandStream true
+					pixelMetric true
+					pixelWidth 400
+					pixelHeight 400
+				}
+			}
+		}
+		ES_Descriptor {
+			ES_ID 2
+			decConfigDescr DecoderConfigDescriptor {
+				streamType 1
+			}
+		}
+	]
+}
+
+EXTERNPROTO IMAGE [
+    exposedField MFString 	url				[]
+	exposedField SFVec2f	size			100 60
+	exposedField SFVec2f 	translation 	0 0
+    exposedField SFVec2f 	scale 			1 1
+	exposedField SFFloat 	rotationAngle 	0.0
+]"image.bt"
+
+OrderedGroup {
+	children [
+		IMAGE {
+			url "11"
+			size 150 150
+            translation -100 0
+            rotationAngle -1.57
+		}
+        IMAGE {
+			url "11"
+			size 150 150
+            translation 100 0
+            rotationAngle 1.57
+            scale 2 2
+		}
+	]
+}
+
+AT 0 {
+	UPDATE OD [
+		ObjectDescriptor {
+			objectDescriptorID 11
+			esDescr [
+				ES_Descriptor {
+					ES_ID 11
+					muxInfo MuxInfo {
+						fileName "images/lightbulb.png"
+					}
+				}
+			]
+		}
+	]
+}
+
+
+
+
+
+
+
+
+

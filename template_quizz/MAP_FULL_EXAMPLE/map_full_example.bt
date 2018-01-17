@@ -1,0 +1,384 @@
+InitialObjectDescriptor {
+	objectDescriptorID 100
+	audioProfileLevelIndication 255
+	visualProfileLevelIndication 254
+	sceneProfileLevelIndication 1
+	graphicsProfileLevelIndication 1
+	ODProfileLevelIndication 1
+	esDescr [
+		ES_Descriptor {
+			ES_ID 1
+			decConfigDescr DecoderConfigDescriptor {
+				streamType 3
+				decSpecificInfo BIFSConfig {
+					useNames true
+					isCommandStream true
+					pixelMetric true
+					pixelWidth 640
+					pixelHeight 800
+				}
+			}
+		}
+		ES_Descriptor {
+			ES_ID 2
+			decConfigDescr DecoderConfigDescriptor {
+				streamType 1
+			}
+		}
+	]
+}
+
+EXTERNPROTO IMAGE [
+	exposedField SFVec2f 	translation 	0 0
+	exposedField SFFloat 	rotationAngle 	0.0
+	exposedField SFVec2f 	scale 			1, 1
+	exposedField MFString 	url				[]
+	exposedField SFVec2f	size			100 60
+]"image.bt"
+
+EXTERNPROTO BUTTON [
+	exposedField SFVec2f 	Transform2D_translation 	0 0
+	exposedField SFFloat 	Transform2D_rotationAngle 	0.0
+	exposedField SFVec2f 	Transform2D_scale 			1, 1
+	exposedField SFVec2f 	Rectangle_size 				0 0
+	exposedField MFString 	ImageTexture_BackImage 		[]
+	exposedField MFString 	ImageTexture_OverImage 		[]
+	exposedField MFString 	Text_Text 					[]
+	exposedField SFColor 	Material2D_TextColor 		1 1 1
+	exposedField SFFloat 	FontStyle_TextSize 			18
+	exposedField SFColor 	Material2D_OverColor 		1 0.5 0.8
+	exposedField SFColor 	Material2D_BackColor 		0.1 0.1 0.1
+	exposedField MFString 	FontStyle_Family 			["ARIAL"]
+	exposedField SFVec2f	Layout_size					-1 -1
+	eventOut 	 SFBool 	onClick
+	eventIn 	 SFBool 	doClick
+]"button.bt"
+
+EXTERNPROTO MapOverlay [
+	exposedField 	SFString 	name 		""
+	exposedField	SFBool 	visible		TRUE
+	exposedField	SFBool 	enabled		TRUE
+	exposedField	SFBool 	clickable	TRUE
+	exposedField 	MFNode		children	[]
+	exposedField	MFString	keywords 	[]
+	eventIn 		MFNode 	addOverlayItems
+	eventIn 		MFNode 	removeOverlayItems
+]"mapOverlay.bt"
+
+EXTERNPROTO MapMarker [
+	exposedField SFString 	name 			""
+	exposedField SFVec2f 	position		0 0
+    exposedField SFFloat 	radius		    0
+	exposedField SFBool 	clickable		TRUE
+	exposedField SFBool 	visible			TRUE
+	exposedField SFBool 	enabled			TRUE
+	exposedField MFNode 	markerShape		[]
+	eventIn 	SFBool		doClick
+	eventIn		SFVec2f	setPlayerGPS
+	eventIn		SFVec2f	setMapGPSCenter
+	eventIn		SFInt32	setMapZoomLevel
+	eventOut 	SFBool		onClick
+	eventOut	SFString	onPlayerAround
+	eventOut	SFString	onPlayerLeft
+]"mapMarker.bt"
+
+EXTERNPROTO MapPlayer [
+    	exposedField 	SFString   	name               "playerName"
+    	exposedField 	SFVec2f    	position          	0 0
+		exposedField 	SFBool     	visible         	TRUE
+		exposedField 	MFNode	 	playerShape			[]
+    	eventIn     	SFInt32 	setMapZoomLevel
+    	eventIn     	SFVec2f		setMapGPSCenter
+]"mapPlayer.bt"
+
+PROTO PLAYER_PIECE [
+		exposedField SFVec2f rectangleTranslation 	0 0
+		exposedField SFVec2f rectangleSize 		5 5
+		exposedField SFColor playerColor 		0 1 0
+		exposedField SFFloat rotationAngle 		0.0
+]
+{
+    Transform2D {
+        translation 	IS rectangleTranslation
+        rotationAngle 	IS rotationAngle
+        children [
+            Shape {
+                appearance Appearance {
+                    material Material2D {
+                        emissiveColor IS playerColor
+                        filled TRUE
+                    }
+                }
+                geometry Rectangle {
+                    size IS rectangleSize
+                }
+            }
+        ]
+    }
+}
+
+EXTERNPROTO MAP_TILE [
+	exposedField SFVec2f 	tileTranslation 	0 0
+	exposedField MFString 	tileURL 			[]
+	exposedField SFVec2f 	tileCenterCoord 	0 0
+	exposedField SFVec2f 	tileSize 			256 256
+]"mapTile.bt"
+
+EXTERNPROTO MAP [
+	exposedField SFString	name				""
+	exposedField SFVec2f 	mapTranslation 		0 0
+	exposedField SFVec2f 	mapSize 			768 768
+	exposedField SFVec2f 	mapLayoutSize 		768 768
+	exposedField SFVec2f 	mapGPSCenter 		0 0
+	exposedField SFInt32 	zoomLevel 			18
+	exposedField MFNode  	overlays   			[]
+	exposedField MFString 	mode   				["SATELLITE"]
+	exposedField MFString 	provider   			["GOOGLE"]
+	eventIn 	MFNode 	    addOverlays
+	eventIn   	MFNode  	removeOverlays
+	eventIn   	SFBool 	    zoomIn
+	eventIn   	SFBool 	    zoomOut
+]"map.bt"
+
+OrderedGroup {
+	children [
+        DEF PLAYER_SHAPE Transform2D {
+            children [
+                PLAYER_PIECE {
+                    rectangleTranslation 0 6
+                }
+                PLAYER_PIECE {
+                    rectangleTranslation 0 -6
+                }
+                PLAYER_PIECE {
+                    rectangleTranslation 6 0
+                }
+                PLAYER_PIECE {
+                    rectangleTranslation -6 0
+                }
+            ]
+        }
+		DEF GOOGLE_MAP MAP {
+			name 'GOOGLEMAP'
+			mapLayoutSize 480 710
+			mapSize 1536 1536
+			mapGPSCenter 48.625200 2.442208
+			zoomLevel 19
+			overlays [
+				MapOverlay {
+					name "overlay1"
+					children [
+						MapMarker {
+							name "lightbulb1"
+							markerShape [
+								IMAGE {
+									size 50 50
+									url "41"
+								}
+							]
+							position 48.625261 2.442527
+                            radius 5
+						}
+						MapMarker {
+							name "lightbulb2"
+							markerShape [
+								IMAGE {
+									size 35 35
+									url "41"
+								}
+							]
+							position 48.625460 2.442889 
+                            radius 5
+						}
+					]
+				}
+				MapOverlay {
+					name "overlay2"
+					children [
+						MapMarker {
+							name "marker1"
+							markerShape [
+								IMAGE {
+									size 50 50
+									url "40"
+								}
+							]
+							position 48.625441 2.442209
+                            radius 5
+						}
+						MapMarker {
+							name "marker2"
+                            visible FALSE
+							markerShape [
+								IMAGE {
+									size 35 35
+									url "40"
+								}
+							]
+							position 48.625194 2.442245 
+                            radius 5
+						}
+					]
+				}
+                DEF PLAYER_OVERLAY MapOverlay {
+                    name "player_overlay"
+                    children [
+                        DEF PLAYER MapPlayer {
+                            name "player"
+                            playerShape [
+                                USE PLAYER_SHAPE
+                            ]
+                        }
+                    ]
+                }
+				
+			]
+		}
+        Transform2D {
+			children [
+				DEF UI_MAP_BTN_ZOOM_IN BUTTON {
+					Transform2D_translation 200 320
+					Rectangle_size 			70 70
+					ImageTexture_BackImage 	["30"]
+					ImageTexture_OverImage 	["32"]
+				}
+				DEF UI_MAP_BTN_ZOOM_OUT BUTTON {
+					Transform2D_translation -200 320
+					Rectangle_size 			70 70
+					ImageTexture_BackImage 	["31"]
+					ImageTexture_OverImage 	["33"]
+				}
+			]
+		}
+	]
+}
+ROUTE UI_MAP_BTN_ZOOM_IN.onClick TO GOOGLE_MAP.zoomIn
+ROUTE UI_MAP_BTN_ZOOM_OUT.onClick TO GOOGLE_MAP.zoomOut
+
+
+AT 0 {
+	UPDATE OD [
+        ObjectDescriptor {
+			objectDescriptorID 2
+			esDescr [
+				ES_Descriptor {
+					ES_ID 2
+					decConfigDescr DecoderConfigDescriptor {
+						streamType 10
+						decSpecificInfo UIConfig {
+							deviceName "Mouse"
+						}
+					}
+				}
+			]
+		}
+        ObjectDescriptor {
+			objectDescriptorID 61
+				esDescr [
+					ES_Descriptor {
+						ES_ID 61
+						decConfigDescr DecoderConfigDescriptor {
+							streamType 10
+							decSpecificInfo UIConfig {
+								deviceName "KeySensor"
+							}
+						}
+					}
+				]
+		}
+		ObjectDescriptor {
+			objectDescriptorID 62
+			esDescr [
+				ES_Descriptor {
+					ES_ID 62
+					decConfigDescr DecoderConfigDescriptor {
+						streamType 10
+						decSpecificInfo UIConfig {
+							deviceName "MPEG-V:siv:OrientationSensorType"
+						}
+					}
+				}
+			]
+		}
+		ObjectDescriptor {
+			objectDescriptorID 63
+			esDescr [
+				ES_Descriptor {
+					ES_ID 63
+					decConfigDescr DecoderConfigDescriptor {
+						streamType 10
+						decSpecificInfo UIConfig {
+							deviceName "MPEG-V:siv:GlobalPositionSensorType"
+						}
+					}
+				}
+			]
+		}
+		ObjectDescriptor {
+			objectDescriptorID 30
+			esDescr [
+				ES_Descriptor {
+					ES_ID 30
+					muxInfo MuxInfo {
+						fileName "images/map/plus_off.png"
+					}
+				}
+			]
+		}
+		ObjectDescriptor {
+			objectDescriptorID 31
+			esDescr [
+				ES_Descriptor {
+					ES_ID 31
+					muxInfo MuxInfo {
+						fileName "images/map/minus_off.png"
+					}
+				}
+			]
+		}
+		ObjectDescriptor {
+			objectDescriptorID 32
+			esDescr [
+				ES_Descriptor {
+					ES_ID 32
+					muxInfo MuxInfo {
+						fileName "images/map/plus_on.png"
+					}
+				}
+			]
+		}
+		ObjectDescriptor {
+			objectDescriptorID 33
+			esDescr [
+				ES_Descriptor {
+					ES_ID 33
+					muxInfo MuxInfo {
+						fileName "images/map/minus_on.png"
+					}
+				}
+			]
+		}
+		ObjectDescriptor {
+			objectDescriptorID 40
+			esDescr [
+				ES_Descriptor {
+					ES_ID 40
+					muxInfo MuxInfo {
+						fileName "images/map_overlay/default_marker.png"
+					}
+				}
+			]
+		}
+		ObjectDescriptor {
+			objectDescriptorID 41
+			esDescr [
+				ES_Descriptor {
+					ES_ID 41
+					muxInfo MuxInfo {
+						fileName "images/map_overlay/lightbulb.png"
+					}
+				}
+			]
+		}
+	]
+}

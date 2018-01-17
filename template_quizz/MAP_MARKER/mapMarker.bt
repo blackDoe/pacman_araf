@@ -1,0 +1,247 @@
+PROTO MapMarker [
+	exposedField SFString 	name 			""
+	exposedField SFVec2f 	position		0 0
+    exposedField SFFloat 	radius		    0
+	exposedField SFBool 	clickable		TRUE
+	exposedField SFBool 	visible			TRUE
+	exposedField SFBool 	enabled			TRUE
+	exposedField MFNode 	markerShape		[]
+	eventIn 	SFBool		doClick
+	eventIn		SFVec2f	    setPlayerGPS
+	eventIn		SFVec2f	    setMapGPSCenter
+	eventIn		SFInt32	    setMapZoomLevel
+	eventOut 	SFBool		onClick
+	eventOut	SFString	onPlayerAround
+	eventOut	SFString	onPlayerLeft
+]
+{
+	DEF MARKER_SW Switch {
+		whichChoice 0
+		choice [
+			Transform2D {
+				children [
+					DEF TS TouchSensor {}
+					DEF MARKER_NODE Transform2D {
+						translation 0 0
+						children IS markerShape
+					}
+				]
+			}
+		]
+	}
+  
+	DEF UI_MARKER_SCRIPT Script {
+		field 		SFNode 	script 				USE UI_MARKER_SCRIPT
+		field 		SFNode 	main_sw				USE MARKER_SW
+		field 		SFNode 	markerNode			USE MARKER_NODE
+		field 		SFNode		ts 					USE TS
+		#
+		# DO NOT CHANGE THE ORDER OF THE INPUT EVENTS!
+		# 'name' should be first in the eventIn list
+		#
+		eventIn 	SFString	setName				IS name
+		eventIn		SFVec2f	    setPosition 		IS position
+        eventIn		SFFloat	    setRadius    		IS radius
+		eventIn 	SFBool  	setVisible 			IS visible
+		eventIn		SFBool		setClickable 		IS clickable
+		eventIn		SFBool		setEnable			IS enabled
+		eventIn 	MFNode		setMarkerShape		IS markerShape
+		eventIn		SFInt32	    updateZoomLevel		IS setMapZoomLevel
+		eventIn		SFVec2f	    updateMapGPSCenter	IS setMapGPSCenter
+		eventIn		SFVec2f	    updatePlayerGPS		IS setPlayerGPS
+		eventIn 	SFBool		fakeClick			IS doClick
+		eventIn 	SFBool		clicked
+		eventOut 	SFBool		onClick				IS onClick
+		eventOut	SFString	playerAround		IS onPlayerAround
+		eventOut	SFString	playerLeft			IS onPlayerLeft
+
+		url ["
+			javascript:
+			
+			function initialize() {
+				# Equatorial radius (m)
+				eqRadius			= 6378137;
+				tileSize			= 256;
+				playerAround 		= false;
+				originShift 		= 2 * Math.PI * eqRadius / 2.0;
+				initialResolution 	= 2 * Math.PI * eqRadius / tileSize;
+				mapGPSCenter		= new SFVec2f ();
+				mapZoomLevel		= 0;
+				isEnabled 			= false;
+				isClickable			= false;
+				isVisible 			= false;
+				markerName			= 'm_'+Math.random().toString(36).substr(2, 5);
+				markerPos			= new SFVec2f ();
+                markerRadius        = 0;
+			}
+			
+			function fakeClick(val) {
+				clicked(val);
+			}
+			
+			function setMarkerPositionOnMap() {
+				if (!mapGPSCenter) return;
+				markerCoord 	= LatLonToPixels(markerPos[0], markerPos[1]);
+				mapCenterCoord 	= LatLonToPixels(mapGPSCenter[0], mapGPSCenter[1]);
+				markerNode.translation[0] = markerCoord[0] - mapCenterCoord[0];
+				markerNode.translation[1] = markerCoord[1] - mapCenterCoord[1];
+				print ('[ MARKER ] - ' + markerName + ': UPDATE POSITION ON MAP : ' + markerNode.translation);
+			}
+			
+			function setName(name) {
+				if (name == '') return;
+				print ('[---------------------------------------------------------]');
+				print ('[ MARKER ] - ' + markerName + ': UPDATE NAME to ' + name);
+				markerName 	= name;
+			}
+			
+			function clicked(val) {
+				if (!val) return;
+				print ('[ MARKER ] - ' + markerName + ': CLICKED!');
+				onClick = true;
+			}
+			
+			function setEnable(val) {
+				isEnabled = val;
+				if (val) {
+					print ('[ MARKER ] - ' + markerName + ': SET ENABLED');
+				}
+				else {
+					print ('[ MARKER ] - ' + markerName + ': SET DISABLED');
+				}
+			}
+			
+			function setClickable(val) {
+				ts.enabled 	= val;
+				isClickable = val;
+				if (val) {
+					print ('[ MARKER ] - ' + markerName + ': SET CLICKABLE');
+				}
+				else {
+					print ('[ MARKER ] - ' + markerName + ': SET UNCLICKABLE');
+				}
+			}
+			
+			function setPosition(gpsPos) {
+				if ( (gpsPos.x == 0) && (gpsPos.y == 0) ) {
+					return;
+				}
+				print ('[ MARKER ] - ' + markerName + ': SET POSITION: ' + gpsPos);
+				markerPos			= gpsPos;
+				setMarkerPositionOnMap();
+			}
+            
+            function setRadius(mRadius) {
+                if (mRadius == 0) {
+					return;
+				}
+                markerRadius = mRadius;
+                print ('[ MARKER ] - ' + markerName + ': SET RADIUS: ' + markerRadius);
+            }
+			
+			function setMarkerShape(markerShape) {
+				if (typeof(markerShape) == 'undefined') return;
+				if (markerShape.length == 0) {
+					print ('[ MARKER ] - ' + markerName + ': markerShape is empty!');
+					print ('[ MARKER ] - ' + markerName + ': Returning...');
+					return;
+				}
+				print ('[ MARKER ] - ' + markerName + ': SET NEW MARKER SHAPE');
+			}
+			
+			function setVisible(val) {
+				if (val) {
+					main_sw.whichChoice = 0;
+					print ('[ MARKER ] - ' + markerName + ': SET VISIBLE');
+				}
+				else {
+					main_sw.whichChoice = -1;
+					print ('[ MARKER ] - ' + markerName + ': SET INVISIBLE');
+				}
+				isVisible 		= val;
+			}
+			
+			function updatePlayerGPS(playerPos) {
+				if (playerPos.x == 0 || playerPos.y == 0) return;
+				distance = haversine_km(markerPos[0], markerPos[1], playerPos[0], playerPos[1]);
+				# to meters
+				distance *= 1000;
+				print ('[ MARKER ] - ' + markerName + ': DISTANCE TO PLAYER = ' + distance + '. Limit to reach: ' + markerRadius);
+				if (!playerAround && (distance <= markerRadius) && isEnabled) {
+					print ('[ MARKER ] - ' + markerName + ': Player around!');
+					playerAround 	= markerName;
+				}
+				else if (playerAround && (distance > markerRadius) && isEnabled) {
+					print ('[ MARKER ] - ' + markerName + ': Player left!');
+					playerLeft 		= markerName;
+					playerAround 	= false;
+				}
+			}
+			
+			function updateZoomLevel(zoomLevel) {
+				if (zoomLevel <= 0) return;
+				print ('[ MARKER ] - ' + markerName + ': MAP ZOOM LEVEL: ' + zoomLevel);
+				mapZoomLevel = zoomLevel;
+				setMarkerPositionOnMap();
+			}
+			
+			function updateMapGPSCenter(gpsCenter) {
+				if (gpsCenter[0] == 0.0 && gpsCenter[1] == 0.0) return;
+				print ('[ MARKER ] - ' + markerName + ': Update MAP GPS CENTER: ' + gpsCenter);
+				mapGPSCenter = gpsCenter;
+				setMarkerPositionOnMap();
+			}
+			
+			#
+			# START COMP_FUNCTIONS 
+			#
+			# The following functions are used to compute distances between 2 GPS positions
+			# and converting GPS position to coordinates and vice-versa. 
+			# These should not be changed
+			#
+			
+			#
+			# Calculates distance between 2 points (lat1, long1) & (lat2, long2)
+			# http://en.wikipedia.org/wiki/Haversine_formula
+			# http://stackoverflow.com/questions/365826/calculate-distance-between-2-gps-coordinates
+			#
+			function haversine_km(lat1, long1, lat2, long2) {
+				d2r 	= Math.PI / 180;
+				d_latt 	= (lat2 - lat1) * d2r;
+				d_long 	= (long2 - long1) * d2r;
+				a 		= Math.sin(d_latt/2)*Math.sin(d_latt/2) + Math.cos(lat1 * d2r) * Math.cos(lat2 * d2r) * Math.sin(d_long/2)*Math.sin(d_long/2);
+				c 		= 2 * Math.atan2(Math.sqrt(a),  Math.sqrt(1-a));
+				return 6371 * c;
+			}
+			
+			function LatLonToMeters(lat, lon ) {
+				mx 		= lon * originShift / 180.0;
+				my 		= Math.log( Math.tan((90 + lat) * Math.PI / 360.0 )) / (Math.PI / 180.0);
+				my 		= my * originShift / 180.0;
+				return new Array(mx, my);
+			}
+			
+			function LatLonToPixels(lat, lon) {
+				ll2p 	= LatLonToMeters(lat, lon);
+				m2p 	= MetersToPixels(ll2p[0], ll2p[1], mapZoomLevel);
+				return new Array(m2p[0], m2p[1]); 
+			}
+			
+			function MetersToPixels(mx, my) {
+				res 	= Resolution();
+				px	 	= (mx + originShift) / res;
+				py 		= (my + originShift) / res;
+				return new Array(px, py);
+			}
+			
+			function Resolution() {
+				return initialResolution / (Math.pow(2,mapZoomLevel));
+			}
+			
+			#
+			# END COMP_FUNCTIONS 
+			#
+		"]
+	}
+	ROUTE TS.isActive TO UI_MARKER_SCRIPT.clicked
+}

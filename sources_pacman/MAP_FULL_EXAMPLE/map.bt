@@ -1,0 +1,539 @@
+PROTO MAP [
+	exposedField SFString	name				""
+	exposedField SFVec2f 	mapTranslation 		0 0
+	exposedField SFVec2f 	mapSize 			768 768
+	exposedField SFVec2f 	mapLayoutSize 		768 768
+	exposedField SFVec2f 	mapGPSCenter 		0 0
+	exposedField SFInt32 	zoomLevel 			18
+	exposedField MFNode  	overlays   			[]
+	exposedField MFString 	mode   				["SATELLITE"]
+	exposedField MFString 	provider   			["GOOGLE"]
+	eventIn 	MFNode 	    addOverlays
+	eventIn   	MFNode  	removeOverlays
+	eventIn   	SFBool 	    zoomIn
+	eventIn   	SFBool 	    zoomOut
+]
+{
+Transform2D {
+	children [
+		Transform2D {
+			children [
+				DEF UI_MAP_TS TouchSensor {}
+				DEF UI_MAP_LAY_ITEMS_VIEW Layer2D {
+					viewport DEF UI_MAP_MAP_VIEW Viewport {
+						alignment [0 0]
+						fit 1
+					}
+					size IS mapLayoutSize
+					children [
+						Background2D {
+							backColor 0 0 0
+						}
+						DEF UI_MAP_CONTAINER Transform2D {
+							translation IS mapTranslation
+							children [
+								DEF UI_MAP_TILE_CONTAINER Transform2D {
+									children []
+								}
+								DEF UI_MAP_MAP_OVERLAYS Transform2D {
+									children IS overlays
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}
+	DEF INITIALIZE_TS TimeSensor {
+		cycleInterval 1
+		loop false
+		enabled TRUE
+	}
+	DEF UI_MAP_SCRIPT Script {
+		field 	SFNode 	script 				USE UI_MAP_SCRIPT
+		field 	SFNode 	tileContainer 		USE UI_MAP_TILE_CONTAINER
+		field 	SFNode 	mapContainer		USE UI_MAP_CONTAINER
+		field 	SFNode 	overlayContainer 	USE UI_MAP_MAP_OVERLAYS
+		field  SFString	mapName				IS name
+		field 	SFBool 	mapTouched 			false
+		field 	SFInt32 down_x 				-10000
+		field 	SFInt32 down_y 				-1
+		field 	SFBool 	scrolling 			false
+		field 	SFBool	initialized 		false
+		eventIn SFVec2f set_coord
+		eventIn SFBool 	ZoomIn IS zoomIn
+		eventIn SFBool 	ZoomOut IS zoomOut
+		eventIn SFBool 	OnActive
+		eventIn MFNode 	addOverlays 		IS addOverlays
+		eventIn MFNode  	removeOverlays		IS removeOverlays
+		eventIn SFInt32 	setZoomLevel 		IS zoomLevel
+		eventIn SFVec2f 	setMapGPSCenter		IS mapGPSCenter
+		eventIn SFVec2f 	setMapTranslation	IS mapTranslation
+		eventIn SFVec2f 	setMapSize			IS mapSize
+		eventIn	SFBool		mapPropertiesInit
+		eventOut SFVec2f  	mapGPSCenter 		IS mapGPSCenter
+		eventOut SFInt32  	zoomLevel 			IS zoomLevel
+		eventOut SFVec2f 	mapTranslation		IS mapTranslation
+		eventOut SFVec2f	js_mapSize			IS mapSize
+		
+		url ["javascript:	
+			function initialize() {
+				# Equatorial radius (m)
+				eqRadius			= 6378137;
+				tiles 				= new Array();
+                tilesNr             = 9;
+				tileSize			= 256;
+				originShift 		= 2 * Math.PI * eqRadius / 2.0;
+				initialResolution 	= 2 * Math.PI * eqRadius / tileSize;
+				magicShift			= 256;
+                # https://developers.google.com/maps/documentation/javascript/maptypes#WorldCoordinates
+                googleMercator      = 256;
+				addMap2OverlayItemRoutes(false);
+				addPlayerMarkerRoutes();
+			}
+			
+			# the function is triggered by a timesensor
+			# its purpose is to RE SET the eventIn (reinitialize them with the same values that were already set)
+			# in order for the routes to recieve the correct values of the "mapSize", "mapZoom" and "mapGPSCenter"
+			# which are created AFTER the corresponding eventIns are set => the new values are not routed
+			function mapPropertiesInit(val) {
+				if (val) return;
+				print ('[ MAP ]: REINITILIZE MAP PROPERTIES');
+				setMapTranslation(mapTranslation);
+				setMapSize(js_mapSize);
+				setZoomLevel(zoomLevel);
+				setMapGPSCenter(mapGPSCenter);
+			}
+			
+			function setMapTranslation(mapTrans) {
+				print ('[ MAP TRANSLATION ]: SET MAP TRANSLATION: ' + mapTrans);
+				mapTranslation = new SFVec2f (mapTrans.x, mapTrans.y);
+			}
+			
+			function setMapSize(mSize) {
+				if (mSize.x == 0 || mSize.y == 0) return;
+				print ('[ MAP SIZE ]: SET MAP SIZE: ' + mSize);
+				js_mapSize = mSize;
+				# the "magicNumber" is used to compute the GPS coordinates of the tiles based, of course, on
+				# the MAP GPS center. For obvious reasons when the map size is 768x768 the tile size (256, a third of the map size)
+				# is the correct value to compute the GPS shift of the tile (relative to the MAP GPS center). For some misterious 
+				# reasons the same logic does not apply for other map size values. Eg. mapSize = 1280, the shift should be 1280/3. Wrong!
+				# In order to compute the correct shift value the following algorithm has to be applied: mapSizeRatio = newMapSize/768.
+				# magicNumber: shiftValue = mapSize / mapSizeRatio
+				# TODO: find out why..
+				
+				if (js_mapSize.y >= js_mapSize.x) {
+					tileSize 		= Math.floor(js_mapSize.y/3);
+					magicShift 		= Math.pow(js_mapSize.y, 2) / (googleMercator * tilesNr);
+				}
+				else {
+					tileSize 		= Math.floor(js_mapSize.x/3);
+					magicShift 		= Math.pow(js_mapSize.x, 2) / (googleMercator * tilesNr);
+				}
+				initialResolution 	= 2 * Math.PI * eqRadius / tileSize;
+			}
+			
+			function setMapGPSCenter(gpsCenter) {
+				if (gpsCenter.x == 0 && gpsCenter.y == 0) {
+					return;
+				}
+				print ('[ MAP GPS ]: SET MAP GPS CENTER: ' + gpsCenter);
+				mapGPSCenter = new SFVec2f (gpsCenter.x, gpsCenter.y);
+				addTileContainers();
+			}
+			
+			function setZoomLevel(lvl) {
+				print ('[ MAP ZOOM ]: Set ZOOM LEVEL ' + lvl);
+				zoomLevel 	= lvl;
+			}
+			
+			function addOverlays(ovrls) {
+				if (typeof(ovrls) == 'undefined') return;
+				if (ovrls.length == 0 ) return;
+				for (ovrls_idx = 0; ovrls_idx < ovrls.length; ovrls_idx++) {
+					overlayContainer.addChildren = new MFNode(ovrls[ovrls_idx]);
+					print ('[ MAP ]: New overlay added: ' + ovrls[ovrls_idx].name);
+					addMapOverlayRoutes(ovrls[ovrls_idx]);
+					addPlayerMarkerRoutes();
+				}
+			}
+			
+			# if the 'anOveralay' parameter is empty, add map routes to 
+			# all existing overlays (all the existing items)
+			# OR add map routes to a specific overlay if the parameter is specified
+			function addMap2OverlayItemRoutes(anOveralay) {
+				if (!anOveralay) {
+					for (i = 0; i < overlayContainer.children.length; i++) {
+						addMapOverlayRoutes(overlayContainer.children[i]);
+					}
+				}
+				else {
+					addMapOverlayRoutes(anOveralay);
+				}
+			}
+			
+			# add MAP Routes to a specific OVERLAY (all its items)
+			# use 'overlay1' as a parameter (not overlay) so that it will not be overwritten in some other function
+			function addMapOverlayRoutes(overlay1) {
+				print ('[ MAP ]: Add MAP-OVERLAY Routes for Overlay: ' + overlay1.name);
+				for (j = 0; j < overlay1.children.length; j++) {
+					marker = overlay1.children[j];
+					Browser.addRoute(script, 'mapGPSCenter', 	marker, 'setMapGPSCenter');
+					Browser.addRoute(script, 'zoomLevel', 		marker, 'setMapZoomLevel');
+					print ('[ MAP ]: MAP routes (GPS, ZOOM, SIZE) to MARKER ' + marker.name + ' has been added.');
+				}
+			}
+			
+			function addTileContainers() {
+				for ( i = 0; i < 3; i++ ) {
+					tiles[i] = new Array();
+					for ( j = 0; j < 3; j++ ) {
+						tiles[i][j] 					= new SFNode ('MAP_TILE');
+						tiles[i][j].tileSize			= new SFVec2f (tileSize, tileSize);
+						tiles[i][j].tileTranslation.x 	= (i-1) * tileSize;
+						tiles[i][j].tileTranslation.y 	= (j-1) * tileSize;
+						tileContainer.children[i*3+j] 	= tiles[i][j];
+					}
+				}
+				calcTilesUrl(mapGPSCenter);
+			}
+			
+			function addPlayerMarkerRoutes() {
+				print ('[ MAP ]: Trying to add PLAYER-MARKERS ROUTES...');
+				playerNode = findPlayer();
+				if (!playerNode) return;
+				addPlayerRoute4EachOveralyItem(playerNode);
+			}
+			
+			function findPlayer() {
+				# search for the player overlay (should have a marker "player" attached)
+				for (i = 0; i < overlayContainer.children.length; i++) {
+					# found the overlay of the player
+					if (overlayContainer.children[i].name == 'player') {
+						print ('[ MAP - OVERLAY ]: The PLAYER OVERLAY has been found. Searching for the player marker...');
+						# check if it has one and only one children
+						if (overlayContainer.children[i].children[0].name != 'player') {
+							print ('[ MAP - MARKER ]: THE FIRST MARKER OF THE PLAYER OVERLAY IS NOT player.');
+						}
+						else {
+							print ('[ MAP - MARKER ]: player marker has been found.');
+							playerItem = overlayContainer.children[i].children[0];
+							return playerItem;
+						}
+					}
+				}
+				print ('[ MAP - OVERLAY ]: PLAYER OVERLAY NOT FOUND. The player has not been added yet.');
+				return false;
+			}
+			
+			function addPlayerRoute4EachOveralyItem(playerNode) {
+				print ('[ MAP ]: Adding PLAYER-MARKER Routes...');
+				for (i = 0; i < overlayContainer.children.length; i++) {
+					currentOverlay = overlayContainer.children[i];
+					if (currentOverlay.name == 'player') {
+						continue;
+					}
+					print ('[ MAP ]: Adding PLAYER-MARKER Routes for OVERLAY ' + currentOverlay.name);
+					for (j = 0; j < currentOverlay.children.length; j++) {
+						marker = currentOverlay.children[j];
+						Browser.addRoute(playerNode, 'playerPosition', 	marker, 'setPlayerGPS');
+						print ('[ MAP ]: Adding PLAYER-MARKER Routes for marker ' + marker.name);
+					}
+				}
+			}
+			
+			function calcTilesCoords(center) {
+				#	Get pixel coordinates of the current map center
+				m2p 		= LatLonToPixels(center[0], center[1], zoomLevel);
+				#	Compute the lat, lon of the bottom left and top right tiles.
+				#  	The coordinates for the middle tile are already known (map center)
+				# 	therefore combining these coordinates will provide the gps coord
+				# 	for all the tiles.
+				coordTR 	= PixelsToLatLon(m2p[0]+magicShift, m2p[1]+magicShift, zoomLevel);
+				coordBL 	= PixelsToLatLon(m2p[0]-magicShift, m2p[1]-magicShift, zoomLevel);
+				#	Add the coordinates to an array: 
+				#		- 3 lat coords
+				#		- 3 lon coords
+				coord	 	= new Array();
+				coord[0] 	= coordBL[0];
+				coord[1] 	= center[0];
+				coord[2] 	= coordTR[0];
+				coord[3+0] 	= coordBL[1];
+				coord[3+1] 	= center[1];
+				coord[3+2] 	= coordTR[1];
+				return coord;
+			}
+			
+			#	Request a google map of tileSize X tileSize from (x,y) lat lon coord
+			#	and fill the corresponding tile with the image result
+			function setTileCoord(i, j, lat, lon) {			
+				print ('[ Google ] Getting images...');
+				tiles[j][i].tileURL[0] 		= 'http://maps.google.com/maps/api/staticmap?center=' 
+					+ lat + ',' + lon 
+					+ '&zoom=' + zoomLevel 
+					+ '&size=' + tileSize + 'x' + tileSize 
+					+ '&maptype=satellite&sensor=true';
+				tiles[j][i].tileCenterCoord[0] 	= lat;
+				tiles[j][i].tileCenterCoord[1] 	= lon;
+			}
+			
+			#	Iterate the tiles and set the corresponding image for each of them
+			function calcTilesUrl(center) {
+				coord = calcTilesCoords(center);
+				for ( i =0; i < 3; i++ ) {
+					for ( j = 0; j < 3; j++ ) {
+						setTileCoord( i, j, coord[i], coord[3+j] );
+					}
+				}
+			}
+						
+			function OnActive(value) {
+				mapTouched = value;
+			}
+			
+			function ZoomIn(value) {
+				if ( zoomLevel < 21 ) {
+					zoomLevel++;
+					mapGPSCenter = tiles[1][1].tileCenterCoord;
+					calcTilesUrl(mapGPSCenter);
+					resetMapOverlayTranslation();
+				}
+			}
+			
+			function ZoomOut(value) {
+				if ( zoomLevel > 1 ) {
+					zoomLevel--;
+					mapGPSCenter = tiles[1][1].tileCenterCoord;
+					calcTilesUrl(mapGPSCenter);
+					resetMapOverlayTranslation();
+				}
+			}
+			
+			function resetMapOverlayTranslation() {
+				overlayContainer.translation.y = 0;
+				overlayContainer.translation.x = 0;
+			}
+			
+			function swapPos(xx, yy) {
+				t 	= xx.x;
+				xx.x = yy.x;
+				yy.x = t;
+				t 	= xx.y;
+				xx.y = yy.y;
+				yy.y = t;
+			}
+			
+			function swapTiles(x1, y1, x2, y2) {
+				t 				= tiles[x1][y1];
+				tiles[x1][y1] 	= tiles[x2][y2];
+				tiles[x2][y2] 	= t;
+			}
+			
+			function shiftLeft() {
+				for ( i = 0; i < 3; i++ )
+				{
+					swapTiles(1, i, 2, i);
+					swapTiles(0, i, 1, i);
+					
+					swapPos(tiles[0][i].tileTranslation, tiles[1][i].tileTranslation);
+					swapPos(tiles[1][i].tileTranslation, tiles[2][i].tileTranslation);
+				}
+				
+				coord 			= calcTilesCoords(mapGPSCenter);
+				setTileCoord( 0, 0, coord[0], coord[3+0]) ;
+				setTileCoord( 1, 0, coord[1], coord[3+0]) ;
+				setTileCoord( 2, 0, coord[2], coord[3+0]) ;
+				overlayContainer.translation.x 	+= tileSize;
+			}
+			
+			function shiftRight() {
+				for ( i = 0; i < 3; i++ )
+				{
+					swapTiles(0, i, 1, i);
+					swapTiles(1, i, 2, i);
+					
+					swapPos(tiles[1][i].tileTranslation, tiles[2][i].tileTranslation);
+					swapPos(tiles[0][i].tileTranslation, tiles[1][i].tileTranslation);
+				}
+
+				coord 			= calcTilesCoords(mapGPSCenter);
+				setTileCoord( 0, 2, coord[0], coord[3+2]) ;
+				setTileCoord( 1, 2, coord[1], coord[3+2]) ;
+				setTileCoord( 2, 2, coord[2], coord[3+2]) ;
+				overlayContainer.translation.x 	-= tileSize;
+			}
+			
+			function shiftUp() {
+				for ( i = 0; i < 3; i++ )
+				{
+					swapTiles(i, 0, i, 1);
+					swapTiles(i, 1, i, 2);
+					
+					swapPos(tiles[i][1].tileTranslation, tiles[i][2].tileTranslation);
+					swapPos(tiles[i][0].tileTranslation, tiles[i][1].tileTranslation);
+				}
+				coord 			= calcTilesCoords(mapGPSCenter);
+				setTileCoord( 2, 0, coord[2], coord[3+0]) ;
+				setTileCoord( 2, 1, coord[2], coord[3+1]) ;
+				setTileCoord( 2, 2, coord[2], coord[3+2]) ;
+				overlayContainer.translation.y 	-= tileSize;
+			}
+			
+			function shiftDown() {
+				for ( i = 0; i < 3; i++ )
+				{
+					swapTiles(i, 1, i, 2);
+					swapTiles(i, 0, i, 1);
+					
+					swapPos(tiles[i][0].tileTranslation, tiles[i][1].tileTranslation);
+					swapPos(tiles[i][1].tileTranslation, tiles[i][2].tileTranslation);
+				}
+
+				coord 			= calcTilesCoords(mapGPSCenter);
+				setTileCoord( 0, 0, coord[0], coord[3+0]) ;
+				setTileCoord( 0, 1, coord[0], coord[3+1]) ;
+				setTileCoord( 0, 2, coord[0], coord[3+2]) ;
+				overlayContainer.translation.y 	+= tileSize;
+			}
+			
+			function Scroll(diffx, diffy) {
+				#
+				# Calculate the offset of the new mapGPSCenter (latitude, longitude)
+				#
+				mapContainer.translation.x 	-= diffx;
+				mapContainer.translation.y 	-= diffy;
+				mapTranslation = new SFVec2f (mapContainer.translation.x, mapContainer.translation.y);
+				
+				if (mapContainer.translation.x > tileSize) {
+					mapContainer.translation.x 	-= tileSize;
+					down_x 						-= tileSize;
+					
+					m2p 						= LatLonToPixels(mapGPSCenter[0], mapGPSCenter[1], zoomLevel);
+					mapGPSCenter 		= PixelsToLatLon(m2p[0]-magicShift, m2p[1]+0, zoomLevel);
+					shiftLeft();
+				}
+				else 
+				if (mapContainer.translation.x < -tileSize) {
+					mapContainer.translation.x 	+= tileSize;
+					down_x 						+= tileSize;
+					
+					m2p 						= LatLonToPixels(mapGPSCenter[0], mapGPSCenter[1], zoomLevel);
+					mapGPSCenter 				= PixelsToLatLon(m2p[0]+magicShift, m2p[1]-0, zoomLevel);
+					shiftRight();
+				}
+				
+				if (mapContainer.translation.y > tileSize) {
+					mapContainer.translation.y 	-= tileSize;
+					down_y 						-= tileSize;
+					
+					m2p 						= LatLonToPixels(mapGPSCenter[0], mapGPSCenter[1], zoomLevel);
+					mapGPSCenter 				= PixelsToLatLon(m2p[0]-0, m2p[1]-magicShift, zoomLevel);
+					shiftDown();
+				}
+				else 
+				if (mapContainer.translation.y < -tileSize) {
+					print ('mapContainer.translation.y = ' + mapContainer.translation.y);
+					mapContainer.translation.y 	+= tileSize;
+					down_y 						+= tileSize;
+					
+					m2p 						= LatLonToPixels(mapGPSCenter[0], mapGPSCenter[1], zoomLevel);
+					mapGPSCenter 				= PixelsToLatLon(m2p[0]+0, m2p[1]+magicShift, zoomLevel);
+					shiftUp();
+				}
+			}
+			
+			function set_coord(val) {
+				m_x = val.x | 0;
+				m_y = val.y | 0;
+				if ( mapTouched ) {
+					if (down_x == -10000) {
+						down_x 	= m_x;
+						down_y 	= m_y;
+					}
+					diffx = down_x - m_x;
+					diffy = down_y - m_y;
+					if ( !scrolling ) {
+						scrolling = true;
+					}
+					if (scrolling) {
+						Scroll(diffx, diffy);
+						down_x 	= m_x;
+						down_y 	= m_y;
+					}
+				}
+				else {
+					down_x 		= -10000;
+					scrolling 	= false;
+				}
+			}
+			 
+			function LatLonToMeters(lat, lon ) {
+				mx 		= lon * originShift / 180.0;
+				my 		= Math.log( Math.tan((90 + lat) * Math.PI / 360.0 )) / (Math.PI / 180.0);
+				my 		= my * originShift / 180.0;
+				return new Array(mx, my);
+			}
+			function LatLonToPixels(lat, lon) {
+				ll2p 	= LatLonToMeters(lat, lon);
+				m2p 	= MetersToPixels(ll2p[0], ll2p[1]);
+				return new Array(m2p[0], m2p[1]); 
+			}
+			function MetersToLatLon(mx, my ) {
+				lon 	= (mx / originShift) * 180.0;
+				lat 	= (my / originShift) * 180.0;
+				lat 	= 180 / Math.PI * (2 * Math.atan( Math.exp( lat * Math.PI / 180.0)) - Math.PI / 2.0);
+				return new Array(lat, lon);
+			}
+			function PixelsToLatLon(px, py) {
+				mp2m 	= PixelsToMeters(px, py);
+				mmtll 	= MetersToLatLon(mp2m[0], mp2m[1]);
+				return new Array(mmtll[0], mmtll[1]);
+			}
+			function PixelsToMeters(px, py) {
+				res 	= Resolution();
+				mx 		= px * res - originShift;
+				my 		= py * res - originShift;
+				return new Array(mx, my);
+			}
+			function MetersToPixels(mx, my) {
+				res 	= Resolution();
+				px	 	= (mx + originShift) / res;
+				py 		= (my + originShift) / res;
+				return new Array(px, py);
+			}
+			function Resolution() {
+				return initialResolution / (Math.pow(2,zoomLevel));
+			}
+
+		"]
+	}
+	
+	DEF UI_MAP_MOUSE_SENS InputSensor {
+		url ["2"]
+		buffer {
+			REPLACE UI_MAP_SCRIPT.set_coord 	BY 0 0
+		}
+	}
+	ROUTE UI_MAP_TS.isActive 			TO UI_MAP_SCRIPT.OnActive
+	ROUTE INITIALIZE_TS.isActive		TO UI_MAP_SCRIPT.mapPropertiesInit
+}
+AT 0 {
+	UPDATE OD [
+		ObjectDescriptor {
+			objectDescriptorID 2
+			esDescr [
+				ES_Descriptor {
+					ES_ID 2
+					decConfigDescr DecoderConfigDescriptor {
+						streamType 10
+						decSpecificInfo UIConfig {
+							deviceName "Mouse"
+						}
+					}
+				}
+			]
+		}
+    ]
+}

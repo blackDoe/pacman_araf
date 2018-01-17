@@ -1,0 +1,68 @@
+PROTO IMAGE_BUTTON [
+    exposedField MFString 	url				[]
+	exposedField SFVec2f	size			100 60
+	exposedField SFVec2f 	translation 	0 0
+    exposedField SFVec2f 	scale 			1 1
+	exposedField SFFloat 	rotationAngle 	0.0
+    eventOut     SFBool     onClick
+    eventIn      SFBool     updateRectangleSize
+]
+{
+	Transform2D {
+		translation 	IS translation
+		rotationAngle	IS rotationAngle
+		scale 			IS scale
+		children [
+            DEF TS TouchSensor {}
+			Shape {
+                geometry DEF RECTANGLE Rectangle {
+					size IS size
+				}
+				appearance Appearance {
+					texture ImageTexture {
+						url IS url
+					}
+					material Material2D {
+						lineProps LineProperties {
+							width 0
+						}
+					}
+				}
+			}
+		]
+	}
+    DEF SCRIPT Script {
+        field SFInt32 dummy 1
+        field SFNode shapeRectangle USE RECTANGLE
+        eventIn SFBool updateSize IS updateRectangleSize
+        eventIn SFBool touchSensor_active
+        eventOut SFBool touchSensor_clicked IS onClick
+        url ["javascript:
+            function touchSensor_active (val) {
+                if (val) {
+                    touchSensor_clicked = true;
+                }
+            }
+            function updateSize() {
+                if (++dummy%2) 
+                    shapeRectangle.size = new SFVec2f (150, 150);
+                else 
+                    shapeRectangle.size = new SFVec2f (50, 50);
+            }
+        "]
+    }
+    ROUTE TS.isActive TO SCRIPT.touchSensor_active
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

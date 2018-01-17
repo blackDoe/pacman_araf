@@ -1,0 +1,163 @@
+InitialObjectDescriptor {
+	objectDescriptorID 100
+	audioProfileLevelIndication 255
+	visualProfileLevelIndication 254
+	sceneProfileLevelIndication 1
+	graphicsProfileLevelIndication 1
+	ODProfileLevelIndication 1
+	esDescr [
+		ES_Descriptor {
+			ES_ID 1
+			decConfigDescr DecoderConfigDescriptor {
+				streamType 3
+				decSpecificInfo BIFSConfig {
+					useNames true
+					isCommandStream true
+					pixelMetric true
+					pixelWidth 800
+					pixelHeight 800
+				}
+			}
+		}
+		ES_Descriptor {
+			ES_ID 2
+			decConfigDescr DecoderConfigDescriptor {
+				streamType 1
+			}
+		}
+	]
+}
+
+EXTERNPROTO BUTTON [
+	exposedField SFVec2f 	translation 	0 0
+	exposedField SFFloat 	rotationAngle 	0.0
+	exposedField SFVec2f 	scale 			1 1
+	exposedField SFVec2f 	size 			50 50
+	exposedField MFString 	backImage 		[]
+	exposedField MFString 	overImage 		[]
+	exposedField MFString 	text 			[]
+	exposedField SFColor 	textColor 		1 1 1
+	exposedField SFFloat 	textSize 		18
+	exposedField SFColor 	overColor 		1 0.5 0.8
+	exposedField SFColor 	backColor 		0.1 0.1 0.1
+	exposedField MFString 	family 			["ARIAL"]
+	exposedField SFVec2f	layoutSize		-1 -1
+	eventOut 	 SFBool 	onClick
+	eventIn 	 SFBool 	doClick
+]"button.bt"
+
+EXTERNPROTO MAP_TILE [
+	exposedField SFVec2f 	tileTranslation 	0 0
+	exposedField MFString 	tileURL 			[]
+	exposedField SFVec2f 	tileCenterCoord 	0 0
+	exposedField SFVec2f 	tileSize 			256 256
+]"mapTile.bt"
+
+EXTERNPROTO MAP [
+	exposedField SFString	name				""
+	exposedField SFVec2f 	mapTranslation 		0 0
+	exposedField SFVec2f 	mapSize 			768 768
+	exposedField SFVec2f 	mapLayoutSize 		768 768
+	exposedField SFVec2f 	mapGPSCenter 		0 0
+	exposedField SFInt32 	zoomLevel 			18
+	exposedField MFNode  	overlays   			[]
+	exposedField MFString 	mode   				["SATELLITE"]
+	exposedField MFString 	provider   			["GOOGLE"]
+	eventIn 	MFNode 	    addOverlays
+	eventIn   	MFNode  	removeOverlays
+	eventIn   	SFBool 	    zoomIn
+	eventIn   	SFBool 	    zoomOut
+]"map.bt"
+
+OrderedGroup {
+	children [
+		DEF GOOGLE_MAP MAP {
+			name 'GOOGLEMAP'
+			mapLayoutSize 480 710
+			mapSize 1536 1536
+			mapGPSCenter 48.625200 2.442208
+			zoomLevel 19
+		}
+        Transform2D {
+			children [
+				DEF UI_MAP_BTN_ZOOM_IN BUTTON {
+					translation 200 320
+					size 		70 70
+					backImage 	["30"]
+					overImage 	["32"]
+				}
+				DEF UI_MAP_BTN_ZOOM_OUT BUTTON {
+					translation -200 320
+					size 		70 70
+					backImage 	["31"]
+					overImage 	["33"]
+				}
+			]
+		}
+	]
+}
+ROUTE UI_MAP_BTN_ZOOM_IN.onClick TO GOOGLE_MAP.zoomIn
+ROUTE UI_MAP_BTN_ZOOM_OUT.onClick TO GOOGLE_MAP.zoomOut
+
+AT 0 {
+	UPDATE OD [
+		ObjectDescriptor {
+			objectDescriptorID 2
+			esDescr [
+				ES_Descriptor {
+					ES_ID 2
+					decConfigDescr DecoderConfigDescriptor {
+						streamType 10
+						decSpecificInfo UIConfig {
+							deviceName "Mouse"
+						}
+					}
+				}
+			]
+		}
+		ObjectDescriptor {
+			objectDescriptorID 30
+			esDescr [
+				ES_Descriptor {
+					ES_ID 30
+					muxInfo MuxInfo {
+						fileName "images/map/plus_off.png"
+					}
+				}
+			]
+		}
+		ObjectDescriptor {
+			objectDescriptorID 31
+			esDescr [
+				ES_Descriptor {
+					ES_ID 31
+					muxInfo MuxInfo {
+						fileName "images/map/minus_off.png"
+					}
+				}
+			]
+		}
+		ObjectDescriptor {
+			objectDescriptorID 32
+			esDescr [
+				ES_Descriptor {
+					ES_ID 32
+					muxInfo MuxInfo {
+						fileName "images/map/plus_on.png"
+					}
+				}
+			]
+		}
+		ObjectDescriptor {
+			objectDescriptorID 33
+			esDescr [
+				ES_Descriptor {
+					ES_ID 33
+					muxInfo MuxInfo {
+						fileName "images/map/minus_on.png"
+					}
+				}
+			]
+		}
+	]
+}
