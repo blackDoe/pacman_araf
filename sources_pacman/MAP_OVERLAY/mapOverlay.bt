@@ -34,6 +34,7 @@ PROTO MapOverlay [
 
 		url ["
 			javascript:
+
 				function initialize() {
 					mapOverlayName 	= 'mo_'+Math.random().toString(36).substr(2, 5);
 				}
@@ -115,6 +116,7 @@ PROTO MapOverlay [
 					}
 					print ('[ MapOverlay ] - ' + mapOverlayName + ': COULD NOT FIND Overlay item \\"' + marker.name + '\\"!');
 				}
-		"]
+		"
+		]
 	}
 }

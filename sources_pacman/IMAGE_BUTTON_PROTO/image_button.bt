@@ -49,7 +49,8 @@ PROTO IMAGE_BUTTON [
                 else 
                     shapeRectangle.size = new SFVec2f (50, 50);
             }
-        "]
+        "
+        ]
     }
     ROUTE TS.isActive TO SCRIPT.touchSensor_active
 }

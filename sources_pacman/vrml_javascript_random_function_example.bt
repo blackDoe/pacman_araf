@@ -1,0 +1,262 @@
+
+#VRML: Javascript Random function
+
+
+#Random Placement
+
+#VRML V2.0 utf8
+
+NavigationInfo { type "EXAMINE" }
+
+DEF ROOT Group {
+   children [
+      Group {
+	 children [
+	    DEF TOUCH TouchSensor {}
+	    Shape {
+	       appearance Appearance { material Material {} }
+	       geometry Sphere {}
+	    }
+	   ]
+      }
+     ]
+}
+
+DEF SCRIPT Script {
+   eventIn SFBool clicked
+   eventOut MFNode newNodes
+   url "vrmlscript:
+
+function clicked(val) {
+   if(val) {
+      size = 8;
+      halfsize = size / 2.0;
+      x = Math.random() * size - halfsize;
+      y = Math.random() * size - halfsize;
+      z = Math.random() * size - halfsize;
+      newNodes = Browser.createVrmlFromString('Transform {' +
+					      '  translation ' + x + ' ' + y + ' ' + z +
+					      '  children Shape {' +
+					      '    appearance Appearance { material Material {} }' +
+					      '    geometry Box { size 1 1 1 }' +
+					      '  }' +
+					      '}');
+   }
+}
+
+"
+}
+
+ROUTE TOUCH.isActive TO SCRIPT.clicked
+ROUTE SCRIPT.newNodes TO ROOT.addChildren
+
+
+##################################################
+
+Random Sounds
+
+#VRML V2.0 utf8
+
+# load all sounds so cached
+Sound { source AudioClip { url "Sounds/drm_clave.wav" } }
+Sound { source AudioClip { url "Sounds/drm_cowbell.wav" } }
+Sound { source AudioClip { url "Sounds/drm_snare.wav" } }
+Sound { source AudioClip { url "Sounds/metal_mute_power.E1.wav" } }
+Sound { source AudioClip { url "Sounds/drm_scratch.wav" } }
+Sound { source AudioClip { url "Sounds/hat_closed.wav" } }
+
+PROTO Voice [
+		   eventIn MFString url
+		   eventIn SFFloat pitch
+		   eventIn SFTime startTime
+		   eventIn SFTime stopTime
+		  ]
+{
+   Sound {
+      spatialize FALSE minFront 100 maxFront 100 minBack 100 maxBack 100
+      source DEF CLIP AudioClip {
+	 url IS url  pitch IS pitch  startTime IS startTime  stopTime IS stopTime }
+   }
+}
+
+DEF VOICE1 Voice {}
+DEF VOICE2 Voice {}
+DEF VOICE3 Voice {}
+DEF VOICE4 Voice {}
+DEF VOICE5 Voice {}
+DEF VOICE6 Voice {}
+
+# voice is scheduled when alarm goes off
+DEF ALARM1 TimeSensor {}
+DEF ALARM2 TimeSensor {}
+DEF ALARM3 TimeSensor {}
+DEF ALARM4 TimeSensor {}
+DEF ALARM5 TimeSensor {}
+DEF ALARM6 TimeSensor {}
+
+# used to start SCRIPT, can't use initialize since vrmlscript doesn't support Date object
+DEF LOADED ProximitySensor { size 1000 1000 1000 }
+
+# init and schedule voices
+DEF SCRIPT Script {
+   directOutput TRUE
+   mustEvaluate TRUE
+   eventIn SFTime loaded
+   eventIn SFTime schedule1
+   eventIn SFTime schedule2
+   eventIn SFTime schedule3
+   eventIn SFTime schedule4
+   eventIn SFTime schedule5
+   eventIn SFTime schedule6
+   field MFNode voices [ USE VOICE1  USE VOICE2  USE VOICE3  USE VOICE4 USE VOICE5 USE VOICE6 ]
+   field MFNode alarms [ USE ALARM1  USE ALARM2  USE ALARM3  USE ALARM4 USE ALARM5 USE ALARM6 ]
+   url "vrmlscript:
+
+function randR(l,h) { return Math.random()*(h-l)+l; }
+
+function initVoices() {
+   voices[0].url = new MFString('Sounds/drm_clave.wav');
+   voices[1].url = new MFString('Sounds/drm_cowbell.wav');
+   voices[2].url = new MFString('Sounds/drm_snare.wav');
+   voices[3].url = new MFString('Sounds/metal_mute_power.E1.wav');
+   voices[4].url = new MFString('Sounds/drm_scratch.wav');
+   voices[5].url = new MFString('Sounds/hat_closed.wav');
+}
+
+function setVoice(i, when) {
+   voices[i].pitch = (Math.random()<.5) ? randR(.25, 1) : randR(1,4);
+   voices[i].startTime = when+1;
+   alarms[i].startTime = when+1;
+   alarms[i].cycleInterval = randR(.5, 3);
+}
+
+function loaded(val) {
+   initVoices();
+   for(i=0; i<voices.length; i++) { setVoice(i, val + 3); }
+}
+
+function schedule1(val) { setVoice(0, val); }
+function schedule2(val) { setVoice(1, val); }
+function schedule3(val) { setVoice(2, val); }
+function schedule4(val) { setVoice(3, val); }
+function schedule5(val) { setVoice(4, val); }
+function schedule6(val) { setVoice(5, val); }
+
+"
+}
+
+# alarm sends cycleTime event at beginning and end, this ignores one at beginning
+# filter out first cycleTime events from alarms
+# (should be able to use isActive=false event instead?)
+PROTO Filter [ eventIn SFTime ein
+	       eventOut SFTime eout ]
+{
+   Script {
+      mustEvaluate TRUE
+      eventIn SFTime ein IS ein
+      eventOut SFTime eout IS eout
+      field SFBool first TRUE
+      url "vrmlscript: function ein(val) { if(first) { first=FALSE; } else { eout=val; first=TRUE; }}"
+   }
+}
+
+DEF FILTER1 Filter {}
+DEF FILTER2 Filter {}
+DEF FILTER3 Filter {}
+DEF FILTER4 Filter {}
+DEF FILTER5 Filter {}
+DEF FILTER6 Filter {}
+
+ROUTE LOADED.enterTime TO SCRIPT.loaded
+ROUTE ALARM1.cycleTime TO FILTER1.ein
+ROUTE FILTER1.eout TO SCRIPT.schedule1
+ROUTE ALARM2.cycleTime TO FILTER2.ein
+ROUTE FILTER2.eout TO SCRIPT.schedule2
+ROUTE ALARM3.cycleTime TO FILTER3.ein
+ROUTE FILTER3.eout TO SCRIPT.schedule3
+ROUTE ALARM4.cycleTime TO FILTER4.ein
+ROUTE FILTER4.eout TO SCRIPT.schedule4
+ROUTE ALARM5.cycleTime TO FILTER5.ein
+ROUTE FILTER5.eout TO SCRIPT.schedule5
+ROUTE ALARM6.cycleTime TO FILTER6.ein
+ROUTE FILTER6.eout TO SCRIPT.schedule6
+
+
+##################################################
+
+Random Interaction
+
+#VRML V2.0 utf8
+
+# when sphere touched, do random action
+# -play sound
+# -change color
+# -create random box
+
+NavigationInfo { type "EXAMINE" }
+
+DEF ROOT Group {
+   children [
+      Group {
+	 children [
+	    DEF TOUCH TouchSensor {}
+	    Shape {
+	       appearance Appearance { material DEF MAT Material {} }
+	       geometry Sphere {}
+	    }
+	   ]
+      }
+     ]
+}
+
+Sound {
+   spatialize FALSE minFront 100 maxFront 100 minBack 100 maxBack 100
+   source DEF CLIP AudioClip { url "Sounds/drm_snare.wav" }
+}
+
+DEF SCRIPT Script {
+   directOutput TRUE
+   eventIn SFBool clicked
+   eventOut MFNode newNodes
+   field SFNode mat USE MAT
+   field SFNode clip USE CLIP
+   url "vrmlscript:
+
+function clicked(val, ts) {
+   if(val) {
+      choice = Math.random() * 3;
+
+      // create a randomly placed box
+      if(choice < 1) {
+	 size = 8;
+	 halfsize = size / 2.0;
+	 x = Math.random() * size - halfsize;
+	 y = Math.random() * size - halfsize;
+	 z = Math.random() * size - halfsize;
+	 newNodes = Browser.createVrmlFromString('Transform {' +
+						 '  translation ' + x + ' ' + y + ' ' + z +
+						 '  children Shape {' +
+						 '    appearance Appearance {' +
+						 '      material Material {}' +
+					         '    }' +
+						 '    geometry Box { size 1 1 1 }' +
+						 '  }' +
+						 '}');
+      }
+      // change the sphere's color
+      else if(choice < 2) {
+	 mat.diffuseColor = new SFColor(Math.random(), Math.random(), Math.random());
+      }
+      // play an audio clip
+      else {
+	 clip.stopTime = 0;
+	 clip.startTime = ts+.5;
+      }
+   }
+}
+
+"
+}
+
+ROUTE TOUCH.isActive TO SCRIPT.clicked
+ROUTE SCRIPT.newNodes TO ROOT.addChildren
