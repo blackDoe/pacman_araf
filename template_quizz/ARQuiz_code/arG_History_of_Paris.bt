@@ -3959,25 +3959,25 @@ OrderedGroup {
             field SFNode tabs               USE TABS
             field SFNode map_tab            USE MAP
             field SFNode quiz_tab           USE QUIZ
-            field SFNode help_tab           USE HELP
-            field SFNode yourScore          USE YOUR_SCORE
+            //field SFNode help_tab           USE HELP
+            //field SFNode yourScore          USE YOUR_SCORE
             field SFNode correct            USE CORRECT_SOUND
             field SFNode wrong              USE WRONG_SOUND
             field SFNode ar_view            USE AR_VIEW_INSTANCE
-            field SFNode score_sw           USE SCORE_SW
+            //field SFNode score_sw           USE SCORE_SW
             field SFNode player             USE PLAYER
-            field SFNode user_initials      USE USER_INPUT
-            field SFNode result_alert_sw    USE RESULT_ALERT_SW
-            field SFNode result_alert       USE RESULT_ALERT
-            field SFNode share_result_sw    USE SHARE_SW
-            field SFNode error_msg          USE ERROR_MSG
-            field SFNode input_initials     USE INPUT_INITIALS
-            field SFNode share_button       USE SHARE_RESULT_BUTTON
-            field SFNode rank_text          USE RANK
-            field SFNode out_of             USE SCORE_OUT_OF
+            //field SFNode user_initials      USE USER_INPUT
+            //field SFNode result_alert_sw    USE RESULT_ALERT_SW
+            //field SFNode result_alert       USE RESULT_ALERT
+            //field SFNode share_result_sw    USE SHARE_SW
+            //field SFNode error_msg          USE ERROR_MSG
+            //field SFNode input_initials     USE INPUT_INITIALS
+            //field SFNode share_button       USE SHARE_RESULT_BUTTON
+            //field SFNode rank_text          USE RANK
+            //field SFNode out_of             USE SCORE_OUT_OF
             field SFNode tmr                USE TMR
             field SFNode internet           USE INTERNET_INSTANCE
-			field SFNode exit_button_sw	  USE EXIT_BUTTON_SW
+			//field SFNode exit_button_sw	  USE EXIT_BUTTON_SW
             field SFVec2f playerPos         PLAYER_POSITION
             # field SFVec2f mapGPSCenter    MAP_CENTER
             
@@ -4391,11 +4391,11 @@ ROUTE Q_PAGE.timeUP                 TO SCRIPT.timeIsUP
 ROUTE H_PAGE.showQuestion           TO SCRIPT.showQuestionView
 ROUTE ADVANCE2Game.onClick          TO SCRIPT.showQuiz
 ROUTE ADVANCE2Help.onClick          TO SCRIPT.showHelp
-ROUTE SHARE_RESULT_BUTTON.onClick   TO SCRIPT.sendResult
+//ROUTE SHARE_RESULT_BUTTON.onClick   TO SCRIPT.sendResult
 ROUTE INTRO_MS.mediaDuration        TO SCRIPT.setIntroDuration
 ROUTE TABS.CurrentTab               TO SCRIPT.tabChanged
 ROUTE TMR.cycleTime                 TO SCRIPT.checkInternetConnection
-ROUTE EXIT_BUTTON.onClick 			TO SCRIPT.exitGame
+//ROUTE EXIT_BUTTON.onClick 			TO SCRIPT.exitGame
 
 # ########################## MEDIA IMPORTS ###############################
 
@@ -4505,7 +4505,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 8
                     muxInfo MuxInfo {
-                        fileName "images/edit_text_field.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/edit_text_field.png"
                     }
                 }
             ]
@@ -4516,7 +4516,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 9
                     muxInfo MuxInfo {
-                        fileName "images/edit_text_field_sel.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/edit_text_field_sel.png"
                     }
                 }
             ]
@@ -4527,7 +4527,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 10
                     muxInfo MuxInfo {
-                        fileName "images/tab_quiz_off.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/tab_quiz_off.png"
                     }
                 }
             ]
@@ -4538,7 +4538,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 11
                     muxInfo MuxInfo {
-                        fileName "images/tab_quiz_on.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/tab_quiz_on.png"
                     }
                 }
             ]
@@ -4549,7 +4549,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 12
                     muxInfo MuxInfo {
-                        fileName "images/tab_map_off.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/tab_map_off.png"
                     }
                 }
             ]
@@ -4560,7 +4560,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 13
                     muxInfo MuxInfo {
-                        fileName "images/tab_map_on.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/tab_map_on.png"
                     }
                 }
             ]
@@ -4571,7 +4571,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 14
                     muxInfo MuxInfo {
-                        fileName "images/camera_tab_off.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/camera_tab_off.png"
                     }
                 }
             ]
@@ -4582,7 +4582,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 15
                     muxInfo MuxInfo {
-                        fileName "images/camera_tab_on.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/camera_tab_on.png"
                     }
                 }
             ]
@@ -4593,7 +4593,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 16
                     muxInfo MuxInfo {
-                        fileName "images/help_tab_off.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/help_tab_off.png"
                     }
                 }
             ]
@@ -4604,7 +4604,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 17
                     muxInfo MuxInfo {
-                        fileName "images/help_tab_on.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/help_tab_on.png"
                     }
                 }
             ]
@@ -4615,7 +4615,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 19
                     muxInfo MuxInfo {
-                        fileName "images/intro.png"
+                        fileName "C:/Users/Quentin/Downloads/AR_PacMan/images/intro.png"
                     }
                 }
             ]
@@ -4626,7 +4626,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 20
                     muxInfo MuxInfo {
-                        fileName "images/help_background.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/help_background.png"
                     }
                 }
             ]
@@ -4637,7 +4637,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 21
                     muxInfo MuxInfo {
-                        fileName "images/result.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/result.png"
                     }
                 }
             ]
@@ -4648,7 +4648,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 22
                     muxInfo MuxInfo {
-                        fileName "sounds/wrong.mp3"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/sounds/wrong.mp3"
                     }
                 }
             ]
@@ -4659,7 +4659,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 23
                     muxInfo MuxInfo {
-                        fileName "sounds/ding.mp4#1"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/sounds/ding.mp4#1"
                     }
                 }
             ]
@@ -4670,7 +4670,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 24
                     muxInfo MuxInfo {
-                        fileName "images/input_bg.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/input_bg.png"
                     }
                 }
             ]
@@ -4681,7 +4681,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 25
                     muxInfo MuxInfo {
-                        fileName "images/heart.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/heart.png"
                     }
                 }
             ]
@@ -4692,7 +4692,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 26
                     muxInfo MuxInfo {
-                        fileName "videos/splashscreen.mp4#1"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/videos/splashscreen.mp4#1"
                     }
                 }
             ]
@@ -4703,7 +4703,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 27
                     muxInfo MuxInfo {
-                        fileName "images/ancient_scroll.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/ancient_scroll.png"
                     }
                 }
             ]
@@ -4714,7 +4714,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 28
                     muxInfo MuxInfo {
-                        fileName "images/marker_eu.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/marker_eu.png"
                     }
                 }
             ]
@@ -4725,7 +4725,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 29
                     muxInfo MuxInfo {
-                        fileName "images/back_ancient_on.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/back_ancient_on.png"
                     }
                 }
             ]
@@ -4736,7 +4736,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 30
                     muxInfo MuxInfo {
-                        fileName "images/plus_off.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/plus_off.png"
                     }
                 }
             ]
@@ -4747,7 +4747,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 31
                     muxInfo MuxInfo {
-                        fileName "images/minus_off.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/minus_off.png"
                     }
                 }
             ]
@@ -4758,7 +4758,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 32
                     muxInfo MuxInfo {
-                        fileName "images/plus_on_v2.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/plus_on_v2.png"
                     }
                 }
             ]
@@ -4769,7 +4769,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 33
                     muxInfo MuxInfo {
-                        fileName "images/minus_on_v2.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/minus_on_v2.png"
                     }
                 }
             ]
@@ -4780,7 +4780,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 34
                     muxInfo MuxInfo {
-                        fileName "images/message_bg.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/message_bg.png"
                     }
                 }
             ]
@@ -4791,7 +4791,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 35
                     muxInfo MuxInfo {
-                        fileName "images/hint_background.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/hint_background.png"
                     }
                 }
             ]
@@ -4802,7 +4802,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 36
                     muxInfo MuxInfo {
-                        fileName "images/back_icon.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/back_icon.png"
                     }
                 }
             ]
@@ -4813,7 +4813,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 37
                     muxInfo MuxInfo {
-                        fileName "images/validate_on.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/validate_on.png"
                     }
                 }
             ]
@@ -4824,7 +4824,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 38
                     muxInfo MuxInfo {
-                        fileName "images/validate.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/validate.png"
                     }
                 }
             ]
@@ -4835,7 +4835,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 39
                     muxInfo MuxInfo {
-                        fileName "images/intro_button.png"
+                        fileName "C:/Users/Quentin/Downloads/AR_PacMan/images/intro_button.png"
                     }
                 }
             ]
@@ -4846,7 +4846,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 42
                     muxInfo MuxInfo {
-                        fileName "images/gps_off.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/gps_off.png"
                     }
                 }
             ]
@@ -4857,7 +4857,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 43
                     muxInfo MuxInfo {
-                        fileName "images/gps_on.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/gps_on.png"
                     }
                 }
             ]
@@ -4868,7 +4868,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 46
                     muxInfo MuxInfo {
-                        fileName "images/input_bg_on.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/input_bg_on.png"
                     }
                 }
             ]
@@ -4879,7 +4879,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 47
                     muxInfo MuxInfo {
-                        fileName "images/internet_off.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/internet_off.png"
                     }
                 }
             ]
@@ -4890,7 +4890,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 48
                     muxInfo MuxInfo {
-                        fileName "images/internet_on.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/internet_on.png"
                     }
                 }
             ]
@@ -4901,7 +4901,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 50
                     muxInfo MuxInfo {
-                        fileName "images/back_icon_on.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/back_icon_on.png"
                     }
                 }
             ]
@@ -4915,7 +4915,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 51
                     muxInfo MuxInfo {
-                        fileName "images/arrows/up.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/arrows/up.png"
                     }
                 }
             ]
@@ -4926,7 +4926,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 52
                     muxInfo MuxInfo {
-                        fileName "images/arrows/up_over.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/arrows/up_over.png"
                     }
                 }
             ]
@@ -4937,7 +4937,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 53
                     muxInfo MuxInfo {
-                        fileName "images/arrows/down.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/arrows/down.png"
                     }
                 }
             ]
@@ -4948,7 +4948,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 54
                     muxInfo MuxInfo {
-                        fileName "images/arrows/down_over.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/arrows/down_over.png"
                     }
                 }
             ]
@@ -4959,7 +4959,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 55
                     muxInfo MuxInfo {
-                        fileName "images/arrows/left.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/arrows/left.png"
                     }
                 }
             ]
@@ -4970,7 +4970,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 56
                     muxInfo MuxInfo {
-                        fileName "images/arrows/left_over.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/arrows/left_over.png"
                     }
                 }
             ]
@@ -4981,7 +4981,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 57
                     muxInfo MuxInfo {
-                        fileName "images/arrows/right.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/arrows/right.png"
                     }
                 }
             ]
@@ -4992,7 +4992,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 58
                     muxInfo MuxInfo {
-                        fileName "images/arrows/right_over.png"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/arrows/right_over.png"
                     }
                 }
             ]
@@ -5012,7 +5012,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 401
                     muxInfo MuxInfo {
-                        fileName "numbers/1.mp4"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/numbers/1.mp4"
                     }
                 }
             ]
@@ -5023,7 +5023,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 402
                     muxInfo MuxInfo {
-                        fileName "numbers/2.mp4"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/numbers/2.mp4"
                     }
                 }
             ]
@@ -5034,7 +5034,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 403
                     muxInfo MuxInfo {
-                        fileName "numbers/3.mp4"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/numbers/3.mp4"
                     }
                 }
             ]
@@ -5045,7 +5045,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 404
                     muxInfo MuxInfo {
-                        fileName "numbers/4.mp4"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/numbers/4.mp4"
                     }
                 }
             ]
@@ -5056,7 +5056,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 405
                     muxInfo MuxInfo {
-                        fileName "numbers/5.mp4"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/numbers/5.mp4"
                     }
                 }
             ]
@@ -5067,7 +5067,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 406
                     muxInfo MuxInfo {
-                        fileName "numbers/6.mp4"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/numbers/6.mp4"
                     }
                 }
             ]
@@ -5078,7 +5078,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 407
                     muxInfo MuxInfo {
-                        fileName "numbers/7.mp4"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/numbers/7.mp4"
                     }
                 }
             ]
@@ -5089,7 +5089,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 408
                     muxInfo MuxInfo {
-                        fileName "numbers/8.mp4"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/numbers/8.mp4"
                     }
                 }
             ]
@@ -5100,7 +5100,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 409
                     muxInfo MuxInfo {
-                        fileName "numbers/9.mp4"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/numbers/9.mp4"
                     }
                 }
             ]
@@ -5111,7 +5111,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 410
                     muxInfo MuxInfo {
-                        fileName "numbers/10.mp4"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/numbers/10.mp4"
                     }
                 }
             ]
@@ -5123,7 +5123,7 @@ AT 0 {
                 ES_Descriptor {
                     ES_ID 800
                     muxInfo MuxInfo {
-                        fileName "sounds/ok.mp3"
+                        fileName "C:/Users/Quentin/Downloads/ARQuiz_code/sounds/ok.mp3"
                     }
                 }
             ]
@@ -5131,12 +5131,12 @@ AT 0 {
     ]
 }
  AT 0 { UPDATE OD [ 
-ObjectDescriptor { objectDescriptorID 512 esDescr [ ES_Descriptor { ES_ID 512 muxInfo MuxInfo {fileName "images/questions/LouisXIV628b0194-8bbf-4789-8076-54ab1ba1dce8.jpg"}}]} 
-ObjectDescriptor { objectDescriptorID 521 esDescr [ ES_Descriptor { ES_ID 521 muxInfo MuxInfo {fileName "images/questions/1024px-Parc_Montsouris_statue_113dbb5127-2b5d-444e-9034-ca25ef4d25c1.jpg"}}]} 
-ObjectDescriptor { objectDescriptorID 522 esDescr [ ES_Descriptor { ES_ID 522 muxInfo MuxInfo {fileName "images/questions/P1110707_Paris_XIV_parc_de_Montsouris_rwk29bd1538-4734-4c3a-813d-5814a3d1d14a.jpg"}}]} 
-ObjectDescriptor { objectDescriptorID 523 esDescr [ ES_Descriptor { ES_ID 523 muxInfo MuxInfo {fileName "images/questions/Lion_death94789b81-eacc-43c4-b525-7043af8a7137.png"}}]} 
-ObjectDescriptor { objectDescriptorID 524 esDescr [ ES_Descriptor { ES_ID 524 muxInfo MuxInfo {fileName "images/questions/Desert dramaeebc8b18-e9c1-46ce-b09b-6bee09ae03d7.png"}}]} 
-ObjectDescriptor { objectDescriptorID 509 esDescr [ ES_Descriptor { ES_ID 509 muxInfo MuxInfo {fileName "images/questions/Jules_cesarfa40ed55-71fc-46f7-a90a-d2d822d7cba5.jpg"}}]} 
-ObjectDescriptor { objectDescriptorID 510 esDescr [ ES_Descriptor { ES_ID 510 muxInfo MuxInfo {fileName "images/questions/Mitterrandcfa3df74-cbba-4c67-a670-3c3990b2fc73.jpg"}}]} 
-ObjectDescriptor { objectDescriptorID 511 esDescr [ ES_Descriptor { ES_ID 511 muxInfo MuxInfo {fileName "images/questions/Napoleon_I_of_France_by_Andrea_Appiani0c9ed1c2-d255-41fb-8fb9-7e133765a403.jpg"}}]} 
- ] } 
+ObjectDescriptor { objectDescriptorID 512 esDescr [ ES_Descriptor { ES_ID 512 muxInfo MuxInfo {fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/questions/LouisXIV628b0194-8bbf-4789-8076-54ab1ba1dce8.jpg"}}]} 
+ObjectDescriptor { objectDescriptorID 521 esDescr [ ES_Descriptor { ES_ID 521 muxInfo MuxInfo {fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/questions/1024px-Parc_Montsouris_statue_113dbb5127-2b5d-444e-9034-ca25ef4d25c1.jpg"}}]} 
+ObjectDescriptor { objectDescriptorID 522 esDescr [ ES_Descriptor { ES_ID 522 muxInfo MuxInfo {fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/questions/P1110707_Paris_XIV_parc_de_Montsouris_rwk29bd1538-4734-4c3a-813d-5814a3d1d14a.jpg"}}]} 
+ObjectDescriptor { objectDescriptorID 523 esDescr [ ES_Descriptor { ES_ID 523 muxInfo MuxInfo {fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/questions/Lion_death94789b81-eacc-43c4-b525-7043af8a7137.png"}}]} 
+ObjectDescriptor { objectDescriptorID 524 esDescr [ ES_Descriptor { ES_ID 524 muxInfo MuxInfo {fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/questions/Desert dramaeebc8b18-e9c1-46ce-b09b-6bee09ae03d7.png"}}]} 
+ObjectDescriptor { objectDescriptorID 509 esDescr [ ES_Descriptor { ES_ID 509 muxInfo MuxInfo {fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/questions/Jules_cesarfa40ed55-71fc-46f7-a90a-d2d822d7cba5.jpg"}}]} 
+ObjectDescriptor { objectDescriptorID 510 esDescr [ ES_Descriptor { ES_ID 510 muxInfo MuxInfo {fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/questions/Mitterrandcfa3df74-cbba-4c67-a670-3c3990b2fc73.jpg"}}]} 
+ObjectDescriptor { objectDescriptorID 511 esDescr [ ES_Descriptor { ES_ID 511 muxInfo MuxInfo {fileName "C:/Users/Quentin/Downloads/ARQuiz_code/images/questions/Napoleon_I_of_France_by_Andrea_Appiani0c9ed1c2-d255-41fb-8fb9-7e133765a403.jpg"}}]} 
+ ] }
