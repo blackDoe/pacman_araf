@@ -1,0 +1,96 @@
+PROTO UI_TAB_PROTO [
+    exposedField SFVec2f    Pos                 0 0
+    exposedField SFVec2f    Size                480 800
+    exposedField SFVec2f    LAYER_BUTTON_SIZE   480 81
+    exposedField SFVec2f    LAYER_TABS_SIZE     480 719
+    exposedField SFInt32    ButtonHeight        81
+    exposedField MFNode     tabButtons          []
+    exposedField MFNode     tabLayers           []
+    exposedField SFBool     tabButtonAutosize   FALSE 
+    exposedField SFInt32    tabButtonLocation   0
+    exposedField SFInt32    CurrentTab          0   
+]
+{
+    Transform2D {
+        translation IS Pos
+        children [
+            DEF UI_TAB_PROTO_MAIN_LAYOUT Layout {
+                topToBottom FALSE
+                horizontal FALSE
+                size IS Size
+                justify ["BEGIN" "BEGIN"]
+                children [
+                    DEF UI_TAB_PROTO_SWITCH Switch {
+                       whichChoice IS CurrentTab
+                       children IS tabLayers                       
+                    }                           
+                    DEF UI_TAB_PROTO_LAYER_BUTTONS Layer2D {
+                        size IS LAYER_BUTTON_SIZE
+                        children IS tabButtons  
+                    }   
+                    
+                ]
+           }
+           DEF UI_TAB_PROTO_SCRIPT Script {
+                field MFNode items IS tabButtons                              
+                field SFNode scr USE UI_TAB_PROTO_SCRIPT 
+                field SFNode selected USE UI_TAB_PROTO_SWITCH
+                field SFNode ml USE UI_TAB_PROTO_MAIN_LAYOUT
+                field SFNode lb USE UI_TAB_PROTO_LAYER_BUTTONS
+
+                # field SFNode lt USE LAYER_TABS
+                field SFInt32 bh IS ButtonHeight
+                field SFBool auto IS tabButtonAutosize
+                
+                eventIn SFInt32 SetBtnLoc IS tabButtonLocation
+                eventIn SFVec2f setSize IS Size
+                
+                field SFInt32 prevBtnLoc 0
+                
+                url ["javascript:
+                    function initialize()
+                    {
+                        for ( i = 0; i < items.length; i++ )
+                            for ( j = 0; j < items.length; j++ )
+                            {
+                                if ( i == j)
+                                {
+                                    items[i].TabIndex = i;
+                                    Browser.addRoute(items[i], 'SelectedTab', selected, 'whichChoice');
+                                }
+                                else
+                                {
+                                    Browser.addRoute(items[i], 'isSelected', items[j], 'Deselect');
+                                }
+                            }
+                    }
+                    
+                    function setSize ( value )
+                    {
+                        lb.size = new SFVec2f ( value.x, bh );
+                        if ( auto )
+                        {
+                            
+                            buttonWidth = value.x / items.length;
+                            for ( i = 0; i < items.length; i++ )
+                            {
+                                items[i].Pos = new SFVec2f ( - value.x/2 + buttonWidth/2 + buttonWidth * i, 0 );
+                                items[i].Size = new SFVec2f ( buttonWidth, bh );
+                            }
+                        }
+                    }
+                    
+                    function SetBtnLoc(value)
+                    {
+                        if ( prevBtnLoc == value )
+                            return;
+                        prevBtnLoc = value;
+                        t = ml.children[0];
+                        ml.children[0] = ml.children[1];
+                        ml.children[1] = t;
+                    }
+               "]
+           }
+        ]                  
+    }
+}

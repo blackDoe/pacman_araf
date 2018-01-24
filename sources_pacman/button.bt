@@ -1,19 +1,19 @@
 PROTO BUTTON [
-	exposedField SFVec2f 	translation 	0 0
-	exposedField SFFloat 	rotationAngle 	0.0
-	exposedField SFVec2f 	scale 			1 1
-	exposedField SFVec2f 	size 			50 50
-	exposedField MFString 	backImage 		[]
-	exposedField MFString 	overImage 		[]
-	exposedField MFString 	text 			[]
-	exposedField SFColor 	textColor 		1 1 1
-	exposedField SFFloat 	textSize 		18
-	exposedField SFColor 	overColor 		1 0.5 0.8
-	exposedField SFColor 	backColor 		0.1 0.1 0.1
-	exposedField MFString 	family 			["ARIAL"]
-	exposedField SFVec2f	layoutSize		-1 -1
-	eventOut 	 SFBool 	onClick
-	eventIn 	 SFBool 	doClick
+    exposedField SFVec2f    translation     0 0
+exposedField SFFloat    rotationAngle   0.0
+exposedField SFVec2f    scale           1, 1
+exposedField SFVec2f    size            0 0
+exposedField MFString   backImage       [""]
+exposedField MFString   overImage       [""]
+exposedField MFString   buttonText      [""]
+exposedField SFColor    textColor       1 1 1
+exposedField SFFloat    textSize        18
+exposedField SFColor    overColor       1 0.5 0.8
+exposedField SFColor    backColor       0.1 0.1 0.1
+exposedField MFString   fonstSyleFamily ["ARIAL"]
+exposedField SFVec2f    layoutSize      -1 -1
+eventIn      SFBool     doClick
+eventOut     SFBool     onClick
 ] 
 {
 	DEF TR Transform2D {

@@ -1,0 +1,1608 @@
+# ########################## FILE DEFINES ##########################
+
+#define MAP_CENTER      48.8227065835 2.33919344086
+#define PLAYER_POSITION 48.8227065835 2.33919344086
+
+# ########################## FILE HEADER ##########################
+
+InitialObjectDescriptor {
+	objectDescriptorID 100
+	audioProfileLevelIndication 255
+	visualProfileLevelIndication 254
+	sceneProfileLevelIndication 1
+	graphicsProfileLevelIndication 1
+	ODProfileLevelIndication 1
+	esDescr [
+		ES_Descriptor {
+			ES_ID 1
+			decConfigDescr DecoderConfigDescriptor {
+				streamType 3
+				decSpecificInfo BIFSConfig {
+					useNames true
+					isCommandStream true
+					pixelMetric true
+					pixelWidth 640
+					pixelHeight 800
+				}
+			}
+		}
+		ES_Descriptor {
+			ES_ID 2
+			decConfigDescr DecoderConfigDescriptor {
+				streamType 1
+			}
+		}
+	]
+}
+
+EXTERNPROTO IMAGE [
+	exposedField SFVec2f 	translation 	0 0
+	exposedField SFFloat 	rotationAngle 	0.0
+	exposedField SFVec2f 	scale 			1, 1
+	exposedField MFString 	url				[]
+	exposedField SFVec2f	size			100 60
+]"image.bt"
+
+EXTERNPROTO BUTTON [
+          exposedField SFVec2f    translation     0 0
+      exposedField SFFloat    rotationAngle   0.0
+      exposedField SFVec2f    scale           1, 1
+      exposedField SFVec2f    size            0 0
+      exposedField MFString   backImage       [""]
+      exposedField MFString   overImage       [""]
+      exposedField MFString   buttonText      [""]
+      exposedField SFColor    textColor       1 1 1
+      exposedField SFFloat    textSize        18
+      exposedField SFColor    overColor       1 0.5 0.8
+      exposedField SFColor    backColor       0.1 0.1 0.1
+      exposedField MFString   fonstSyleFamily ["ARIAL"]
+      exposedField SFVec2f    layoutSize      -1 -1
+      eventIn      SFBool     doClick
+      eventOut     SFBool     onClick
+      ]"button.bt"
+
+EXTERNPROTO MapOverlay [
+	exposedField 	SFString 	name 		""
+	exposedField	SFBool 	visible		TRUE
+	exposedField	SFBool 	enabled		TRUE
+	exposedField	SFBool 	clickable	TRUE
+	exposedField 	MFNode		children	[]
+	exposedField	MFString	keywords 	[]
+	eventIn 		MFNode 	addOverlayItems
+	eventIn 		MFNode 	removeOverlayItems
+]"mapOverlay.bt"
+
+EXTERNPROTO MapMarker [
+	exposedField SFString 	name 			""
+	exposedField SFVec2f 	position		0 0
+    exposedField SFFloat 	radius		    0
+	exposedField SFBool 	clickable		TRUE
+	exposedField SFBool 	visible			TRUE
+	exposedField SFBool 	enabled			TRUE
+	exposedField MFNode 	markerShape		[]
+	eventIn 	SFBool		doClick
+	eventIn		SFVec2f	setPlayerGPS
+	eventIn		SFVec2f	setMapGPSCenter
+	eventIn		SFInt32	setMapZoomLevel
+	eventOut 	SFBool		onClick
+	eventOut	SFString	onPlayerAround
+	eventOut	SFString	onPlayerLeft
+]"mapMarker.bt"
+
+EXTERNPROTO MapPlayer [
+    	exposedField 	SFString   	name               "playerName"
+    	exposedField 	SFVec2f    	position          	0 0
+		exposedField 	SFBool     	visible         	TRUE
+		exposedField 	MFNode	 	playerShape			[]
+    	eventIn     	SFInt32 	setMapZoomLevel
+    	eventIn     	SFVec2f		setMapGPSCenter
+]"mapPlayer.bt"
+
+PROTO PLAYER_PIECE [
+		exposedField SFVec2f rectangleTranslation 	0 0
+		exposedField SFVec2f rectangleSize 		5 5
+		exposedField SFColor playerColor 		0 1 0
+		exposedField SFFloat rotationAngle 		0.0
+]
+{
+    Transform2D {
+        translation 	IS rectangleTranslation
+        rotationAngle 	IS rotationAngle
+        children [
+            Shape {
+                appearance Appearance {
+                    material Material2D {
+                        emissiveColor IS playerColor
+                        filled TRUE
+                    }
+                }
+                geometry Rectangle {
+                    size IS rectangleSize
+                }
+            }
+        ]
+    }
+}
+
+EXTERNPROTO MAP_TILE [
+	exposedField SFVec2f 	tileTranslation 	0 0
+	exposedField MFString 	tileURL 			[]
+	exposedField SFVec2f 	tileCenterCoord 	0 0
+	exposedField SFVec2f 	tileSize 			256 256
+]"mapTile.bt"
+
+EXTERNPROTO MAP [
+	exposedField SFString	name				""
+	exposedField SFVec2f 	mapTranslation 		0 0
+	exposedField SFVec2f 	mapSize 			768 768
+	exposedField SFVec2f 	mapLayoutSize 		768 768
+	exposedField SFVec2f 	mapGPSCenter 		0 0
+	exposedField SFInt32 	zoomLevel 			18
+	exposedField MFNode  	overlays   			[]
+	exposedField MFString 	mode   				["SATELLITE"]
+	exposedField MFString 	provider   			["GOOGLE"]
+	eventIn 	MFNode 	    addOverlays
+	eventIn   	MFNode  	removeOverlays
+	eventIn   	SFBool 	    zoomIn
+	eventIn   	SFBool 	    zoomOut
+]"map.bt"
+
+EXTERNPROTO GPS_SIGNAL [
+          exposedField SFVec2f    translation     -20 320
+      exposedField SFTime     checkInterval   5
+      exposedField SFBool     gps             FALSE
+      exposedField SFVec2f    iconSize        25 25
+      exposedField MFString   image_on        []
+      exposedField MFString   image_off       []
+      ]"GPSsignal.bt"
+
+EXTERNPROTO INTERNET_CONNECTION [
+          exposedField SFVec2f    translation     20 320
+      exposedField SFTime     checkInterval   5
+      exposedField SFBool     internet        FALSE
+      exposedField SFVec2f    iconSize        25 25
+      exposedField MFString   imgOff          "47"
+      exposedField MFString   imgOn           "48"
+      ]"internetConnection.bt"
+
+EXTERNPROTO ARROW_NAVIGATOR [
+    exposedField    SFVec2f translation         0 0
+	eventOut        SFInt32 navigate
+]"arrowNavigator.bt"
+
+EXTERNPROTO AR_OBJECT [
+    exposedField    SFString        name                ""
+exposedField    SFVec2f         position            0 0
+exposedField    SFVec2f         playerPosition      0.0 0.0
+exposedField    SFBool          visible             FALSE
+exposedField    SFBool          clickable           FALSE
+exposedField    MFString        objectURL           ["401"]
+exposedField    SFVec3f         objTrans            0 0 0
+exposedField    SFVec3f         objScale            0.003 0.003 0.003
+exposedField    SFRotation      objRotation         0 0 0 0
+eventOut        SFString        onClick
+]"ARobject.bt"
+
+EXTERNPROTO AR_VIEW [
+    exposedField SFVec2f    translation     0 0
+exposedField SFVec2f    layerSize       480 800
+exposedField SFVec2f    rectangleSize   800 480
+exposedField SFVec3f    cameraTrans     0 0 -900
+exposedField MFNode     ar_objects      []
+eventIn      SFVec2f    setPlayerPosition
+eventIn      SFNode     addObject
+eventIn      SFBool     openCamera
+]"ARview.bt"
+
+EXTERNPROTO UI_TAB_LAYER [
+    exposedField SFVec2f    Pos             0 0
+    exposedField SFVec2f    BackImgTrans    0 0
+    exposedField SFVec2f    Size            480 650
+    exposedField MFString   BackImg         [""]
+    exposedField MFNode     children        []
+]"UI_tab_layer.bt"
+
+EXTERNPROTO UI_TAB_BUTTON [
+          exposedField SFVec2f    Pos                 0 0
+          exposedField SFVec2f    Size                80 30
+          exposedField MFString   BackImage           [""]
+          exposedField MFString   BackImageSelected   [""]
+          exposedField MFString   IconImage           [""]
+          exposedField MFString   IconImageSelected   [""]
+          exposedField MFString   Text                [""]
+          exposedField SFColor    TextColor           1 0 0
+          exposedField SFColor    TextColorSelected   0.7 0 0
+          exposedField SFFloat    TextSize            18
+          exposedField SFBool     isSelected          FALSE
+          exposedField SFInt32    TabIndex            -1
+          exposedField SFBool     tsEnabled           TRUE
+          eventIn SFBool          Deselect
+          eventIn SFBool          Select
+          eventOut SFInt32        SelectedTab
+      ]"UI_tab_button.bt"
+
+EXTERNPROTO UI_TAB_PROTO [
+          exposedField SFVec2f    Pos                 0 0
+          exposedField SFVec2f    Size                480 800
+          exposedField SFVec2f    LAYER_BUTTON_SIZE   480 81
+          exposedField SFVec2f    LAYER_TABS_SIZE     480 719
+          exposedField SFInt32    ButtonHeight        81
+          exposedField MFNode     tabButtons          []
+          exposedField MFNode     tabLayers           []
+          exposedField SFBool     tabButtonAutosize   FALSE
+          exposedField SFInt32    tabButtonLocation   0
+          exposedField SFInt32    CurrentTab          0
+      ]"UI_tab_proto.bt"
+
+# à triturer
+EXTERNPROTO QUESTION_PAGE [
+          exposedField    MFNode      children        []
+      exposedField    SFFloat     quizTime        10
+      exposedField    SFInt32     activeQuestion  0
+      exposedField    SFVec2f     Size            480 700
+      eventIn         SFFloat     currentScore
+      eventOut        SFBool      timeUP
+      eventOut        SFFloat     secondsLeft
+      ]"questionPage.bt"
+
+
+
+# ########################## ARAF Scene ###############################
+OrderedGroup {
+    children [
+        Background2D { backColor 0 0 0 }
+        DEF NAV NavigationInfo { type ["NONE"] }
+        DEF INTRO_MS MediaSensor { url "26" }
+        DEF MAIN_TS TimeSensor {
+            cycleInterval   1
+            enabled         TRUE
+            loop            TRUE
+            startTime       0
+            stopTime        -1
+        }
+
+        ################################################# GAME MENU ##########################################################
+        DEF MENU Switch {
+            whichChoice -1
+            choice [
+                #################### SPLASHSCREEN           #################
+                Group {
+                    children [
+                        Shape {
+                            appearance Appearance {
+                                texture ImageTexture {
+                                    url "26"
+                                }
+                            }
+                            geometry Rectangle {
+                                size 480 800
+                            }
+                        }
+                    ]
+                }
+                #################### INTRO                  #################
+                Group {
+                    children [
+                        IMAGE {
+                        url "19"
+                        translation 0 0
+                        size 480 800
+                        }
+
+                        DEF ADVANCE2Help BUTTON {
+                            layoutSize 200 37
+                            size 200 80
+                            translation -130 -300
+                            textColor $345253
+                            textSize 22
+                            buttonText "How to play.."
+                            backImage "39"
+                            overImage "39"
+                            fonstSyleFamily "Arial"
+                        }
+
+                        DEF ADVANCE2Game BUTTON {
+                            layoutSize 200 53
+                            size 200 80
+                            translation 130 -300
+                            textColor $345253
+                            textSize 32
+                            buttonText "Start!"
+                            backImage "39"
+                            overImage "39"
+                            fonstSyleFamily "Arial"
+                        }
+                    ]
+                }
+                #################### PLAYING THE GAME       #################
+                OrderedGroup {
+                    children [
+                        DEF TIME TimeSensor {
+                        cycleInterval 2
+                        enabled FALSE
+                        loop TRUE
+                        }
+
+                        DEF BKG1 Shape {
+                            appearance Appearance {
+                                material Material2D {
+                                    emissiveColor 0 0 0
+                                    filled true
+                                }
+                            }
+                            geometry Rectangle {
+                                size 480 800
+                            }
+                        }
+
+
+
+                        DEF TABS UI_TAB_PROTO {
+                            ButtonHeight 81
+                            LAYER_BUTTON_SIZE 480 81
+                            LAYER_TABS_SIZE 480 719
+                            tabButtons [
+                                DEF QUIZ UI_TAB_BUTTON {
+                                Size 108 81
+                                Pos -180 0
+                                BackImage           "10"
+                                BackImageSelected   "11"
+                                }
+                                DEF MAP UI_TAB_BUTTON {
+                                    Size 108 81
+                                    Pos -60 0
+                                    BackImage           "12"
+                                    BackImageSelected   "13"
+                                }
+                                DEF CAMERA UI_TAB_BUTTON {
+                                    Size 108 81
+                                    Pos 60 0
+                                    BackImage           "14"
+                                    BackImageSelected   "15"
+                                }
+                            ]
+                            tabLayers [
+                                # view.whichChoice == 0 - QUIZ VIEW
+                                Group {
+                                    children [
+                                        UI_TAB_LAYER {
+                                            Size 480 670
+                                            BackImg "27"
+                                            BackImgTrans 0 20
+                                            children [
+                                                DEF QUIZ_SW Switch {
+                                                whichChoice 0
+                                                choice [
+                                                    DEF Q_PAGE QUESTION_PAGE {
+                                                    activeQuestion 0
+                                                    quizTime 300
+                                                    Size 480 650
+                                                    children []
+                                                    }
+                                                ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+
+                                # view.whichChoice == 1 - MAP VIEW
+                                Group {
+                                    children [
+                                        UI_TAB_LAYER {
+                                        Size 480 700
+                                        children [
+                                            DEF GMAP MAP {
+                                            name "Map1"
+                                            mapTranslation 0 0
+                                            mapLayoutSize 480 700
+                                            mapSize 1536 1536
+                                            mapGPSCenter MAP_CENTER
+                                            zoomLevel 19
+                                        }
+                                        DEF PLAYER_SWITCH Switch {
+                                            whichChoice -1
+                                            choice [
+                                                DEF PLAYER MapPlayer {
+                                                name "player"
+                                                playerShape [
+                                                    DEF PLAYER_SHAPE Transform2D {
+                                                    children [
+                                                        PLAYER_PIECE {
+                                                        rectangleTranslation 0 6
+                                                    }
+                                                    PLAYER_PIECE {
+                                                        rectangleTranslation 0 -6
+                                                    }
+                                                    PLAYER_PIECE {
+                                                        rectangleTranslation 6 0
+                                                    }
+                                                    PLAYER_PIECE {
+                                                        rectangleTranslation -6 0
+                                                    }
+                                                ]
+                                                }
+                                            ]
+                                            }
+                                        ]
+                                        }
+                                        DEF GPS_INSTANCE GPS_SIGNAL {
+                                            iconSize 30 30
+                                            image_on ["43"]
+                                            image_off ["42"]
+                                        }
+                                        DEF INTERNET_INSTANCE INTERNET_CONNECTION {}
+                                        DEF ARR_NAV ARROW_NAVIGATOR {
+                                            translation 0 -330
+                                        }
+                                    ]
+                                    }
+                                ]
+                                }
+
+                                # view.whichChoice == 2 - CAMERA VIEW
+                                Group {
+                                    children [
+                                        UI_TAB_LAYER {
+                                        Size 480 800
+                                        children [
+                                            Group {
+                                            children [
+                                                DEF AR_VIEW_INSTANCE AR_VIEW {
+                                                translation 0 40
+                                                layerSize 480 730
+                                                rectangleSize 730 490
+                                                setPlayerPosition PLAYER_POSITION
+                                            }
+                                        ]
+                                        }
+                                    ]
+                                    }
+                                ]
+                                }
+                            ]
+                        }
+                    ]
+				}
+            ]
+        }
+
+        DEF TMR TimeSensor {
+            cycleInterval 30
+            loop TRUE
+            enabled TRUE
+        }
+
+        DEF SCRIPT Script {
+	        field SFNode script             USE SCRIPT
+	        field SFNode gmap               USE GMAP
+	        field SFNode menu               USE MENU
+	        field SFNode q_page             USE Q_PAGE
+	        field SFNode h_page             USE H_PAGE
+	        field SFNode quiz_sw            USE QUIZ_SW
+	        field SFNode tabs               USE TABS
+	        field SFNode map_tab            USE MAP
+	        field SFNode quiz_tab           USE QUIZ
+	        field SFNode correct            USE CORRECT_SOUND
+	        field SFNode wrong              USE WRONG_SOUND
+	        field SFNode ar_view            USE AR_VIEW_INSTANCE
+	        field SFNode player             USE PLAYER
+	        field SFNode tmr                USE TMR
+	        field SFNode internet           USE INTERNET_INSTANCE
+	        field SFVec2f playerPos         PLAYER_POSITION
+	        # field SFVec2f mapGPSCenter    MAP_CENTER
+
+	        eventIn SFInt32     showMapView
+	        eventIn SFInt32     showQuestionView
+	        eventIn SFString    showMarkerStory
+	        eventIn SFInt32     addScore
+	        eventIn SFTime      currentTime
+	        eventIn SFBool      timeIsUP
+	        eventIn SFBool      showQuiz
+	        eventIn SFBool      showHelp
+	        eventIn SFBool      sendResult
+	        eventIn SFBool      openResultPage
+	        eventIn SFInt32     tabChanged
+	        eventIn SFFloat     timeLeft
+	        eventIn SFTime      setIntroDuration
+	        eventIn SFTime      checkInternetConnection
+	        eventIn SFBool		 exitGame
+
+	####################################################################################################################
+
+	        field SFInt32 totalNrOfQ 5
+
+	        field SFInt32 nrOfDisplayedQ 5
+	        field MFString question0 ["Who was the roman general defeating the Parisii in 52 BC?
+	        ", "Titus Labienus", "Quintus Aponius", "Lucius Minucius Basilus", "Decimus Junius Brutus Albinus", "1", ]
+	        field MFString question1 ["Whose name was erased from the Meridian of Paris Monument?
+	        ", "509;Cesar", "510;Mitterrand", "511;Napoleon", "512;Louis XIV", "3", ]
+	        field MFString question2 ["When did Clovis the Frank install the capital of the first Franck kingdom in Paris?
+	        ", "356", "508", "534", "426", "2", ]
+	        field MFString question3 ["When was the construction of Notre Dame started?
+	        ", "1200", "999", "1163", "1056", "3", ]
+	        field MFString question4 ["Which monument located in the park was created by Jules-Felix Coutan?
+	        ", "521;Shipwrecked", "522;Armed Peace", "523;Lion’s death", "524;Desert drama", "2", ]
+	        field MFVec2f gpsPos [48.8223268105 2.33874917739, 48.8227259152 2.33890474551, 48.8231320802 2.33855605834, 48.8221961296 2.34015733712, 48.8224716188 2.33930439466, ]
+	        field MFString hint ["He commanded the winter quarters in Vesontio in 58 BC. He also had full command of the legions in Gaul during Caesar’s absence
+	        ", "The Meridian of Paris was defined by French astronomers in 1667 and used as the zero point for longitude on all French maps until 1884.
+	        The name of a French Emperior was erased from the monument after the Restoration of the Monarchy.
+	        ", "The last digit corresponds to the distance, in meters, between the door of the restaurant “Le pavillon Montsouris” and the main gate
+	        ", "If you took the bus to arrive here, divide the bus number by 8 and you will get the first two digits out of four.
+	        ", "This work, dominating the park entrance originally stood in the Square d'Anvers. It replaced a bronze statue symbolizing the French Revolution melted down by the Germans in 1942
+	        ",
+	        ]
+
+	        url [
+	            "javascript:
+	            function initialize() {
+	                gpac.set_orientation_portrait();
+	                currentQuestionIndex = 0;
+	                maxScore            = nrOfDisplayedQ*10*2;
+	                out_of.String       = 'out of '+maxScore;
+	                introDuration       = 5;
+	                myScore             = 0;
+	                secondsLeft         = -1;
+	                coorectAnsNr        = 0;
+	                quizTime            = 60*nrOfDisplayedQ;
+	                q_page.quizTime     = quizTime;
+
+	                generateQuestionIndexes();
+	                addQuestions();
+	                addMarkers();
+	                addPlayer();
+	                addHints();
+	                createMarkerRoutes();
+	                addARObjects();
+	                addPlayerGPS2ARView();
+	                routeQuestionsToScore();
+	            }
+
+	            function generateQuestionIndexes() {
+	                allIndexes = new Array();
+	                qIndexes = new Array();
+	                for (i = 0; i < totalNrOfQ; i++) {
+	                    allIndexes[i] = i;
+	                }
+	                for (i = 0; i < nrOfDisplayedQ; i++) {
+	                    nextIndex = allIndexes[Math.floor(Math.random()*allIndexes.length)];
+	                    qIndexes[i] = nextIndex;
+	                    index = allIndexes.indexOf(nextIndex );
+	                    allIndexes.splice(index ,1);
+	                }
+	            }
+
+	            function addQuestions() {
+	                for (i = 0; i < nrOfDisplayedQ; i++) {
+	                    q_page.children[i] = new SFNode ('QUESTION');
+	                    q_page.children[i].initialize = eval('question'+qIndexes[i]);
+	                }
+	            }
+
+	            function addMarkers() {
+	            # in order to add markers to map we need to create an overlay
+	                markerOverlay = new SFNode ('MapOverlay');
+	                markerOverlay.name = 'markers';
+	                for (i = 0; i < nrOfDisplayedQ; i++) {
+	                # create a new MapMarker instance
+	                    marker                          = new SFNode ('MapMarker');
+	                    marker.name                     = ''+i;
+	                    marker.visible                  = true;
+	                    marker.enabled                  = true;
+	                            # create a new shape for the current marker
+	                    markerShape                     = new SFNode ('IMAGE');
+	                    markerShape.size                = new SFVec2f (35, 35);
+	                    markerShape.url                 = new MFString('28');
+	                            # set the shape to the marker
+	                    marker.markerShape              = new MFNode(markerShape);
+	                    marker.position                 = new SFVec2f (gpsPos[qIndexes[i]].x, gpsPos[qIndexes[i]].y);
+	                    marker.radius                   = 5.0;
+
+	                            # add the marker to the already defined overlay (first of the map)
+	                    markerOverlay.addOverlayItems = new MFNode(marker);
+	                }
+	                        # add overlay (together with its items) to the map
+	                gmap.addOverlays = new MFNode(markerOverlay);
+	            }
+
+	            function addPlayer() {
+	                playerOverlay = new SFNode ('MapOverlay');
+	                playerOverlay.name = 'player_overlay';
+	                playerOverlay.addOverlayItems = new MFNode(player);
+	                print ('[ GLOBAL SCRIPT ]: Add the PLAYER MARKER to overlay: ' + player.name);
+	                gmap.addOverlays = new MFNode(playerOverlay);
+	                print ('[ GLOBAL SCRIPT ]: Add the PLAYER OVERLAY to map: ' + playerOverlay.name);
+	            }
+
+	            function addHints() {
+	                print ('[ GLOBAL SCRIPT ]: Adding hints...');
+	                for (i = 0; i < nrOfDisplayedQ; i++) {
+	                    h_page.children[i] = new SFNode ('TEXT');
+	                    h_page.children[i].layoutSize = new SFVec2f (400, 700);
+	                    h_page.children[i].Layout_wrap = true;
+	                    h_page.children[i].FontStyle_size = 28;
+	                    h_page.children[i].FontStyle_family = 'Arial';
+	                    h_page.children[i].emissiveColor = new SFColor(0.25, 0.16, 0.06);
+	                    h_page.children[i].translation = new SFVec2f (0, -80);
+	                    h_page.children[i].String = hint[qIndexes[i]];
+	                }
+	            }
+
+	            function createMarkerRoutes() {
+	                print ('[ GLOBAL SCRIPT ]: Adding marker routes for: '  + gmap.overlays[0].name);
+	                for (i = 0; i < gmap.overlays[0].children.length; i++) {
+	                    Browser.addRoute(gmap.overlays[0].children[i], 'onPlayerAround', script, 'showMarkerStory');
+	                    print ('[ GLOBAL SCRIPT ]: Current marker: '  + gmap.overlays[0].children[i].name);
+	                }
+	                print ('[ GLOBAL SCRIPT ]: Adding marker routes for: '  + gmap.overlays[0].name);
+	            }
+
+	            function addARObjects() {
+	                overlayContainer = gmap.overlays;
+	                if (overlayContainer.length == 0) {
+	                    print ('[ GLOBAL SCRIPT ] - ' + gmap.name + ': There are no overlays');
+	                    return;
+	                }
+	                print ('[ GLOBAL SCRIPT ] - ' + gmap.name + ': Adding AR Objects...');
+	                for (i = 0; i < overlayContainer.length; i++) {
+	                    currentOverlay = overlayContainer[i];
+	                    if (currentOverlay.name == 'player_overlay') {
+	                        continue;
+	                    }
+	                    print ('[ GLOBAL SCRIPT ]: ADD AR items for overlay: ' + currentOverlay.name);
+	                    for (j = 0; j < currentOverlay.children.length; j++) {
+	                        marker              = currentOverlay.children[j];
+	                        arNode              = new SFNode ('AR_OBJECT');
+	                        arNode.name         = marker.name;
+	                        arNode.position     = marker.position;
+	                        arNode.objectURL    = ''+(401+parseInt(marker.name));
+	                        arNode.objScale     = new SFVec3f (0.0001, 0.0001, 0.0001);
+	                        arNode.visible      = true;
+	                        ar_view.addObject   = arNode;
+	                                # get the last AR OBJECT of the ar_view which has exactly the same properties as arNode
+	                                # defined above. We must get the instance of the ar_view because when adding a new node
+	                                # another instance is created, therefore arNode instance does not refer to the ar_object of ar_view
+	                                # ex: addObject uses "new MFNode(arNode)" => creates another instance of arNode
+	                            #   print ('ar_view = ' + ar_view.ar_objects.length);
+	                        arObject            = ar_view.ar_objects[ar_view.ar_objects.length-1];
+	                        Browser.addRoute(marker, 'position',    arObject, 'position');
+	                        Browser.addRoute(marker, 'visible',     arObject, 'visible');
+	                    }
+	                }
+	                        # TESTING (when GPS singal is not available)
+	                ar_view.setPlayerPosition = new SFVec2f (playerPos.x, playerPos.y);
+	                        # END TESTING
+	                return;
+	            }
+
+	            function addPlayerGPS2ARView() {
+	                Browser.addRoute(player, 'position', ar_view, 'setPlayerPosition');
+	            }
+
+	            function routeQuestionsToScore() {
+	                for (i=0; i<q_page.children.length; i++) {
+	                    Browser.addRoute(q_page.children[i], 'score', script, 'addScore');
+	                }
+	                Browser.addRoute(q_page, 'secondsLeft', script, 'timeLeft');
+	            }
+
+	            function tabChanged(whichTab) {
+	                print ('[ GLOBAL SCRIPT ]: Tab changed: ' + whichTab);
+	                if (whichTab == 2) {
+	                    ar_view.openCamera = true;
+	                }
+	                else {
+	                    ar_view.openCamera = false;
+	                }
+	            }
+
+	            function setIntroDuration(val) {
+	                if (val != -1) {
+	                    introDuration = val+cTime;
+	                    menu.whichChoice = 0;
+	                }
+	            }
+
+	            function timeLeft(val) {
+	                secondsLeft = val;
+	            }
+
+	            function sendResult(val) {
+	                initials = user_initials.Text[0];
+	                if (initials == '') {
+	                    error_msg.String = 'Please input your initials!';
+	                    return;
+	                }
+	                else {
+	                    myInitials = '';
+	                    for (i = 0; i < user_initials.Text.length; i++) {
+	                        myInitials += user_initials.Text[i] + ' ';
+	                    }
+	                }
+	                if (!internet.internet) {
+	                    share_button.Text = 'Try again!';
+	                    result_alert.translation = new SFVec2f (20, -130);
+	                    result_alert.T_FS_JUSTIFY = 'BEGIN';
+	                    result_alert.String[0] = 'You finished the game, ';
+	                    result_alert.String[1] = 'you can now exit ARAF.';
+	                    result_alert_sw.whichChoice = 0;
+	                    error_msg.FontStyle_size = 24;
+	                    error_msg.String = 'Your internet is down!!';
+	                    error_msg.translation = new SFVec2f (120, -45);
+	                    error_msg.layoutSize[0] = 200;
+	                    return;
+	                }
+	                else {
+	                    error_msg.String = 'Please wait..';
+	                }
+	                xmlhttp=new XMLHttpRequest();
+	                xmlhttp.onreadystatechange = function() {
+	                    if (this.readyState==4 && this.status==200)
+	                    {
+	                        result_alert_sw.whichChoice = 0;
+	                        if (rank = IsNumeric(this.responseText)) {
+	                            if (rank > 0) {
+	                                rank_text.String = 'Rank: ' + this.responseText;
+	                            }
+	                            input_initials.whichChoice = -1;
+	                            error_msg.FontStyle_size = 26;
+	                            error_msg.T_FS_JUSTIFY = 'MIDDLE';
+	                            error_msg.translation = new SFVec2f (75, 0);
+	                            error_msg.String[0] = 'Thanks for sharing!';
+
+	                            result_alert.String[0] = 'You finished the game, ';
+	                            result_alert.String[1] = 'you can now exit ARAF.';
+	                            result_alert.T_FS_JUSTIFY = 'BEGIN';
+	                            result_alert.translation = new SFVec2f (20, -70);
+	                            share_result_sw.whichChoice = -1;
+	                            exit_button_sw.whichChoice = 0;
+	                        }
+	                        else {
+	                            share_button.Text = 'Try again!';
+	                            error_msg.String = '';
+	                            result_alert.T_FS_JUSTIFY = 'BEGIN';
+	                            result_alert.translation = new SFVec2f (20, -130);
+	                            result_alert.String[0] = 'An error occured.';
+	                            result_alert.String[1] = 'Check your internet connection';
+	                            result_alert.String[2] = 'and try again!';
+	                        }
+	                    }
+	                };
+	                xmlhttp.open('GET', 'http://www.mymultimediaworld.com/games/arquiz/addScore/MOOC/'+initials+'/'+myScore+'/', true);
+	                xmlhttp.send();
+	            }
+
+	            function IsNumeric(num) {
+	                return (num >=0 || num < 0);
+	            }
+
+	            function showCustomScoreMessage() {
+	                if (myScore < 0) {
+	                    score_sw.whichChoice = 0;
+	                }
+	                else if (myScore < maxScore*40/100) {
+	                    score_sw.whichChoice = 1;
+	                }
+	                else if (myScore < maxScore*75/100) {
+	                    score_sw.whichChoice = 2;
+	                }
+	                else {
+	                    score_sw.whichChoice = 3;
+	                }
+	            }
+
+	            function disableTabs() {
+	                for (x = 0; x < tabs.tabButtons.length; x++) {
+	                    tabs.tabButtons[x].tsEnabled = false;
+	                }
+	            }
+
+	            function deselectTabs() {
+	                for (x = 0; x < tabs.tabButtons.length; x++) {
+	                    tabs.tabButtons[x].Deselect = true;
+	                }
+	            }
+
+	            function showQuestionView(val) {
+	                if (val == 1) {
+	                # display quiz view and select the tab button
+	                    tabs.CurrentTab = 0;
+	                    quiz_tab.Select = true;
+	                            # display the quiz question view (there is also the quiz hint view in the same SW)
+	                    quiz_sw.whichChoice = 0;
+	                }
+	            }
+
+	            function showQuiz(val) {
+	                if (val) {
+	                    menu.whichChoice = 2;
+	                    quiz_tab.Select = true;
+	                    tabs.CurrentTab = 3;
+	                }
+	            }
+
+	            function showHelp(val) {
+	                if (val) {
+	                    menu.whichChoice = 2;
+	                    deselectTabs();
+	                    tabs.CurrentTab = 3;
+	                    help_tab.Select = true;
+	                }
+	            }
+
+	            function showMarkerStory(storyID) {
+	                idx = parseInt(storyID);
+	                gmap.overlays[0].children[idx].visible = false;
+	                gmap.overlays[0].children[idx].enabled = false;
+	                        # the story view is actually the first view (where the questions are displayed)
+	                tabs.CurrentTab = 0;
+	                quiz_tab.Select = true;
+	                        # switch to story view (the second sub-view of the Quiz view)
+	                    quiz_sw.whichChoice = 1;
+	                        # display the corresponding marker story
+	                    h_page.activeHint   = idx;
+	                }
+
+	            function exitGame() {
+	                gpac.quit_araf();
+	            }
+	            "
+	        ]
+
+    }
+    ]
+}
+
+# ########################## ROUTES ###############################
+ROUTE ARR_NAV.navigate              TO PLAYER.arrow_navigator
+ROUTE MAIN_TS.time                  TO SCRIPT.currentTime
+ROUTE Q_PAGE.timeUP                 TO SCRIPT.timeIsUP
+ROUTE H_PAGE.showQuestion           TO SCRIPT.showQuestionView
+ROUTE ADVANCE2Game.onClick          TO SCRIPT.showQuiz
+ROUTE ADVANCE2Help.onClick          TO SCRIPT.showHelp
+ROUTE INTRO_MS.mediaDuration        TO SCRIPT.setIntroDuration
+ROUTE TABS.CurrentTab               TO SCRIPT.tabChanged
+ROUTE TMR.cycleTime                 TO SCRIPT.checkInternetConnection
+
+# ########################## MEDIA IMPORTS ###############################
+
+AT 0 {
+    UPDATE OD [
+    ObjectDescriptor {
+        objectDescriptorID 1
+        esDescr [
+            ES_Descriptor {
+            ES_ID 1
+            decConfigDescr DecoderConfigDescriptor {
+                streamType 10
+                decSpecificInfo UIConfig {
+                    deviceName "KeySensor"
+                }
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 2
+        esDescr [
+            ES_Descriptor {
+            ES_ID 2
+            decConfigDescr DecoderConfigDescriptor {
+                streamType 10
+                decSpecificInfo UIConfig {
+                    deviceName "Mouse"
+                }
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 3
+        esDescr [
+            ES_Descriptor {
+            ES_ID 3
+            decConfigDescr DecoderConfigDescriptor {
+                streamType 10
+                decSpecificInfo UIConfig {
+                    deviceName "StringSensor"
+                }
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 4
+        esDescr [
+            ES_Descriptor {
+            ES_ID 4
+            decConfigDescr DecoderConfigDescriptor {
+                streamType 10
+                decSpecificInfo UIConfig {
+                    deviceName "MPEG-V:siv:OrientationSensorType"
+                }
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 5
+        esDescr [
+            ES_Descriptor {
+            ES_ID 5
+            decConfigDescr DecoderConfigDescriptor {
+                streamType 10
+                decSpecificInfo UIConfig {
+                    deviceName "MPEG-V:siv:GlobalPositionSensorType"
+                }
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 201
+        esDescr [
+            ES_Descriptor {
+            ES_ID 201
+            decConfigDescr DecoderConfigDescriptor {
+                streamType 10
+                decSpecificInfo UIConfig {
+                    deviceName "MPEG-V:siv:GlobalPositionSensorType"
+                }
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 202
+        esDescr [
+            ES_Descriptor {
+            ES_ID 202
+            decConfigDescr DecoderConfigDescriptor {
+                streamType 10
+                decSpecificInfo UIConfig {
+                    deviceName "MPEG-V:siv:OrientationSensorType"
+                }
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 8
+        esDescr [
+            ES_Descriptor {
+            ES_ID 8
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/edit_text_field.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 9
+        esDescr [
+            ES_Descriptor {
+            ES_ID 9
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/edit_text_field_sel.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 10
+        esDescr [
+            ES_Descriptor {
+            ES_ID 10
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/tab_quiz_off.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 11
+        esDescr [
+            ES_Descriptor {
+            ES_ID 11
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/tab_quiz_on.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 12
+        esDescr [
+            ES_Descriptor {
+            ES_ID 12
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/tab_map_off.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 13
+        esDescr [
+            ES_Descriptor {
+            ES_ID 13
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/tab_map_on.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 14
+        esDescr [
+            ES_Descriptor {
+            ES_ID 14
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/camera_tab_off.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 15
+        esDescr [
+            ES_Descriptor {
+            ES_ID 15
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/camera_tab_on.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 16
+        esDescr [
+            ES_Descriptor {
+            ES_ID 16
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/help_tab_off.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 17
+        esDescr [
+            ES_Descriptor {
+            ES_ID 17
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/help_tab_on.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 19
+        esDescr [
+            ES_Descriptor {
+            ES_ID 19
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/intro.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 20
+        esDescr [
+            ES_Descriptor {
+            ES_ID 20
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/help_background.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 21
+        esDescr [
+            ES_Descriptor {
+            ES_ID 21
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/result.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 22
+        esDescr [
+            ES_Descriptor {
+            ES_ID 22
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/sounds/wrong.mp3"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 23
+        esDescr [
+            ES_Descriptor {
+            ES_ID 23
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/sounds/ding.mp4#1"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 24
+        esDescr [
+            ES_Descriptor {
+            ES_ID 24
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/input_bg.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 25
+        esDescr [
+            ES_Descriptor {
+            ES_ID 25
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/heart.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 26
+        esDescr [
+            ES_Descriptor {
+            ES_ID 26
+            muxInfo MuxInfo {
+                fileName "videos/splashscreen.mp4#1"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 27
+        esDescr [
+            ES_Descriptor {
+            ES_ID 27
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/ancient_scroll.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 28
+        esDescr [
+            ES_Descriptor {
+            ES_ID 28
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/marker_eu.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 29
+        esDescr [
+            ES_Descriptor {
+            ES_ID 29
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/back_ancient_on.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 30
+        esDescr [
+            ES_Descriptor {
+            ES_ID 30
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/plus_off.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 31
+        esDescr [
+            ES_Descriptor {
+            ES_ID 31
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/minus_off.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 32
+        esDescr [
+            ES_Descriptor {
+            ES_ID 32
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/plus_on_v2.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 33
+        esDescr [
+            ES_Descriptor {
+            ES_ID 33
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/minus_on_v2.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 34
+        esDescr [
+            ES_Descriptor {
+            ES_ID 34
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/message_bg.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 35
+        esDescr [
+            ES_Descriptor {
+            ES_ID 35
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/hint_background.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 36
+        esDescr [
+            ES_Descriptor {
+            ES_ID 36
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/back_icon.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 37
+        esDescr [
+            ES_Descriptor {
+            ES_ID 37
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/validate_on.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 38
+        esDescr [
+            ES_Descriptor {
+            ES_ID 38
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/validate.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 39
+        esDescr [
+            ES_Descriptor {
+            ES_ID 39
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/intro_button.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 42
+        esDescr [
+            ES_Descriptor {
+            ES_ID 42
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/gps_off.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 43
+        esDescr [
+            ES_Descriptor {
+            ES_ID 43
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/gps_on.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 46
+        esDescr [
+            ES_Descriptor {
+            ES_ID 46
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/input_bg_on.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 47
+        esDescr [
+            ES_Descriptor {
+            ES_ID 47
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/internet_off.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 48
+        esDescr [
+            ES_Descriptor {
+            ES_ID 48
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/internet_on.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 50
+        esDescr [
+            ES_Descriptor {
+            ES_ID 50
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/back_icon_on.png"
+            }
+        }
+    ]
+    }
+
+    #
+    # NAVIGATOR ICONS
+    #
+    ObjectDescriptor {
+        objectDescriptorID 51
+        esDescr [
+            ES_Descriptor {
+            ES_ID 51
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/arrows/up.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 52
+        esDescr [
+            ES_Descriptor {
+            ES_ID 52
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/arrows/up_over.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 53
+        esDescr [
+            ES_Descriptor {
+            ES_ID 53
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/arrows/down.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 54
+        esDescr [
+            ES_Descriptor {
+            ES_ID 54
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/arrows/down_over.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 55
+        esDescr [
+            ES_Descriptor {
+            ES_ID 55
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/arrows/left.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 56
+        esDescr [
+            ES_Descriptor {
+            ES_ID 56
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/arrows/left_over.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 57
+        esDescr [
+            ES_Descriptor {
+            ES_ID 57
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/arrows/right.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 58
+        esDescr [
+            ES_Descriptor {
+            ES_ID 58
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/arrows/right_over.png"
+            }
+        }
+    ]
+    }
+    #
+    # /NAVIGATOR ICONS
+    #
+
+    # # #         # #
+    # 3D Numbers OD #
+    # # #         # #
+    ObjectDescriptor {
+        objectDescriptorID 401
+        esDescr [
+            ES_Descriptor {
+            ES_ID 401
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/numbers/1.mp4"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 402
+        esDescr [
+            ES_Descriptor {
+            ES_ID 402
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/numbers/2.mp4"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 403
+        esDescr [
+            ES_Descriptor {
+            ES_ID 403
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/numbers/3.mp4"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 404
+        esDescr [
+            ES_Descriptor {
+            ES_ID 404
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/numbers/4.mp4"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 405
+        esDescr [
+            ES_Descriptor {
+            ES_ID 405
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/numbers/5.mp4"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 406
+        esDescr [
+            ES_Descriptor {
+            ES_ID 406
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/numbers/6.mp4"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 407
+        esDescr [
+            ES_Descriptor {
+            ES_ID 407
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/numbers/7.mp4"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 408
+        esDescr [
+            ES_Descriptor {
+            ES_ID 408
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/numbers/8.mp4"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 409
+        esDescr [
+            ES_Descriptor {
+            ES_ID 409
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/numbers/9.mp4"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 410
+        esDescr [
+            ES_Descriptor {
+            ES_ID 410
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/numbers/10.mp4"
+            }
+        }
+    ]
+    }
+    # ok click
+    ObjectDescriptor {
+        objectDescriptorID 800
+        esDescr [
+            ES_Descriptor {
+            ES_ID 800
+            muxInfo MuxInfo {
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/sounds/ok.mp3"
+            }
+        }
+    ]
+    }
+    ]
+}
+AT 0 { UPDATE OD [
+    ObjectDescriptor { objectDescriptorID 512 esDescr [ ES_Descriptor { ES_ID 512 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/questions/LouisXIV628b0194-8bbf-4789-8076-54ab1ba1dce8.jpg"}}]}
+    ObjectDescriptor { objectDescriptorID 521 esDescr [ ES_Descriptor { ES_ID 521 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/questions/1024px-Parc_Montsouris_statue_113dbb5127-2b5d-444e-9034-ca25ef4d25c1.jpg"}}]}
+    ObjectDescriptor { objectDescriptorID 522 esDescr [ ES_Descriptor { ES_ID 522 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/questions/P1110707_Paris_XIV_parc_de_Montsouris_rwk29bd1538-4734-4c3a-813d-5814a3d1d14a.jpg"}}]}
+    ObjectDescriptor { objectDescriptorID 523 esDescr [ ES_Descriptor { ES_ID 523 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/questions/Lion_death94789b81-eacc-43c4-b525-7043af8a7137.png"}}]}
+    ObjectDescriptor { objectDescriptorID 524 esDescr [ ES_Descriptor { ES_ID 524 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/questions/Desert dramaeebc8b18-e9c1-46ce-b09b-6bee09ae03d7.png"}}]}
+    ObjectDescriptor { objectDescriptorID 509 esDescr [ ES_Descriptor { ES_ID 509 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/questions/Jules_cesarfa40ed55-71fc-46f7-a90a-d2d822d7cba5.jpg"}}]}
+    ObjectDescriptor { objectDescriptorID 510 esDescr [ ES_Descriptor { ES_ID 510 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/questions/Mitterrandcfa3df74-cbba-4c67-a670-3c3990b2fc73.jpg"}}]}
+    ObjectDescriptor { objectDescriptorID 511 esDescr [ ES_Descriptor { ES_ID 511 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/questions/Napoleon_I_of_France_by_Andrea_Appiani0c9ed1c2-d255-41fb-8fb9-7e133765a403.jpg"}}]}
+] }
