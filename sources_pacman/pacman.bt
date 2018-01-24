@@ -3829,6 +3829,23 @@ OrderedGroup {
                                 size 480 800
                             }
                         }
+
+						Transform {
+                                                    children [
+                                                        Shape {
+                                                            geometry Box {
+                                                                size 1 1 1
+                                                            }
+                                                            appearance Appearance {
+                                                                material Material2D {
+                                                                    emissiveColor 1 1 1
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+
+
                         DEF TABS UI_TAB_PROTO {
                             ButtonHeight 81
                             LAYER_BUTTON_SIZE 480 81
