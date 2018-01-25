@@ -44,22 +44,22 @@ EXTERNPROTO IMAGE [
 ]"image.bt"
 
 EXTERNPROTO BUTTON [
-          exposedField SFVec2f    translation     0 0
-      exposedField SFFloat    rotationAngle   0.0
-      exposedField SFVec2f    scale           1, 1
-      exposedField SFVec2f    size            0 0
-      exposedField MFString   backImage       [""]
-      exposedField MFString   overImage       [""]
-      exposedField MFString   buttonText      [""]
-      exposedField SFColor    textColor       1 1 1
-      exposedField SFFloat    textSize        18
-      exposedField SFColor    overColor       1 0.5 0.8
-      exposedField SFColor    backColor       0.1 0.1 0.1
-      exposedField MFString   fonstSyleFamily ["ARIAL"]
-      exposedField SFVec2f    layoutSize      -1 -1
-      eventIn      SFBool     doClick
-      eventOut     SFBool     onClick
-      ]"button.bt"
+	exposedField SFVec2f    translation     0 0
+	exposedField SFFloat    rotationAngle   0.0
+	exposedField SFVec2f    scale           1, 1
+	exposedField SFVec2f    size            0 0
+	exposedField MFString   backImage       [""]
+	exposedField MFString   overImage       [""]
+	exposedField MFString   buttonText      [""]
+	exposedField SFColor    textColor       1 1 1
+	exposedField SFFloat    textSize        18
+	exposedField SFColor    overColor       1 0.5 0.8
+	exposedField SFColor    backColor       0.1 0.1 0.1
+	exposedField MFString   fonstSyleFamily ["ARIAL"]
+	exposedField SFVec2f    layoutSize      -1 -1
+	eventIn      SFBool     doClick
+	eventOut     SFBool     onClick
+]"button.bt"
 
 EXTERNPROTO MapOverlay [
 	exposedField 	SFString 	name 		""
@@ -90,39 +90,20 @@ EXTERNPROTO MapMarker [
 ]"mapMarker.bt"
 
 EXTERNPROTO MapPlayer [
-    	exposedField 	SFString   	name               "playerName"
-    	exposedField 	SFVec2f    	position          	0 0
-		exposedField 	SFBool     	visible         	TRUE
-		exposedField 	MFNode	 	playerShape			[]
-    	eventIn     	SFInt32 	setMapZoomLevel
-    	eventIn     	SFVec2f		setMapGPSCenter
+    exposedField 	SFString   	name               "playerName"
+    exposedField 	SFVec2f    	position          	0 0
+	exposedField 	SFBool     	visible         	TRUE
+	exposedField 	MFNode	 	playerShape			[]
+    eventIn     	SFInt32 	setMapZoomLevel
+    eventIn     	SFVec2f		setMapGPSCenter
 ]"mapPlayer.bt"
 
-PROTO PLAYER_PIECE [
-		exposedField SFVec2f rectangleTranslation 	0 0
-		exposedField SFVec2f rectangleSize 		5 5
-		exposedField SFColor playerColor 		0 1 0
-		exposedField SFFloat rotationAngle 		0.0
-]
-{
-    Transform2D {
-        translation 	IS rectangleTranslation
-        rotationAngle 	IS rotationAngle
-        children [
-            Shape {
-                appearance Appearance {
-                    material Material2D {
-                        emissiveColor IS playerColor
-                        filled TRUE
-                    }
-                }
-                geometry Rectangle {
-                    size IS rectangleSize
-                }
-            }
-        ]
-    }
-}
+EXTERNPROTO PLAYER_PIECE [
+	exposedField SFVec2f rectangleTranslation 	0 0
+	exposedField SFVec2f rectangleSize 		5 5
+	exposedField SFColor playerColor 		0 1 0
+	exposedField SFFloat rotationAngle 		0.0
+]"playerPiece.bt"
 
 EXTERNPROTO MAP_TILE [
 	exposedField SFVec2f 	tileTranslation 	0 0
@@ -148,22 +129,22 @@ EXTERNPROTO MAP [
 ]"map.bt"
 
 EXTERNPROTO GPS_SIGNAL [
-          exposedField SFVec2f    translation     -20 320
-      exposedField SFTime     checkInterval   5
-      exposedField SFBool     gps             FALSE
-      exposedField SFVec2f    iconSize        25 25
-      exposedField MFString   image_on        []
-      exposedField MFString   image_off       []
-      ]"GPSsignal.bt"
+	exposedField SFVec2f    translation     -20 320
+	exposedField SFTime     checkInterval   5
+	exposedField SFBool     gps             FALSE
+	exposedField SFVec2f    iconSize        25 25
+	exposedField MFString   image_on        []
+	exposedField MFString   image_off       []
+]"GPSsignal.bt"
 
 EXTERNPROTO INTERNET_CONNECTION [
-          exposedField SFVec2f    translation     20 320
-      exposedField SFTime     checkInterval   5
-      exposedField SFBool     internet        FALSE
-      exposedField SFVec2f    iconSize        25 25
-      exposedField MFString   imgOff          "47"
-      exposedField MFString   imgOn           "48"
-      ]"internetConnection.bt"
+	exposedField SFVec2f    translation     20 320
+	exposedField SFTime     checkInterval   5
+	exposedField SFBool     internet        FALSE
+	exposedField SFVec2f    iconSize        25 25
+	exposedField MFString   imgOff          []
+	exposedField MFString   imgOn           []
+]"internetConnection.bt"
 
 EXTERNPROTO ARROW_NAVIGATOR [
     exposedField    SFVec2f translation         0 0
@@ -171,27 +152,27 @@ EXTERNPROTO ARROW_NAVIGATOR [
 ]"arrowNavigator.bt"
 
 EXTERNPROTO AR_OBJECT [
-    exposedField    SFString        name                ""
-exposedField    SFVec2f         position            0 0
-exposedField    SFVec2f         playerPosition      0.0 0.0
-exposedField    SFBool          visible             FALSE
-exposedField    SFBool          clickable           FALSE
-exposedField    MFString        objectURL           ["401"]
-exposedField    SFVec3f         objTrans            0 0 0
-exposedField    SFVec3f         objScale            0.003 0.003 0.003
-exposedField    SFRotation      objRotation         0 0 0 0
-eventOut        SFString        onClick
+	exposedField    SFString        name                ""
+	exposedField    SFVec2f         position            0 0
+	exposedField    SFVec2f         playerPosition      0.0 0.0
+	exposedField    SFBool          visible             FALSE
+	exposedField    SFBool          clickable           FALSE
+	exposedField    MFString        objectURL           ["401"]
+	exposedField    SFVec3f         objTrans            0 0 0
+	exposedField    SFVec3f         objScale            0.003 0.003 0.003
+	exposedField    SFRotation      objRotation         0 0 0 0
+	eventOut        SFString        onClick
 ]"ARobject.bt"
 
 EXTERNPROTO AR_VIEW [
     exposedField SFVec2f    translation     0 0
-exposedField SFVec2f    layerSize       480 800
-exposedField SFVec2f    rectangleSize   800 480
-exposedField SFVec3f    cameraTrans     0 0 -900
-exposedField MFNode     ar_objects      []
-eventIn      SFVec2f    setPlayerPosition
-eventIn      SFNode     addObject
-eventIn      SFBool     openCamera
+	exposedField SFVec2f    layerSize       480 800
+	exposedField SFVec2f    rectangleSize   800 480
+	exposedField SFVec3f    cameraTrans     0 0 -900
+	exposedField MFNode     ar_objects      []
+	eventIn      SFVec2f    setPlayerPosition
+	eventIn      SFNode     addObject
+	eventIn      SFBool     openCamera
 ]"ARview.bt"
 
 EXTERNPROTO UI_TAB_LAYER [
@@ -203,51 +184,49 @@ EXTERNPROTO UI_TAB_LAYER [
 ]"UI_tab_layer.bt"
 
 EXTERNPROTO UI_TAB_BUTTON [
-          exposedField SFVec2f    Pos                 0 0
-          exposedField SFVec2f    Size                80 30
-          exposedField MFString   BackImage           [""]
-          exposedField MFString   BackImageSelected   [""]
-          exposedField MFString   IconImage           [""]
-          exposedField MFString   IconImageSelected   [""]
-          exposedField MFString   Text                [""]
-          exposedField SFColor    TextColor           1 0 0
-          exposedField SFColor    TextColorSelected   0.7 0 0
-          exposedField SFFloat    TextSize            18
-          exposedField SFBool     isSelected          FALSE
-          exposedField SFInt32    TabIndex            -1
-          exposedField SFBool     tsEnabled           TRUE
-          eventIn SFBool          Deselect
-          eventIn SFBool          Select
-          eventOut SFInt32        SelectedTab
-      ]"UI_tab_button.bt"
+	exposedField SFVec2f    Pos                 0 0
+	exposedField SFVec2f    Size                80 30
+	exposedField MFString   BackImage           [""]
+	exposedField MFString   BackImageSelected   [""]
+	exposedField MFString   IconImage           [""]
+	exposedField MFString   IconImageSelected   [""]
+	exposedField MFString   Text                [""]
+	exposedField SFColor    TextColor           1 0 0
+	exposedField SFColor    TextColorSelected   0.7 0 0
+	exposedField SFFloat    TextSize            18
+	exposedField SFBool     isSelected          FALSE
+	exposedField SFInt32    TabIndex            -1
+	exposedField SFBool     tsEnabled           TRUE
+	eventIn SFBool          Deselect
+	eventIn SFBool          Select
+	eventOut SFInt32        SelectedTab
+]"UI_tab_button.bt"
 
 EXTERNPROTO UI_TAB_PROTO [
-          exposedField SFVec2f    Pos                 0 0
-          exposedField SFVec2f    Size                480 800
-          exposedField SFVec2f    LAYER_BUTTON_SIZE   480 81
-          exposedField SFVec2f    LAYER_TABS_SIZE     480 719
-          exposedField SFInt32    ButtonHeight        81
-          exposedField MFNode     tabButtons          []
-          exposedField MFNode     tabLayers           []
-          exposedField SFBool     tabButtonAutosize   FALSE
-          exposedField SFInt32    tabButtonLocation   0
-          exposedField SFInt32    CurrentTab          0
-      ]"UI_tab_proto.bt"
+	exposedField SFVec2f    Pos                 0 0
+	exposedField SFVec2f    Size                480 800
+	exposedField SFVec2f    LAYER_BUTTON_SIZE   480 81
+	exposedField SFVec2f    LAYER_TABS_SIZE     480 719
+	exposedField SFInt32    ButtonHeight        81
+	exposedField MFNode     tabButtons          []
+	exposedField MFNode     tabLayers           []
+	exposedField SFBool     tabButtonAutosize   FALSE
+	exposedField SFInt32    tabButtonLocation   0
+	exposedField SFInt32    CurrentTab          0
+]"UI_tab_proto.bt"
 
-# à triturer
 EXTERNPROTO QUESTION_PAGE [
-          exposedField    MFNode      children        []
-      exposedField    SFFloat     quizTime        10
-      exposedField    SFInt32     activeQuestion  0
-      exposedField    SFVec2f     Size            480 700
-      eventIn         SFFloat     currentScore
-      eventOut        SFBool      timeUP
-      eventOut        SFFloat     secondsLeft
-      ]"questionPage.bt"
+	exposedField    MFNode      children        []
+	exposedField    SFFloat     quizTime        10
+	exposedField    SFInt32     activeQuestion  0
+	exposedField    SFVec2f     Size            480 700
+	eventIn         SFFloat     currentScore
+	eventOut        SFBool      timeUP
+	eventOut        SFFloat     secondsLeft
+]"questionPage.bt" # À modifier ?
 
+########################### ARAF Scene ###############################
 
-
-# ########################## ARAF Scene ###############################
 OrderedGroup {
     children [
         Background2D { backColor 0 0 0 }
@@ -262,10 +241,13 @@ OrderedGroup {
         }
 
         ################################################# GAME MENU ##########################################################
+
         DEF MENU Switch {
             whichChoice -1
             choice [
+
                 #################### SPLASHSCREEN           #################
+
                 Group {
                     children [
                         Shape {
@@ -280,6 +262,7 @@ OrderedGroup {
                         }
                     ]
                 }
+
                 #################### INTRO                  #################
                 Group {
                     children [
@@ -335,7 +318,9 @@ OrderedGroup {
                             }
                         }
 
-
+						DEF INLINE1 Inline {
+							url ["1000"]
+						}
 
                         DEF TABS UI_TAB_PROTO {
                             ButtonHeight 81
@@ -431,7 +416,11 @@ OrderedGroup {
                                             image_on ["43"]
                                             image_off ["42"]
                                         }
-                                        DEF INTERNET_INSTANCE INTERNET_CONNECTION {}
+                                        DEF INTERNET_INSTANCE INTERNET_CONNECTION {
+                                            iconSize 30 30
+	                                        imgOn "48"
+	                                        imgOff "47"
+	                                    }
                                         DEF ARR_NAV ARROW_NAVIGATOR {
                                             translation 0 -330
                                         }
@@ -483,8 +472,8 @@ OrderedGroup {
 	        field SFNode tabs               USE TABS
 	        field SFNode map_tab            USE MAP
 	        field SFNode quiz_tab           USE QUIZ
-	        field SFNode correct            USE CORRECT_SOUND
-	        field SFNode wrong              USE WRONG_SOUND
+	        #field SFNode correct            USE CORRECT_SOUND
+	        #field SFNode wrong              USE WRONG_SOUND
 	        field SFNode ar_view            USE AR_VIEW_INSTANCE
 	        field SFNode player             USE PLAYER
 	        field SFNode tmr                USE TMR
@@ -514,16 +503,22 @@ OrderedGroup {
 
 	        field SFInt32 nrOfDisplayedQ 5
 	        field MFString question0 ["Who was the roman general defeating the Parisii in 52 BC?
-	        ", "Titus Labienus", "Quintus Aponius", "Lucius Minucius Basilus", "Decimus Junius Brutus Albinus", "1", ]
+	        ", "Titus Labienus", "Quintus Aponius", "Lucius Minucius Basilus", "Decimus Junius Brutus Albinus", "1",
+	        ]
 	        field MFString question1 ["Whose name was erased from the Meridian of Paris Monument?
-	        ", "509;Cesar", "510;Mitterrand", "511;Napoleon", "512;Louis XIV", "3", ]
+	        ", "509;Cesar", "510;Mitterrand", "511;Napoleon", "512;Louis XIV", "3",
+	        ]
 	        field MFString question2 ["When did Clovis the Frank install the capital of the first Franck kingdom in Paris?
-	        ", "356", "508", "534", "426", "2", ]
+	        ", "356", "508", "534", "426", "2",
+	        ]
 	        field MFString question3 ["When was the construction of Notre Dame started?
-	        ", "1200", "999", "1163", "1056", "3", ]
+	        ", "1200", "999", "1163", "1056", "3",
+	        ]
 	        field MFString question4 ["Which monument located in the park was created by Jules-Felix Coutan?
-	        ", "521;Shipwrecked", "522;Armed Peace", "523;Lion’s death", "524;Desert drama", "2", ]
-	        field MFVec2f gpsPos [48.8223268105 2.33874917739, 48.8227259152 2.33890474551, 48.8231320802 2.33855605834, 48.8221961296 2.34015733712, 48.8224716188 2.33930439466, ]
+	        ", "521;Shipwrecked", "522;Armed Peace", "523;Lion’s death", "524;Desert drama", "2",
+	        ]
+	        field MFVec2f gpsPos [48.8223268105 2.33874917739, 48.8227259152 2.33890474551, 48.8231320802 2.33855605834, 48.8221961296 2.34015733712, 48.8224716188 2.33930439466,
+	        ]
 	        field MFString hint ["He commanded the winter quarters in Vesontio in 58 BC. He also had full command of the legions in Gaul during Caesar’s absence
 	        ", "The Meridian of Paris was defined by French astronomers in 1667 and used as the zero point for longitude on all French maps until 1884.
 	        The name of a French Emperior was erased from the monument after the Restoration of the Monarchy.
@@ -846,14 +841,14 @@ OrderedGroup {
 	            function exitGame() {
 	                gpac.quit_araf();
 	            }
-	            "
+	        "
 	        ]
-
-    }
+        }
     ]
 }
 
 # ########################## ROUTES ###############################
+
 ROUTE ARR_NAV.navigate              TO PLAYER.arrow_navigator
 ROUTE MAIN_TS.time                  TO SCRIPT.currentTime
 ROUTE Q_PAGE.timeUP                 TO SCRIPT.timeIsUP
@@ -864,745 +859,761 @@ ROUTE INTRO_MS.mediaDuration        TO SCRIPT.setIntroDuration
 ROUTE TABS.CurrentTab               TO SCRIPT.tabChanged
 ROUTE TMR.cycleTime                 TO SCRIPT.checkInternetConnection
 
-# ########################## MEDIA IMPORTS ###############################
+########################### MEDIA IMPORTS ###############################
 
 AT 0 {
     UPDATE OD [
-    ObjectDescriptor {
-        objectDescriptorID 1
-        esDescr [
-            ES_Descriptor {
-            ES_ID 1
-            decConfigDescr DecoderConfigDescriptor {
-                streamType 10
-                decSpecificInfo UIConfig {
-                    deviceName "KeySensor"
-                }
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 2
-        esDescr [
-            ES_Descriptor {
-            ES_ID 2
-            decConfigDescr DecoderConfigDescriptor {
-                streamType 10
-                decSpecificInfo UIConfig {
-                    deviceName "Mouse"
-                }
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 3
-        esDescr [
-            ES_Descriptor {
-            ES_ID 3
-            decConfigDescr DecoderConfigDescriptor {
-                streamType 10
-                decSpecificInfo UIConfig {
-                    deviceName "StringSensor"
-                }
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 4
-        esDescr [
-            ES_Descriptor {
-            ES_ID 4
-            decConfigDescr DecoderConfigDescriptor {
-                streamType 10
-                decSpecificInfo UIConfig {
-                    deviceName "MPEG-V:siv:OrientationSensorType"
-                }
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 5
-        esDescr [
-            ES_Descriptor {
-            ES_ID 5
-            decConfigDescr DecoderConfigDescriptor {
-                streamType 10
-                decSpecificInfo UIConfig {
-                    deviceName "MPEG-V:siv:GlobalPositionSensorType"
-                }
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 201
-        esDescr [
-            ES_Descriptor {
-            ES_ID 201
-            decConfigDescr DecoderConfigDescriptor {
-                streamType 10
-                decSpecificInfo UIConfig {
-                    deviceName "MPEG-V:siv:GlobalPositionSensorType"
-                }
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 202
-        esDescr [
-            ES_Descriptor {
-            ES_ID 202
-            decConfigDescr DecoderConfigDescriptor {
-                streamType 10
-                decSpecificInfo UIConfig {
-                    deviceName "MPEG-V:siv:OrientationSensorType"
-                }
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 8
-        esDescr [
-            ES_Descriptor {
-            ES_ID 8
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/edit_text_field.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 9
-        esDescr [
-            ES_Descriptor {
-            ES_ID 9
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/edit_text_field_sel.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 10
-        esDescr [
-            ES_Descriptor {
-            ES_ID 10
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/tab_quiz_off.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 11
-        esDescr [
-            ES_Descriptor {
-            ES_ID 11
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/tab_quiz_on.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 12
-        esDescr [
-            ES_Descriptor {
-            ES_ID 12
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/tab_map_off.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 13
-        esDescr [
-            ES_Descriptor {
-            ES_ID 13
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/tab_map_on.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 14
-        esDescr [
-            ES_Descriptor {
-            ES_ID 14
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/camera_tab_off.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 15
-        esDescr [
-            ES_Descriptor {
-            ES_ID 15
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/camera_tab_on.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 16
-        esDescr [
-            ES_Descriptor {
-            ES_ID 16
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/help_tab_off.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 17
-        esDescr [
-            ES_Descriptor {
-            ES_ID 17
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/help_tab_on.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 19
-        esDescr [
-            ES_Descriptor {
-            ES_ID 19
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/intro.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 20
-        esDescr [
-            ES_Descriptor {
-            ES_ID 20
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/help_background.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 21
-        esDescr [
-            ES_Descriptor {
-            ES_ID 21
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/result.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 22
-        esDescr [
-            ES_Descriptor {
-            ES_ID 22
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/sounds/wrong.mp3"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 23
-        esDescr [
-            ES_Descriptor {
-            ES_ID 23
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/sounds/ding.mp4#1"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 24
-        esDescr [
-            ES_Descriptor {
-            ES_ID 24
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/input_bg.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 25
-        esDescr [
-            ES_Descriptor {
-            ES_ID 25
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/heart.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 26
-        esDescr [
-            ES_Descriptor {
-            ES_ID 26
-            muxInfo MuxInfo {
-                fileName "videos/splashscreen.mp4#1"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 27
-        esDescr [
-            ES_Descriptor {
-            ES_ID 27
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/ancient_scroll.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 28
-        esDescr [
-            ES_Descriptor {
-            ES_ID 28
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/marker_eu.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 29
-        esDescr [
-            ES_Descriptor {
-            ES_ID 29
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/back_ancient_on.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 30
-        esDescr [
-            ES_Descriptor {
-            ES_ID 30
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/plus_off.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 31
-        esDescr [
-            ES_Descriptor {
-            ES_ID 31
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/minus_off.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 32
-        esDescr [
-            ES_Descriptor {
-            ES_ID 32
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/plus_on_v2.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 33
-        esDescr [
-            ES_Descriptor {
-            ES_ID 33
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/minus_on_v2.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 34
-        esDescr [
-            ES_Descriptor {
-            ES_ID 34
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/message_bg.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 35
-        esDescr [
-            ES_Descriptor {
-            ES_ID 35
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/hint_background.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 36
-        esDescr [
-            ES_Descriptor {
-            ES_ID 36
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/back_icon.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 37
-        esDescr [
-            ES_Descriptor {
-            ES_ID 37
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/validate_on.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 38
-        esDescr [
-            ES_Descriptor {
-            ES_ID 38
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/validate.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 39
-        esDescr [
-            ES_Descriptor {
-            ES_ID 39
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/intro_button.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 42
-        esDescr [
-            ES_Descriptor {
-            ES_ID 42
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/gps_off.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 43
-        esDescr [
-            ES_Descriptor {
-            ES_ID 43
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/gps_on.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 46
-        esDescr [
-            ES_Descriptor {
-            ES_ID 46
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/input_bg_on.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 47
-        esDescr [
-            ES_Descriptor {
-            ES_ID 47
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/internet_off.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 48
-        esDescr [
-            ES_Descriptor {
-            ES_ID 48
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/internet_on.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 50
-        esDescr [
-            ES_Descriptor {
-            ES_ID 50
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/back_icon_on.png"
-            }
-        }
-    ]
-    }
 
-    #
-    # NAVIGATOR ICONS
-    #
-    ObjectDescriptor {
-        objectDescriptorID 51
-        esDescr [
-            ES_Descriptor {
-            ES_ID 51
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/arrows/up.png"
-            }
+        ObjectDescriptor {
+            objectDescriptorID 1000
+            esDescr [
+                ES_Descriptor {
+                    ES_ID 1000
+                    muxInfo MuxInfo {
+                        fileName "objects.wrl"
+                    }
+                }
+            ]
         }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 52
-        esDescr [
-            ES_Descriptor {
-            ES_ID 52
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/arrows/up_over.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 53
-        esDescr [
-            ES_Descriptor {
-            ES_ID 53
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/arrows/down.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 54
-        esDescr [
-            ES_Descriptor {
-            ES_ID 54
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/arrows/down_over.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 55
-        esDescr [
-            ES_Descriptor {
-            ES_ID 55
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/arrows/left.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 56
-        esDescr [
-            ES_Descriptor {
-            ES_ID 56
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/arrows/left_over.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 57
-        esDescr [
-            ES_Descriptor {
-            ES_ID 57
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/arrows/right.png"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 58
-        esDescr [
-            ES_Descriptor {
-            ES_ID 58
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/arrows/right_over.png"
-            }
-        }
-    ]
-    }
-    #
-    # /NAVIGATOR ICONS
-    #
 
-    # # #         # #
-    # 3D Numbers OD #
-    # # #         # #
-    ObjectDescriptor {
-        objectDescriptorID 401
-        esDescr [
-            ES_Descriptor {
-            ES_ID 401
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/numbers/1.mp4"
-            }
+	    ObjectDescriptor {
+	        objectDescriptorID 1
+	        esDescr [
+	            ES_Descriptor {
+		            ES_ID 1
+		            decConfigDescr DecoderConfigDescriptor {
+		                streamType 10
+		                decSpecificInfo UIConfig {
+		                    deviceName "KeySensor"
+		                }
+		            }
+	            }
+	        ]
         }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 402
-        esDescr [
-            ES_Descriptor {
-            ES_ID 402
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/numbers/2.mp4"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 403
-        esDescr [
-            ES_Descriptor {
-            ES_ID 403
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/numbers/3.mp4"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 404
-        esDescr [
-            ES_Descriptor {
-            ES_ID 404
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/numbers/4.mp4"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 405
-        esDescr [
-            ES_Descriptor {
-            ES_ID 405
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/numbers/5.mp4"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 406
-        esDescr [
-            ES_Descriptor {
-            ES_ID 406
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/numbers/6.mp4"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 407
-        esDescr [
-            ES_Descriptor {
-            ES_ID 407
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/numbers/7.mp4"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 408
-        esDescr [
-            ES_Descriptor {
-            ES_ID 408
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/numbers/8.mp4"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 409
-        esDescr [
-            ES_Descriptor {
-            ES_ID 409
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/numbers/9.mp4"
-            }
-        }
-    ]
-    }
-    ObjectDescriptor {
-        objectDescriptorID 410
-        esDescr [
-            ES_Descriptor {
-            ES_ID 410
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/numbers/10.mp4"
-            }
-        }
-    ]
-    }
-    # ok click
-    ObjectDescriptor {
-        objectDescriptorID 800
-        esDescr [
-            ES_Descriptor {
-            ES_ID 800
-            muxInfo MuxInfo {
-                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/sounds/ok.mp3"
-            }
-        }
-    ]
-    }
+	    ObjectDescriptor {
+	        objectDescriptorID 2
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 2
+	            decConfigDescr DecoderConfigDescriptor {
+	                streamType 10
+	                decSpecificInfo UIConfig {
+	                    deviceName "Mouse"
+	                }
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 3
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 3
+	            decConfigDescr DecoderConfigDescriptor {
+	                streamType 10
+	                decSpecificInfo UIConfig {
+	                    deviceName "StringSensor"
+	                }
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 4
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 4
+	            decConfigDescr DecoderConfigDescriptor {
+	                streamType 10
+	                decSpecificInfo UIConfig {
+	                    deviceName "MPEG-V:siv:OrientationSensorType"
+	                }
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 5
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 5
+	            decConfigDescr DecoderConfigDescriptor {
+	                streamType 10
+	                decSpecificInfo UIConfig {
+	                    deviceName "MPEG-V:siv:GlobalPositionSensorType"
+	                }
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 201
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 201
+	            decConfigDescr DecoderConfigDescriptor {
+	                streamType 10
+	                decSpecificInfo UIConfig {
+	                    deviceName "MPEG-V:siv:GlobalPositionSensorType"
+	                }
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 202
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 202
+	            decConfigDescr DecoderConfigDescriptor {
+	                streamType 10
+	                decSpecificInfo UIConfig {
+	                    deviceName "MPEG-V:siv:OrientationSensorType"
+	                }
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 8
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 8
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/edit_text_field.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 9
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 9
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/edit_text_field_sel.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 10
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 10
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/tab_quiz_off.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 11
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 11
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/tab_quiz_on.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 12
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 12
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/tab_map_off.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 13
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 13
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/tab_map_on.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 14
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 14
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/camera_tab_off.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 15
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 15
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/camera_tab_on.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 16
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 16
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/help_tab_off.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 17
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 17
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/help_tab_on.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 19
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 19
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/intro.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 20
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 20
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/help_background.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 21
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 21
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/result.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 22
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 22
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/sounds/wrong.mp3"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 23
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 23
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/sounds/ding.mp4#1"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 24
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 24
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/input_bg.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 25
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 25
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/heart.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 26
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 26
+	            muxInfo MuxInfo {
+	                fileName "videos/splashscreen.mp4#1"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 27
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 27
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/ancient_scroll.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 28
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 28
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/marker_eu.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 29
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 29
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/back_ancient_on.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 30
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 30
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/plus_off.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 31
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 31
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/minus_off.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 32
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 32
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/plus_on_v2.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 33
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 33
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/minus_on_v2.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 34
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 34
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/message_bg.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 35
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 35
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/hint_background.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 36
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 36
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/back_icon.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 37
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 37
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/validate_on.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 38
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 38
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/validate.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 39
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 39
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/intro_button.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 42
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 42
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/gps_off.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 43
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 43
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/gps_on.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 46
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 46
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/input_bg_on.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 47
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 47
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/internet_off.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 48
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 48
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/internet_on.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 50
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 50
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/back_icon_on.png"
+	            }
+	        }
+	    ]
+	    }
+
+	    #
+	    # NAVIGATOR ICONS
+	    #
+	    ObjectDescriptor {
+	        objectDescriptorID 51
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 51
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/arrows/up.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 52
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 52
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/arrows/up_over.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 53
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 53
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/arrows/down.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 54
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 54
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/arrows/down_over.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 55
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 55
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/arrows/left.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 56
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 56
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/arrows/left_over.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 57
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 57
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/arrows/right.png"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 58
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 58
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/arrows/right_over.png"
+	            }
+	        }
+	    ]
+	    }
+	    #
+	    # /NAVIGATOR ICONS
+	    #
+
+	    # # #         # #
+	    # 3D Numbers OD #
+	    # # #         # #
+	    ObjectDescriptor {
+	        objectDescriptorID 401
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 401
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/numbers/1.mp4"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 402
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 402
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/numbers/2.mp4"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 403
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 403
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/numbers/3.mp4"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 404
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 404
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/numbers/4.mp4"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 405
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 405
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/numbers/5.mp4"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 406
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 406
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/numbers/6.mp4"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 407
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 407
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/numbers/7.mp4"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 408
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 408
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/numbers/8.mp4"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 409
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 409
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/numbers/9.mp4"
+	            }
+	        }
+	    ]
+	    }
+	    ObjectDescriptor {
+	        objectDescriptorID 410
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 410
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/numbers/10.mp4"
+	            }
+	        }
+	    ]
+	    }
+	    # ok click
+	    ObjectDescriptor {
+	        objectDescriptorID 800
+	        esDescr [
+	            ES_Descriptor {
+	            ES_ID 800
+	            muxInfo MuxInfo {
+	                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/sounds/ok.mp3"
+	            }
+	        }
+	    ]
+	    }
     ]
 }
-AT 0 { UPDATE OD [
-    ObjectDescriptor { objectDescriptorID 512 esDescr [ ES_Descriptor { ES_ID 512 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/questions/LouisXIV628b0194-8bbf-4789-8076-54ab1ba1dce8.jpg"}}]}
-    ObjectDescriptor { objectDescriptorID 521 esDescr [ ES_Descriptor { ES_ID 521 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/questions/1024px-Parc_Montsouris_statue_113dbb5127-2b5d-444e-9034-ca25ef4d25c1.jpg"}}]}
-    ObjectDescriptor { objectDescriptorID 522 esDescr [ ES_Descriptor { ES_ID 522 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/questions/P1110707_Paris_XIV_parc_de_Montsouris_rwk29bd1538-4734-4c3a-813d-5814a3d1d14a.jpg"}}]}
-    ObjectDescriptor { objectDescriptorID 523 esDescr [ ES_Descriptor { ES_ID 523 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/questions/Lion_death94789b81-eacc-43c4-b525-7043af8a7137.png"}}]}
-    ObjectDescriptor { objectDescriptorID 524 esDescr [ ES_Descriptor { ES_ID 524 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/questions/Desert dramaeebc8b18-e9c1-46ce-b09b-6bee09ae03d7.png"}}]}
-    ObjectDescriptor { objectDescriptorID 509 esDescr [ ES_Descriptor { ES_ID 509 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/questions/Jules_cesarfa40ed55-71fc-46f7-a90a-d2d822d7cba5.jpg"}}]}
-    ObjectDescriptor { objectDescriptorID 510 esDescr [ ES_Descriptor { ES_ID 510 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/questions/Mitterrandcfa3df74-cbba-4c67-a670-3c3990b2fc73.jpg"}}]}
-    ObjectDescriptor { objectDescriptorID 511 esDescr [ ES_Descriptor { ES_ID 511 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/PACMAN_MAP_BASED/images/questions/Napoleon_I_of_France_by_Andrea_Appiani0c9ed1c2-d255-41fb-8fb9-7e133765a403.jpg"}}]}
-] }
+
+AT 0 {
+	UPDATE OD [
+	    ObjectDescriptor { objectDescriptorID 512 esDescr [ ES_Descriptor { ES_ID 512 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/questions/LouisXIV628b0194-8bbf-4789-8076-54ab1ba1dce8.jpg"}}]}
+	    ObjectDescriptor { objectDescriptorID 521 esDescr [ ES_Descriptor { ES_ID 521 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/questions/1024px-Parc_Montsouris_statue_113dbb5127-2b5d-444e-9034-ca25ef4d25c1.jpg"}}]}
+	    ObjectDescriptor { objectDescriptorID 522 esDescr [ ES_Descriptor { ES_ID 522 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/questions/P1110707_Paris_XIV_parc_de_Montsouris_rwk29bd1538-4734-4c3a-813d-5814a3d1d14a.jpg"}}]}
+	    ObjectDescriptor { objectDescriptorID 523 esDescr [ ES_Descriptor { ES_ID 523 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/questions/Lion_death94789b81-eacc-43c4-b525-7043af8a7137.png"}}]}
+	    ObjectDescriptor { objectDescriptorID 524 esDescr [ ES_Descriptor { ES_ID 524 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/questions/Desert dramaeebc8b18-e9c1-46ce-b09b-6bee09ae03d7.png"}}]}
+	    ObjectDescriptor { objectDescriptorID 509 esDescr [ ES_Descriptor { ES_ID 509 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/questions/Jules_cesarfa40ed55-71fc-46f7-a90a-d2d822d7cba5.jpg"}}]}
+	    ObjectDescriptor { objectDescriptorID 510 esDescr [ ES_Descriptor { ES_ID 510 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/questions/Mitterrandcfa3df74-cbba-4c67-a670-3c3990b2fc73.jpg"}}]}
+	    ObjectDescriptor { objectDescriptorID 511 esDescr [ ES_Descriptor { ES_ID 511 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/sources_pacman/images/questions/Napoleon_I_of_France_by_Andrea_Appiani0c9ed1c2-d255-41fb-8fb9-7e133765a403.jpg"}}]}
+	]
+}

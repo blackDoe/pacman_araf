@@ -1,0 +1,10 @@
+Shape {
+	geometry Box {
+		size 1 1 1
+	}
+	appearance Appearance {
+		material Material2D {
+			emissiveColor 1 0 0
+		}
+	}
+}

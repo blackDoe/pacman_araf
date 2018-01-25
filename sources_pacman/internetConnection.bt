@@ -1,10 +1,10 @@
 PROTO INTERNET_CONNECTION [
     exposedField SFVec2f    translation     20 320
-exposedField SFTime     checkInterval   5
-exposedField SFBool     internet        FALSE
-exposedField SFVec2f    iconSize        25 25
-exposedField MFString   imgOff          "47"
-exposedField MFString   imgOn           "48"
+	exposedField SFTime     checkInterval   5
+	exposedField SFBool     internet        FALSE
+	exposedField SFVec2f    iconSize        25 25
+	exposedField MFString   imgOff          []
+	exposedField MFString   imgOn           []
 ]
 {
     Transform2D {
