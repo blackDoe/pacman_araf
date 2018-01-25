@@ -1,0 +1,293 @@
+PROTO ARROW_NAVIGATOR [
+    exposedField    SFVec2f translation         0 0
+	eventOut        SFInt32 navigate
+]
+{
+    PROTO ARR_NAV_BUTTON [
+	    exposedField SFVec2f    translation     0 0
+	    exposedField SFFloat    rotationAngle   0.0
+	    exposedField SFVec2f    scale           1, 1
+	    exposedField SFVec2f    size                0 0
+	    exposedField MFString   backImage       [""]
+	    exposedField MFString   overImage       [""]
+	    exposedField MFString   buttonText      [""]
+	    exposedField SFColor    textColor       1 1 1
+	    exposedField SFFloat    textSize            18
+	    exposedField SFColor    overColor       1 0.5 0.8
+	    exposedField SFColor    backColor       0.1 0.1 0.1
+	    exposedField MFString   fonstSyleFamily             ["ARIAL"]
+	    exposedField SFTime     frequency                   0.1
+	    eventOut     SFBool     onClick
+	    eventIn      SFBool     doClick
+	]
+    {
+        DEF TR Transform2D {
+        translation     IS translation
+        rotationAngle   IS rotationAngle
+        scale           IS scale
+        children [
+            Shape {
+	            appearance DEF BColor Appearance {
+	                material Material2D {
+	                    emissiveColor IS backColor
+	                    filled TRUE
+	                }
+	            }
+	        }
+	        Shape {
+	            appearance DEF OColor Appearance {
+	                material Material2D {
+	                    emissiveColor IS overColor
+	                    filled TRUE
+	                }
+	            }
+	        }
+	        Shape {
+	            appearance DEF APP_BACK Appearance {
+	                texture ImageTexture {
+	                    url IS backImage
+	                }
+	                material DEF MAT_LINE Material2D {
+	                    lineProps DEF LINE_PROP LineProperties {
+	                        width 0
+	                    }
+	                }
+	            }
+	        }
+	        Shape {
+	            appearance DEF APP_OVER Appearance {
+	                texture ImageTexture {
+	                    url IS overImage
+	                }
+	                material USE MAT_LINE
+	            }
+	        }
+	        DEF FREQ_TS TimeSensor {
+	            cycleInterval IS frequency
+	            enabled FALSE
+	            loop TRUE
+	        }
+	        DEF TS TouchSensor {}
+	        DEF SR Shape {
+	            geometry Rectangle {
+	                size IS size
+	            }
+	            appearance USE APP_BACK
+	        }
+
+	        DEF SCRIPT Script {
+	            field SFNode overColor  USE OColor
+	            field SFNode backColor  USE BColor
+	            field SFNode rect           USE SR
+	            field SFNode app_over       USE APP_OVER
+	            field SFNode app_back       USE APP_BACK
+	            field SFNode freqTS     USE FREQ_TS
+	            field SFBool Active         false
+	            field SFBool CanClick       true
+	            eventIn SFBool Click        IS doClick
+	            eventIn SFBool OnActive
+	            eventIn SFBool OnOver
+	            eventIn MFString    setImgButtonBack    IS backImage
+	            eventIn MFString    setImgButtonOver    IS overImage
+	            eventIn SFTime      setClick
+	            eventOut SFBool     DoClick IS onClick
+
+	            url ["javascript:
+	            function initialize() {
+	                if (app_back.texture.url[0] != '') {
+	                    back = app_back;
+	                }
+	                else {
+	                    back = backColor;
+	                    rect.appearance = back;
+	                }
+
+	                if (app_over.texture.url[0] != '') {
+	                    over = app_over;
+	                }
+	                else {
+	                    over = overColor;
+	                }
+	            }
+
+	            function setImgButtonBack(val) {
+	                if (val[0] != '') {
+	                    back = app_back;
+	                    rect.appearance = back;
+	                }
+	            }
+	            function setImgButtonOver(val) {
+	                if (val[0] != '') {
+	                    over = app_over;
+	                }
+	            }
+
+	            function setClick() {
+	                DoClick = true;
+	            }
+
+	            function OnActive(value, timestamp) {
+	                isClicked = value;
+	                if (value) {
+	                    freqTS.enabled = true;
+	                    DoClick = true;
+	                    rect.appearance = over;
+	                }
+	                else {
+	                    freqTS.enabled = false;
+	                    rect.appearance = back;
+	                }
+	            }
+
+	            function setClick() {
+	                if (isClicked) {
+	                    DoClick = true;
+	                }
+	            }
+
+	            function Click(value) {
+	                if (!value) return;
+	                DoClick = true;
+	            }
+	            "
+	            ]
+	        }
+	    ]
+    }
+        ROUTE TS.isActive TO SCRIPT.OnActive
+        ROUTE FREQ_TS.cycleTime TO SCRIPT.setClick
+    }
+    DEF SHOW_NAV Switch {
+    whichChoice -1
+    choice [
+        Transform2D {
+        translation IS translation
+        children [
+            DEF UP_ARROW ARR_NAV_BUTTON {
+            translation     0 50
+            size                50 50
+            backImage       "51"
+            overImage       "52"
+        }
+        DEF DOWN_ARROW ARR_NAV_BUTTON {
+            translation     0 0
+            size                50 50
+            backImage       "53"
+            overImage       "54"
+        }
+        DEF LEFT_ARROW ARR_NAV_BUTTON {
+            translation     -50 25
+            size                50 50
+            backImage       "55"
+            overImage       "56"
+        }
+        DEF RIGHT_ARROW ARR_NAV_BUTTON {
+            translation     50 25
+            size                50 50
+            backImage       "57"
+            overImage       "58"
+        }
+    ]
+    }
+]
+}
+    DEF SCRIPT Script {
+    eventIn SFBool up
+    eventIn SFBool down
+    eventIn SFBool left
+    eventIn SFBool right
+    eventOut SFInt32 navigate IS navigate
+
+    url ["javascript:
+    function initialize() {
+        go_up   = 0;
+        go_down = 1;
+        go_left = 2;
+        go_right= 3;
+    }
+
+    function up() {
+        navigate = go_up;
+    }
+
+    function down() {
+        navigate = go_down;
+    }
+
+    function left() {
+        navigate = go_left;
+    }
+
+    function right() {
+        navigate = go_right;
+    }
+    "
+    ]
+}
+    DEF DISPLAY_SCRIPT Script {
+    field SFNode show_nav USE SHOW_NAV
+    eventIn SFVec3f updateOrientation
+    eventOut SFBool disable_orientation
+    url ["javascript:
+    function initialize() {
+        print ('[ ARROW NAVIGATOR ]: Initialize...');
+        testing = false;
+        disable_orientation = false;
+        interval = 60;
+        deviceOrientationPortrait = gpac.get_option('General', 'DeviceOrientationPortrait');
+    }
+    function updateOrientation(rot, ts) {
+    #               print ('[ ARROW NAVIGATOR ]: Remaining time until testing mode may be activated: ' + (interval-ts));
+        if (ts > interval) {
+            disable_orientation = true;
+            return;
+        }
+        if (testing) return;
+        if (deviceOrientationPortrait == 1) {
+            if (rot.y >= 84) {
+                if (show_nav.whichChoice == -1) {
+                    print ('[ ARROW NAVIGATOR ]: Display ARROW NAVIGATOR');
+                    show_nav.whichChoice = 0;
+                    disable_orientation = true;
+                }
+            }
+        }
+        else {
+            if ((Math.abs(rot.y) <= 5) && ((rot.z <= -85) && (rot.z >= -90))) {
+                if (show_nav.whichChoice == -1) {
+                    print ('[ ARROW NAVIGATOR ]: Display ARROW NAVIGATOR');
+                    show_nav.whichChoice = 0;
+                    disable_orientation = true;
+                }
+            }
+        }
+    }
+    "
+    ]
+}
+    DEF ORIENTATION_SENSOR InputSensor {
+    url "202"
+    buffer {
+        REPLACE DISPLAY_SCRIPT.updateOrientation BY 0 0 0
+    }
+}
+    DEF DUMMY_SCRIPT Script {
+    field SFNode orientation_sensor USE ORIENTATION_SENSOR
+    eventIn SFBool disable_orientation
+    url ["javascript:
+    function disable_orientation(val) {
+        if (val) {
+            orientation_sensor.enabled = false;
+            orientation_sensor.url = '';
+        }
+    }
+    "
+    ]
+}
+    ROUTE DISPLAY_SCRIPT.disable_orientation    TO DUMMY_SCRIPT.disable_orientation
+    ROUTE UP_ARROW.onClick                      TO SCRIPT.up
+    ROUTE DOWN_ARROW.onClick                    TO SCRIPT.down
+    ROUTE LEFT_ARROW.onClick                    TO SCRIPT.left
+    ROUTE RIGHT_ARROW.onClick                   TO SCRIPT.right
+}
+

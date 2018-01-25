@@ -1,0 +1,120 @@
+PROTO MapOverlay [
+	exposedField 	SFString 	name 		""
+	exposedField    SFBool 	    clickable	TRUE
+	exposedField    SFBool 	    visible		TRUE
+	exposedField    SFBool 	    enabled		TRUE
+	exposedField 	MFNode		children	[]
+	exposedField	MFString	keywords 	[]
+	eventIn 		MFNode 	    addOverlayItems
+	eventIn 		MFNode 	    removeOverlayItems
+]
+{
+	DEF MapOverlaySW Switch {
+		whichChoice 0
+		choice [
+			DEF MapOverlayOG OrderedGroup {
+				children IS children
+			}
+		]
+	}
+	
+	DEF UI_MapOverlay_SCRIPT Script {
+		field SFNode og  	USE MapOverlayOG
+		field SFNode sw	USE MapOverlaySW
+		#
+		# DO NOT CHANGE THE ORDER OF THE INPUT EVENTS!
+		# 'name' should be first in the eventIn list
+		#
+		eventIn SFString 	setOverlayName		IS name
+		eventIn SFBool 	    setVisible			IS visible
+		eventIn SFBool		setClickable		IS clickable
+		eventIn SFBool		setEnable			IS enabled
+		eventIn MFNode 	    addOverlayItems 	IS addOverlayItems
+		eventIn MFNode 	    removeOverlayItems 	IS removeOverlayItems
+
+		url ["
+			javascript:
+				function initialize() {
+					mapOverlayName 	= 'mo_'+Math.random().toString(36).substr(2, 5);
+				}
+				
+				function setOverlayName(name) {
+					if (name == '') return;
+					print ('[ MapOverlay ] - ' + mapOverlayName + ': UPDATE NAME to ' + name);
+					mapOverlayName 	= name;
+				}
+				
+				function setEnable(val) {
+					if (val) {
+						for (i = 0; i < og.children.length; i++) {
+							og.children[i].enabled = true;
+						}
+						print ('[ MapOverlay ] - ' + mapOverlayName + ': SET ENABLE ');
+					}
+					else {
+						for (i = 0; i < og.children.length; i++) {
+							og.children[i].enabled = false;
+						}
+						print ('[ MapOverlay ] - ' + mapOverlayName + ': SET DISABLE ');
+					}
+					isEnabled = val;
+				}
+				
+				function setVisible(val) {
+					if (val) {
+						print ('[ MapOverlay ] - ' + mapOverlayName + ': SET VISIBLE');
+					#	sw.whichChoice = 0;
+						for (i = 0; i < og.children.length; i++) {
+							og.children[i].visible = true;
+						}
+					}
+					else {
+						print ('[ MapOverlay ] - ' + mapOverlayName + ': SET INVISIBLE');
+					#	sw.whichChoice = -1;
+						for (i = 0; i < og.children.length; i++) {
+							og.children[i].visible = false;
+						}
+					}
+					isVisible = val;
+				}
+				
+				function setClickable(val) {
+					if (val) {
+						for (i = 0; i < og.children.length; i++) {
+							og.children[i].clickable = true;
+						}
+						enabled = true;
+						print ('[ MapOverlay ] - ' + mapOverlayName + ': SET CLICKABLE');
+					}
+					else {
+						for (i = 0; i < og.children.length; i++) {
+							og.children[i].clickable = false;
+						}
+						enabled = false;
+						print ('[ MapOverlay ] - ' + mapOverlayName + ': SET UNCLICKABLE');
+					}
+					isClickable = val;
+				}
+				
+				function addOverlayItems(marker) {
+					if (marker == null) return;
+					if (marker.length == 0) return;
+					og.addChildren 	= new MFNode(marker[0]);
+					print ('[ MapOverlay ] - ' + mapOverlayName + ': ADD new overlay item \\"' +  marker[0].name + '\\"');
+				}
+				
+				function removeOverlayItems(marker) {
+					if (marker == null) return;
+					if (marker.length == 0) return;
+					for (i = 0; i < og.children.length; i++) {
+						if (og.children[i].name == marker.name) {
+							og.removeChildren = new MFNode(og.children[i]);
+							print ('[ MapOverlay ] - ' + mapOverlayName + ': REMOVE overlay item \\"' + marker.name + '\\"');
+							return;
+						}
+					}
+					print ('[ MapOverlay ] - ' + mapOverlayName + ': COULD NOT FIND Overlay item \\"' + marker.name + '\\"!');
+				}
+		"]
+	}
+}

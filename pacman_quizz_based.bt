@@ -1,0 +1,5401 @@
+# ########################## FILE DEFINES ##########################
+
+#define MAP_CENTER      48.8227065835 2.33919344086
+#define PLAYER_POSITION 48.8227065835 2.33919344086
+
+# ########################## FILE HEADER ##########################
+
+InitialObjectDescriptor {
+    objectDescriptorID 100
+    audioProfileLevelIndication 255
+    visualProfileLevelIndication 254
+    sceneProfileLevelIndication 1
+    graphicsProfileLevelIndication 1
+    ODProfileLevelIndication 1
+    esDescr [
+        ES_Descriptor {
+        ES_ID 101
+        decConfigDescr DecoderConfigDescriptor {
+            streamType 3
+            decSpecificInfo BIFSConfig {
+                useNames true
+                isCommandStream true
+                pixelMetric true
+                pixelWidth 480
+                pixelHeight 800
+            }
+        }
+    }
+    ES_Descriptor {
+        ES_ID 102
+        decConfigDescr DecoderConfigDescriptor {
+            streamType 1
+        }
+    }
+]
+}
+
+# ########################## PROTO DEFINITIONS ##########################
+
+PROTO UI_TEXT_FIELD [
+    exposedField SFVec2f    Pos             0 0
+    exposedField SFVec2f    LayoutSize      80 30
+    exposedField MFString   Text            []
+    exposedField MFString   TextAlign       ["BEGIN" "END"]
+    exposedField SFColor    TextColor       1 0 0
+    exposedField SFFloat    transparency    0
+    exposedField SFFloat    TextSize        18
+]
+{
+    Transform2D {
+    translation IS Pos
+    children [
+        Layout {
+        wrap    TRUE
+        size    IS LayoutSize
+        justify IS TextAlign
+        children [
+            Shape {
+            geometry Text {
+                string IS Text
+                fontStyle FontStyle {
+                    justify ["MIDDLE"]
+                    size    IS TextSize
+                }
+            }
+            appearance Appearance {
+                material Material2D {
+                    emissiveColor   IS TextColor
+                    transparency    IS transparency
+                    filled          true
+                }
+            }
+        }
+    ]
+    }
+]
+}
+}
+
+PROTO UI_TEXT_INPUT [
+    exposedField SFVec2f    Pos                 0 0
+exposedField SFVec2f    Size                80 30
+exposedField SFString   BackImage           "8"
+exposedField SFString   BackImageSel        "9"
+exposedField MFString   Text                [""]
+exposedField SFColor    TextColor           1 1 1
+exposedField SFFloat    TextSize            18
+exposedField MFString   TextAlign           ["BEGIN" "MIDDLE"]
+exposedField MFString   KeySensorUrl        [""]
+exposedField MFString   StringSensorUrl     [""]
+exposedField SFString   PassChar            ""
+eventIn      SFString   SetText
+eventIn      SFBool     Focus
+eventIn      SFBool     Defocus
+eventOut     SFBool     OnFocus
+eventOut     SFBool     OnEnteredText
+eventOut     SFBool     OnTabPressed
+]
+{
+    Transform2D {
+    translation IS Pos
+    children [
+        Shape {
+        appearance DEF UI_TEXT_INPUT_APP_BACK Appearance {
+            texture ImageTexture {
+                url IS BackImage
+            }
+            material DEF UI_TEXT_INPUT_MAT_LINE Material2D {
+                lineProps LineProperties {
+                    width 0
+                }
+            }
+        }
+    }
+    Shape {
+        appearance DEF UI_TEXT_INPUT_APP_SEL Appearance {
+            texture ImageTexture {
+                url IS BackImageSel
+            }
+            material USE UI_TEXT_INPUT_MAT_LINE
+        }
+    }
+    Switch {
+        whichChoice -1
+        children [
+            Shape {
+            geometry DEF UI_TEXT_INPUT_TX Text {
+                string IS Text
+            }
+        }
+    ]
+    }
+    DEF UI_TEXT_INPUT_TS TouchSensor {}
+    DEF UI_TEXT_INPUT_SR Shape {
+        geometry Rectangle {
+            size IS Size
+        }
+        appearance USE UI_TEXT_INPUT_APP_BACK
+    }
+    DEF UI_TEXT_INPUT_TEXT UI_TEXT_FIELD {
+        LayoutSize IS Size
+        TextColor IS TextColor
+        TextSize IS TextSize
+        TextAlign IS TextAlign
+    }
+    DEF UI_TEXT_INPUT_SCRIPT Script {
+        eventIn SFBool OnActive IS Focus
+        eventIn SFBool OnDefocus IS Defocus
+        eventIn SFString SetText IS SetText
+        eventOut SFBool Focus IS OnFocus
+        eventOut SFBool EnteredText IS OnEnteredText
+        eventOut SFBool TabEvent IS OnTabPressed
+
+        field SFNode key_s USE UI_TEXT_INPUT_KEY_SENS
+        field SFNode input_s USE UI_TEXT_INPUT_INPUT_SENS
+        field SFString passChr IS PassChar
+        field SFBool IsFocused false
+        field SFNode text USE UI_TEXT_INPUT_TEXT
+        field SFNode outText USE UI_TEXT_INPUT_TX
+        field SFNode back USE UI_TEXT_INPUT_SR
+        field SFNode app_sel USE UI_TEXT_INPUT_APP_SEL
+        field SFNode app_back USE UI_TEXT_INPUT_APP_BACK
+
+        eventIn SFInt32 KeyPress
+        eventIn SFInt32 KeyRelease
+        eventIn SFString OnCurrentString
+        eventIn SFString OnFinalString
+
+        field SFInt32 prevStringLength 0
+        field SFInt32 currStringLength 0
+        field SFBool keyEnabled false
+        field SFBool key_processed false
+
+        url ["javascript:
+        function KeyRelease(value) {}
+        function OnActive(value) {
+            if ( value && !IsFocused )
+            {
+                IsFocused = true;
+
+                            # Enable the input sensor
+                keyEnabled = true;
+                back.appearance = app_sel;
+                gpac.show_keyboard(true);
+                            # Send the event
+                Focus = true;
+            }
+        }
+        function OnDefocus(value) {
+            if ( value && IsFocused )
+            {
+            # Disable the input sensor
+                keyEnabled = false;
+                IsFocused = false;
+                back.appearance = app_back;
+                currStringLength = 0;
+                gpac.show_keyboard(false);
+            }
+        }
+        function SetText(value) {
+            if ( passChr == '' )
+            {
+                text.Text[0] = value;
+            }
+            else
+            {
+                str = '';
+                for ( i = 0; i < value.length; i ++ )
+                {
+                    str += passChr;
+                }
+                text.Text[0] = str;
+            }
+            outText.string[0] = value;
+        }
+        function OnFinalString(value) {}
+        function OnCurrentString(value) {
+            if (!keyEnabled) return;
+            if (value.length > 0 && key_processed == false
+                && value.charCodeAt(value.length-1) != 13
+                && value.charCodeAt(value.length-1) != 9
+                && value.charCodeAt(value.length-1) != 8
+                && value.charCodeAt(value.length-1) != 27)
+            {
+                outText.string[0] += value[value.length-1];
+                SetText(outText.string[0]);
+            }
+            if (key_processed)
+                key_processed = false;
+        }
+        function KeyPress(value) {
+            if (!keyEnabled) return;
+            switch (value)
+            {
+                #enter
+                case 13:
+                {
+                    key_processed = true;
+                    EnteredText = true;
+                    break;
+                }
+                            #esc
+                case 27:
+                {
+                    key_processed = true;
+                }
+                            #tab
+                case 9:
+                {
+                    key_processed = true;
+                    TabEvent = true;
+                    break;
+                }
+                            #backspace
+                case 8:
+                {
+                    key_processed = true;
+                    if (outText.string[0].length > 0)
+                    {
+                        delcnt = 1;
+                        outText.string[0] = outText.string[0].substr(0,outText.string[0].length-delcnt);
+                        SetText(outText.string[0]);
+                    }
+                    break;
+                }
+                default :
+                {
+                    key_processed = false;
+                    break;
+                }
+            }
+        }
+        "
+        ]
+    }
+    DEF UI_TEXT_INPUT_KEY_SENS InputSensor {
+        url "1"
+        buffer {
+            REPLACE UI_TEXT_INPUT_SCRIPT.KeyPress BY 0
+            REPLACE UI_TEXT_INPUT_SCRIPT.KeyRelease BY 0
+        }
+    }
+    DEF UI_TEXT_INPUT_INPUT_SENS InputSensor {
+        url "3"
+        buffer {
+            REPLACE UI_TEXT_INPUT_SCRIPT.OnCurrentString BY ""
+            REPLACE UI_TEXT_INPUT_SCRIPT.OnFinalString BY ""
+        }
+    }
+]
+}
+    ROUTE UI_TEXT_INPUT_TS.isActive TO UI_TEXT_INPUT_SCRIPT.OnActive
+}
+
+PROTO IMAGE [
+    exposedField MFString   url             [""]
+exposedField SFVec2f    size            100 60
+exposedField SFVec2f    translation     0 0
+exposedField SFFloat    rotationAngle   0.0
+exposedField SFVec2f    scale           1 1
+]
+{
+    Transform2D {
+    translation     IS translation
+    rotationAngle   IS rotationAngle
+    scale           IS scale
+    children [
+        Shape {
+        geometry Rectangle {
+            size IS size
+        }
+        appearance Appearance {
+            texture ImageTexture {
+                url IS url
+            }
+            material Material2D {
+                lineProps LineProperties {
+                    width 0
+                }
+            }
+        }
+    }
+]
+}
+}
+
+PROTO GPS_SIGNAL [
+    exposedField SFVec2f    translation     -20 320
+exposedField SFTime     checkInterval   5
+exposedField SFBool     gps             FALSE
+exposedField SFVec2f    iconSize        25 25
+exposedField MFString   image_on        []
+exposedField MFString   image_off       []
+]
+{
+    Transform2D {
+    children [
+        DEF GPS_TS TimeSensor {
+        loop TRUE
+        cycleInterval IS checkInterval
+    }
+    Transform2D {
+        translation IS translation
+        children [
+            DEF SW Switch {
+            whichChoice 0
+            choice [
+                IMAGE {
+                url IS image_off
+                size IS iconSize
+            }
+            IMAGE {
+                url IS image_on
+                size IS iconSize
+            }
+        ]
+        }
+    ]
+    }
+    DEF SCRIPT Script {
+        field SFTime checkInterval  IS checkInterval
+        field SFNode gpsSw          USE SW
+        eventIn SFTime checkGPS
+        eventIn SFVec3f updateGPS
+        eventOut SFBool gps IS gps
+
+        url ["javascript:
+        function initialize() {
+            lastGPSTimestamp = 0;
+            gps = false;
+        }
+
+        function updateGPS(gpsPos) {
+            if (gpsPos.x != 0 && gpsPos.y != 0) {
+                gpsSw.whichChoice = 1;
+                lastGPSTimestamp = gpac.get_scene_time();
+                gps = true;
+            }
+        }
+
+        function checkGPS(time) {
+            if ((time - lastGPSTimestamp) > checkInterval + 1) {
+                gpsSw.whichChoice = 0;
+                gps = false;
+            }
+        }
+        "
+        ]
+    }
+    InputSensor {
+        url "201"
+        buffer {
+            REPLACE SCRIPT.updateGPS BY 0 0 0
+        }
+    }
+]
+}
+    ROUTE GPS_TS.cycleTime TO SCRIPT.checkGPS
+}
+
+PROTO INTERNET_CONNECTION [
+    exposedField SFVec2f    translation     20 320
+exposedField SFTime     checkInterval   5
+exposedField SFBool     internet        FALSE
+exposedField SFVec2f    iconSize        25 25
+exposedField MFString   imgOff          "47"
+exposedField MFString   imgOn           "48"
+]
+{
+    Transform2D {
+    children [
+        DEF NET_TS TimeSensor {
+        loop TRUE
+        cycleInterval IS checkInterval
+    }
+    DEF CHECK_TIMER TimeSensor {
+        loop FALSE
+        cycleInterval 3
+        enabled TRUE
+    }
+    Transform2D {
+        translation IS translation
+        children [
+            DEF SW Switch {
+            whichChoice 0
+            choice [
+                IMAGE {
+                url IS imgOff
+                size IS iconSize
+            }
+            IMAGE {
+                url IS imgOn
+                size IS iconSize
+            }
+        ]
+        }
+    ]
+    }
+    DEF SCRIPT Script {
+        field SFNode sw USE SW
+        field SFNode checker USE CHECK_TIMER
+        eventIn SFTime check_internet
+        eventIn SFBool checkDone
+        eventOut SFBool internet IS internet
+        url ["javascript:
+        function initialize() {
+            internet = false;
+            tmpInternet = false;
+        }
+        function check_internet() {
+            xmlhttp=new XMLHttpRequest();
+            xmlhttp.onreadystatechange = checkInternet;
+            xmlhttp.open('GET', 'http://www.google.com', true);
+            xmlhttp.send();
+        }
+        function checkInternet() {
+            if (xmlhttp.readyState==1 && xmlhttp.status==0) {
+                checker.startTime = gpac.get_scene_time();
+                tmpInternet = false;
+            }
+            else if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+                internet = true;
+                tmpInternet = true;
+                sw.whichChoice = 1;
+                checker.stopTime = gpac.get_scene_time();
+            }
+        }
+        function checkDone(val, ts) {
+            if (val) return;
+            if (ts-checker.startTime < 1) return;
+            if (tmpInternet == false) {
+                sw.whichChoice = 0;
+                internet = false;
+            }
+        }
+        "
+        ]
+    }
+]
+}
+    ROUTE NET_TS.cycleTime TO SCRIPT.check_internet
+    ROUTE CHECK_TIMER.isActive TO SCRIPT.checkDone
+}
+
+PROTO TEXT [
+    exposedField SFVec2f    translation                 0 0
+exposedField SFFloat    rotationAngle               0.0
+exposedField SFVec2f    scale                       1 1
+exposedField SFBool     Layout_wrap                 TRUE
+exposedField SFVec2f    layoutSize                  80 50
+exposedField SFBool     Layout_horizontal           TRUE
+exposedField MFString   Layout_justify              ["BEGIN, FIRST"]
+exposedField SFBool     Layout_leftToRight          TRUE
+exposedField SFBool     Layout_topToBottom          TRUE
+exposedField SFFloat    Layout_spacing              1.0
+exposedField MFString   String                      [""]
+exposedField MFString   FontStyle_family            ["ARIAL"]
+exposedField SFBool     FontStyle_horizontal        TRUE
+exposedField MFString   FontStyle_justify           ["BEGIN"]
+exposedField SFString   FontStyle_language          ""
+exposedField SFBool     FontStyle_leftToRight       TRUE
+exposedField SFFloat    FontStyle_size              16.0
+exposedField SFFloat    FontStyle_spacing           1.1
+exposedField SFString   FontStyle_style             "PLAIN"
+exposedField SFBool     FontStyle_topToBottom       TRUE
+exposedField SFColor    emissiveColor               0.8, 0.8, 0.8
+exposedField SFBool     filled                      TRUE
+exposedField SFFloat    transparency                0.0
+]
+{
+    Transform2D {
+    translation     IS translation
+    rotationAngle   IS rotationAngle
+    scale           IS scale
+    children [
+        Layout {
+        wrap        IS Layout_wrap
+        size        IS layoutSize
+        horizontal  IS Layout_horizontal
+        justify     IS Layout_justify
+        leftToRight IS Layout_leftToRight
+        topToBottom IS Layout_topToBottom
+        spacing     IS Layout_spacing
+
+        children [
+            Shape {
+            geometry Text {
+                string  IS String
+                fontStyle FontStyle {
+                    family       IS FontStyle_family
+                    horizontal   IS FontStyle_horizontal
+                    justify      IS FontStyle_justify
+                    language     IS FontStyle_language
+                    leftToRight  IS FontStyle_leftToRight
+                    size         IS FontStyle_size
+                    spacing      IS FontStyle_spacing
+                    style        IS FontStyle_style
+                    topToBottom  IS FontStyle_topToBottom
+                }
+            }
+            appearance Appearance {
+                material Material2D {
+                    emissiveColor   IS emissiveColor
+                    transparency    IS transparency
+                    filled          IS filled
+                }
+            }
+        }
+    ]
+    }
+]
+}
+}
+
+PROTO AUDIO [
+    exposedField SFBool     spatialize  TRUE
+exposedField SFFloat    intensity   1.0
+exposedField SFVec2f    location    0 0
+exposedField SFFloat    speed       1.0
+exposedField SFTime     startTime   -1
+exposedField SFTime     stopTime    -1
+exposedField MFString   url         [""]
+exposedField SFFloat    pitch       1.0
+]
+{
+    DEF SD Sound2D {
+    intensity   IS intensity
+    location    IS location
+    source DEF AS AudioSource {
+        url         IS url
+        pitch       IS pitch
+        speed       IS speed
+        startTime   IS startTime
+        stopTime    IS stopTime
+    }
+}
+}
+
+PROTO BUTTON [
+    exposedField SFVec2f    translation     0 0
+exposedField SFFloat    rotationAngle   0.0
+exposedField SFVec2f    scale           1, 1
+exposedField SFVec2f    size            0 0
+exposedField MFString   backImage       [""]
+exposedField MFString   overImage       [""]
+exposedField MFString   buttonText      [""]
+exposedField SFColor    textColor       1 1 1
+exposedField SFFloat    textSize        18
+exposedField SFColor    overColor       1 0.5 0.8
+exposedField SFColor    backColor       0.1 0.1 0.1
+exposedField MFString   fonstSyleFamily ["ARIAL"]
+exposedField SFVec2f    layoutSize      -1 -1
+eventIn      SFBool     doClick
+eventOut     SFBool     onClick
+]
+{
+    DEF TR Transform2D {
+    translation     IS translation
+    rotationAngle   IS rotationAngle
+    scale           IS scale
+    children [
+        Shape {
+        appearance DEF BColor Appearance {
+            material Material2D {
+                emissiveColor IS backColor
+                filled TRUE
+            }
+        }
+    }
+    Shape {
+        appearance DEF OColor Appearance {
+            material Material2D {
+                emissiveColor IS overColor
+                filled TRUE
+            }
+        }
+    }
+    Shape {
+        appearance DEF APP_BACK Appearance {
+            texture ImageTexture {
+                url IS backImage
+            }
+            material DEF MAT_LINE Material2D {
+                lineProps DEF LINE_PROP LineProperties {
+                    width 0
+                }
+            }
+        }
+    }
+    Shape {
+        appearance DEF APP_OVER Appearance {
+            texture ImageTexture {
+                url IS overImage
+            }
+            material USE MAT_LINE
+        }
+    }
+    DEF TS TouchSensor {}
+    DEF SR Shape {
+        geometry Rectangle {
+            size IS size
+        }
+        appearance USE APP_BACK
+    }
+    DEF LAYOUT Layout {
+        size IS layoutSize
+        wrap TRUE
+        justify     ["MIDDLE" "FIRST"]
+        children [
+            DEF ST Shape {
+            geometry DEF TX Text {
+                string IS buttonText
+                fontStyle FontStyle {
+                    justify     ["MIDDLE"]
+                    size        IS textSize
+                    family      IS fonstSyleFamily
+                }
+            }
+            appearance Appearance {
+                material DEF MT Material2D {
+                    emissiveColor   IS textColor
+                    filled          true
+                }
+            }
+        }
+    ]
+    }
+    DEF SCRIPT Script {
+        field SFNode overColor  USE OColor
+        field SFNode backColor  USE BColor
+        field SFNode rect           USE SR
+        field SFNode app_over       USE APP_OVER
+        field SFNode app_back       USE APP_BACK
+        field SFNode layout     USE LAYOUT
+        field SFBool Active         false
+        field SFBool CanClick       true
+        eventIn SFBool Click        IS doClick
+        eventIn SFBool OnActive
+        eventIn SFBool OnOver
+        eventIn MFString    setImgButtonBack    IS backImage
+        eventIn MFString    setImgButtonOver    IS overImage
+        eventIn MFString    setText             IS buttonText
+        eventIn SFVec2f     setLayoutSize       IS layoutSize
+        eventIn SFVec2f setRectangleSize    IS size
+        eventOut SFBool DoClick IS onClick
+
+        url ["javascript:
+        function initialize() {
+            text = false;
+            layoutSize = new SFVec2f (-1, -1);
+            if (app_back.texture.url[0] != '') {
+                back = app_back;
+            }
+            else {
+                back = backColor;
+                rect.appearance = back;
+            }
+
+            if (app_over.texture.url[0] != '') {
+                over = app_over;
+            }
+            else {
+                over = overColor;
+            }
+        }
+
+        function setRectangleSize(rSize) {
+            if (!isDefault(layoutSize)) {
+                return;
+            }
+            if (!isDefault(rSize)) {
+                layout.size = new SFVec2f (rSize.x, rSize.y);
+            }
+        }
+
+        function setImgButtonBack(val) {
+            if (val[0] != '') {
+                back = app_back;
+                rect.appearance = back;
+            }
+        }
+        function setImgButtonOver(val) {
+            if (val[0] != '') {
+                over = app_over;
+            }
+        }
+
+        function setLayoutSize(lSize) {
+        #   print ('[ BUTTON ]: Set layout size: ' + lSize);
+            layoutSize = new SFVec2f (lSize.x, lSize.y);
+            layout.size = layoutSize;
+        }
+
+        function setText(txt) {
+        #   print ('[ BUTTON ]: Set text: ' + txt);
+            text = txt;
+            if (!isDefault(layoutSize)) {
+                layout.size = layoutSize;
+            }
+        }
+
+        function OnActive(value, timestamp) {
+            Active = value;
+            if ( value )
+            {
+                rect.appearance = over;
+                CanClick = true;
+            }
+            else
+            {
+                rect.appearance = back;
+                if ( CanClick )
+                {
+                    DoClick = true;
+                }
+            }
+        }
+        function OnOver(value) {
+            if ( Active && value )
+            {
+                CanClick = true;
+            }
+            else
+            {
+                CanClick = false;
+            }
+        }
+        function Click(value) {
+            if ( !value ) return;
+            DoClick = true;
+        }
+
+        function isDefault(vect2f) {
+            return (vect2f.x == -1 && vect2f.y == -1);
+        }
+
+        "
+        ]
+    }
+]
+}
+    ROUTE TS.isActive TO SCRIPT.OnActive
+    ROUTE TS.isOver TO SCRIPT.OnOver
+}
+
+PROTO CONFIRMATION_ALERT [
+    exposedField MFString   Text        ["Confirm"]
+exposedField SFVec2f    trans       0 0
+exposedField SFVec2f    Pos         0 0
+exposedField SFVec2f    Size        150 40
+exposedField MFString   BackImage   "29"
+exposedField MFString   OverImage   "29"
+exposedField SFColor    TextColor   1 1 1
+exposedField SFFloat    TextSize    26
+exposedField MFString   Family      ["SERIF"]
+eventOut     SFBool     alertConfirmed
+]
+{
+    Transform2D {
+    translation IS trans
+    children[
+        DEF CONFIRMATION_ALERT_VALIDATE BUTTON {
+        translation -70 -40
+        size IS Size
+        backImage IS BackImage
+        overImage IS OverImage
+        textColor IS TextColor
+        textSize IS TextSize
+    }
+]
+}
+
+    DEF CONFIRMATION_ALERT_SCRIPT Script {
+
+    eventIn SFBool clickedYes
+    eventOut SFBool alertConfirmed IS alertConfirmed
+    eventIn MFString confirmation IS Text
+    field SFNode confAlert USE CONFIRMATION_ALERT_VALIDATE
+    url ["javascript:
+    function clickedYes(val) {
+        alertConfirmed = true;
+    }
+    function confirmation(validationText) {
+        confAlert.buttonText[0] = validationText[0];
+    }
+    "
+    ]
+}
+    ROUTE CONFIRMATION_ALERT_VALIDATE.onClick TO CONFIRMATION_ALERT_SCRIPT.clickedYes
+}
+
+PROTO ARROW_NAVIGATOR [
+    exposedField    SFVec2f translation         0 0
+eventOut        SFInt32 navigate
+]
+{
+    PROTO ARR_NAV_BUTTON [
+    exposedField SFVec2f    translation     0 0
+    exposedField SFFloat    rotationAngle   0.0
+    exposedField SFVec2f    scale           1, 1
+    exposedField SFVec2f    size                0 0
+    exposedField MFString   backImage       [""]
+    exposedField MFString   overImage       [""]
+    exposedField MFString   buttonText      [""]
+    exposedField SFColor    textColor       1 1 1
+    exposedField SFFloat    textSize            18
+    exposedField SFColor    overColor       1 0.5 0.8
+    exposedField SFColor    backColor       0.1 0.1 0.1
+    exposedField MFString   fonstSyleFamily             ["ARIAL"]
+    exposedField SFTime     frequency                   0.1
+    eventOut     SFBool     onClick
+    eventIn      SFBool     doClick
+]
+    {
+        DEF TR Transform2D {
+        translation     IS translation
+        rotationAngle   IS rotationAngle
+        scale           IS scale
+        children [
+            Shape {
+            appearance DEF BColor Appearance {
+                material Material2D {
+                    emissiveColor IS backColor
+                    filled TRUE
+                }
+            }
+        }
+        Shape {
+            appearance DEF OColor Appearance {
+                material Material2D {
+                    emissiveColor IS overColor
+                    filled TRUE
+                }
+            }
+        }
+        Shape {
+            appearance DEF APP_BACK Appearance {
+                texture ImageTexture {
+                    url IS backImage
+                }
+                material DEF MAT_LINE Material2D {
+                    lineProps DEF LINE_PROP LineProperties {
+                        width 0
+                    }
+                }
+            }
+        }
+        Shape {
+            appearance DEF APP_OVER Appearance {
+                texture ImageTexture {
+                    url IS overImage
+                }
+                material USE MAT_LINE
+            }
+        }
+        DEF FREQ_TS TimeSensor {
+            cycleInterval IS frequency
+            enabled FALSE
+            loop TRUE
+        }
+        DEF TS TouchSensor {}
+        DEF SR Shape {
+            geometry Rectangle {
+                size IS size
+            }
+            appearance USE APP_BACK
+        }
+
+        DEF SCRIPT Script {
+            field SFNode overColor  USE OColor
+            field SFNode backColor  USE BColor
+            field SFNode rect           USE SR
+            field SFNode app_over       USE APP_OVER
+            field SFNode app_back       USE APP_BACK
+            field SFNode freqTS     USE FREQ_TS
+            field SFBool Active         false
+            field SFBool CanClick       true
+            eventIn SFBool Click        IS doClick
+            eventIn SFBool OnActive
+            eventIn SFBool OnOver
+            eventIn MFString    setImgButtonBack    IS backImage
+            eventIn MFString    setImgButtonOver    IS overImage
+            eventIn SFTime      setClick
+            eventOut SFBool     DoClick IS onClick
+
+            url ["javascript:
+            function initialize() {
+                if (app_back.texture.url[0] != '') {
+                    back = app_back;
+                }
+                else {
+                    back = backColor;
+                    rect.appearance = back;
+                }
+
+                if (app_over.texture.url[0] != '') {
+                    over = app_over;
+                }
+                else {
+                    over = overColor;
+                }
+            }
+
+            function setImgButtonBack(val) {
+                if (val[0] != '') {
+                    back = app_back;
+                    rect.appearance = back;
+                }
+            }
+            function setImgButtonOver(val) {
+                if (val[0] != '') {
+                    over = app_over;
+                }
+            }
+
+            function setClick() {
+                DoClick = true;
+            }
+
+            function OnActive(value, timestamp) {
+                isClicked = value;
+                if (value) {
+                    freqTS.enabled = true;
+                    DoClick = true;
+                    rect.appearance = over;
+                }
+                else {
+                    freqTS.enabled = false;
+                    rect.appearance = back;
+                }
+            }
+
+            function setClick() {
+                if (isClicked) {
+                    DoClick = true;
+                }
+            }
+
+            function Click(value) {
+                if (!value) return;
+                DoClick = true;
+            }
+            "
+            ]
+        }
+    ]
+    }
+        ROUTE TS.isActive TO SCRIPT.OnActive
+        ROUTE FREQ_TS.cycleTime TO SCRIPT.setClick
+    }
+    DEF SHOW_NAV Switch {
+    whichChoice -1
+    choice [
+        Transform2D {
+        translation IS translation
+        children [
+            DEF UP_ARROW ARR_NAV_BUTTON {
+            translation     0 50
+            size                50 50
+            backImage       "51"
+            overImage       "52"
+        }
+        DEF DOWN_ARROW ARR_NAV_BUTTON {
+            translation     0 0
+            size                50 50
+            backImage       "53"
+            overImage       "54"
+        }
+        DEF LEFT_ARROW ARR_NAV_BUTTON {
+            translation     -50 25
+            size                50 50
+            backImage       "55"
+            overImage       "56"
+        }
+        DEF RIGHT_ARROW ARR_NAV_BUTTON {
+            translation     50 25
+            size                50 50
+            backImage       "57"
+            overImage       "58"
+        }
+    ]
+    }
+]
+}
+    DEF SCRIPT Script {
+    eventIn SFBool up
+    eventIn SFBool down
+    eventIn SFBool left
+    eventIn SFBool right
+    eventOut SFInt32 navigate IS navigate
+
+    url ["javascript:
+    function initialize() {
+        go_up   = 0;
+        go_down = 1;
+        go_left = 2;
+        go_right= 3;
+    }
+
+    function up() {
+        navigate = go_up;
+    }
+
+    function down() {
+        navigate = go_down;
+    }
+
+    function left() {
+        navigate = go_left;
+    }
+
+    function right() {
+        navigate = go_right;
+    }
+    "
+    ]
+}
+    DEF DISPLAY_SCRIPT Script {
+    field SFNode show_nav USE SHOW_NAV
+    eventIn SFVec3f updateOrientation
+    eventOut SFBool disable_orientation
+    url ["javascript:
+    function initialize() {
+        print ('[ ARROW NAVIGATOR ]: Initialize...');
+        testing = false;
+        disable_orientation = false;
+        interval = 60;
+        deviceOrientationPortrait = gpac.get_option('General', 'DeviceOrientationPortrait');
+    }
+    function updateOrientation(rot, ts) {
+    #               print ('[ ARROW NAVIGATOR ]: Remaining time until testing mode may be activated: ' + (interval-ts));
+        if (ts > interval) {
+            disable_orientation = true;
+            return;
+        }
+        if (testing) return;
+        if (deviceOrientationPortrait == 1) {
+            if (rot.y >= 84) {
+                if (show_nav.whichChoice == -1) {
+                    print ('[ ARROW NAVIGATOR ]: Display ARROW NAVIGATOR');
+                    show_nav.whichChoice = 0;
+                    disable_orientation = true;
+                }
+            }
+        }
+        else {
+            if ((Math.abs(rot.y) <= 5) && ((rot.z <= -85) && (rot.z >= -90))) {
+                if (show_nav.whichChoice == -1) {
+                    print ('[ ARROW NAVIGATOR ]: Display ARROW NAVIGATOR');
+                    show_nav.whichChoice = 0;
+                    disable_orientation = true;
+                }
+            }
+        }
+    }
+    "
+    ]
+}
+    DEF ORIENTATION_SENSOR InputSensor {
+    url "202"
+    buffer {
+        REPLACE DISPLAY_SCRIPT.updateOrientation BY 0 0 0
+    }
+}
+    DEF DUMMY_SCRIPT Script {
+    field SFNode orientation_sensor USE ORIENTATION_SENSOR
+    eventIn SFBool disable_orientation
+    url ["javascript:
+    function disable_orientation(val) {
+        if (val) {
+            orientation_sensor.enabled = false;
+            orientation_sensor.url = '';
+        }
+    }
+    "
+    ]
+}
+    ROUTE DISPLAY_SCRIPT.disable_orientation    TO DUMMY_SCRIPT.disable_orientation
+    ROUTE UP_ARROW.onClick                      TO SCRIPT.up
+    ROUTE DOWN_ARROW.onClick                    TO SCRIPT.down
+    ROUTE LEFT_ARROW.onClick                    TO SCRIPT.left
+    ROUTE RIGHT_ARROW.onClick                   TO SCRIPT.right
+}
+
+PROTO AR_OBJECT [
+    exposedField    SFString        name                ""
+exposedField    SFVec2f         position            0 0
+exposedField    SFVec2f         playerPosition      0.0 0.0
+exposedField    SFBool          visible             FALSE
+exposedField    SFBool          clickable           FALSE
+exposedField    MFString        objectURL           ["401"]
+exposedField    SFVec3f         objTrans            0 0 0
+exposedField    SFVec3f         objScale            0.003 0.003 0.003
+exposedField    SFRotation      objRotation         0 0 0 0
+eventOut        SFString        onClick
+]
+{
+    Group {
+	    children [
+	        DEF AR_OBJECT_TS TimeSensor {
+	        cycleInterval   3
+	        loop            TRUE
+	        enabled         TRUE
+	    }
+		    DEF AR_OBJECT_SI OrientationInterpolator  {
+		        key              [0 0.25 0.5 0.75 1]
+		        keyValue         [0 1 0 0, 0 1 0 1.57, 0 1 0 3.14, 0 1 0 4.71, 0 1 0 6.28]
+		    }
+		    DEF AR_OBJECT_TouchSensor TouchSensor {}
+		    DEF AR_OBJECT Switch {
+		        whichChoice     0
+		        children [
+		            DEF AR_OBJECT_TR Transform {
+		                rotation        1 0 0 1.57
+		                scale           0.5 0.5 0.5
+		                children [
+		                    DEF OBJECT Transform {
+				                translation IS objTrans
+				                scale       IS objScale
+				                rotation    IS objRotation
+				                children [
+				                    Inline {
+				                    url IS objectURL
+				                    }
+				                ]
+		                    }
+		                    Switch {
+		                whichChoice 0
+		                children [
+		                    DEF AR_OBJECT_DISTANCE_TRANSLATION Transform {
+		                    translation 0 1.2 0
+		                    children [
+		                        Shape {
+		                        geometry DEF AR_OBJECT_DISTANCE_STRING Text {
+		                            string []
+		                            fontStyle FontStyle {
+		                                family      ["Verdana" "SERIF" "Arial"]
+		                                justify     ["MIDDLE"]
+		                                size        0.6
+		                            }
+		                        }
+		                        appearance Appearance {
+		                            material Material2D {
+		                                emissiveColor   0 0 1
+		                                filled          TRUE
+		                            }
+		                        }
+		                    }
+		                ]
+		                }
+		            ]
+		            }
+		                ]
+		            }
+		        ]
+		    }
+		    DEF AR_OBJECT_SCRIPT Script {
+		        field       SFNode  arObject                    USE AR_OBJECT
+		        field       SFNode  arObjectTouch               USE AR_OBJECT_TouchSensor
+		        field       SFNode  arObjectPos                 USE AR_OBJECT_TR
+		        field       SFNode      arObjDistanceString         USE AR_OBJECT_DISTANCE_STRING
+		        field       SFNode      arObjDistanceTranslation    USE AR_OBJECT_DISTANCE_TRANSLATION
+		        eventIn     SFString    setName         IS name
+		        eventIn     SFVec2f     setPosition     IS position
+		        eventIn     SFVec2f     setPlayerPos    IS playerPosition
+		        eventIn     SFBool      setVisible      IS visible
+		        eventIn     SFBool      setClickable    IS clickable
+		        eventIn     SFBool      arObjectClicked
+		        eventOut    SFString    onClick         IS onClick
+
+		        url ["javascript:
+		        function initialize() {
+		            playerPos       = new SFVec2f (0,0);
+		            objectPosition  = new SFVec2f (0,0);
+		            arObjectName    = 'notSet';
+		        }
+
+		        function setName(name) {
+		            if (name == '') return;
+		            arObjectName = name;
+		            print ('[ AR OBJECT - ' + arObjectName + ' ]: Set NAME to ' + name);
+		        }
+
+		        function setPosition(pos) {
+		            if (vec2fUndefined(pos)) return;
+		                    #   print ('[ AR OBJECT - ' + arObjectName + ' ]: Set POSITION: ' + pos);
+		            objectPosition = pos;
+		            setObjTranslation();
+		        }
+
+		        function setPlayerPos(pos) {
+		            if (vec2fUndefined(pos)) return;
+		            print ('[ AR OBJECT - ' + arObjectName + ' ]: Set PLAYER POSITION: ' + pos);
+		            playerPos = pos;
+		            setObjTranslation();
+		        }
+
+		        function setVisible(val) {
+		        #   if (vec2fUndefined(objectPosition)) return;
+		            if (val) {
+		                arObject.whichChoice = 0;
+		                print ('[ AR OBJECT - ' + arObjectName + ' ]: Set VISIBLE');
+		            }
+		            else {
+		                arObject.whichChoice = -1;
+		                print ('[ AR OBJECT - ' + arObjectName + ' ]: Set INVISIBLE');
+		            }
+		            setObjTranslation();
+		        }
+
+		        function setClickable(val) {
+		            if (val) {
+		                arObjectTouch.enabled = true;
+		                print ('[ AR OBJECT - ' + arObjectName + ' ]: Set CLICKABLE');
+		            }
+		            else {
+		                arObjectTouch.enabled = false;
+		                print ('[ AR OBJECT - ' + arObjectName + ' ]: Set UNCLICKABLE');
+		            }
+		        }
+
+		        function arObjectClicked(val) {
+		            if (val) {
+		                onClick = arObjectName;
+		            }
+		        }
+
+		        function setObjTranslation() {
+		            if (!arObjectIsVisible() || vec2fUndefined(playerPos) || vec2fUndefined(objectPosition)) return;
+		            tmpx = calcmetdistance(playerPos.x, playerPos.y, objectPosition.x, playerPos.y);
+		            tmpy = calcmetdistance(playerPos.x, playerPos.y, playerPos.x, objectPosition.y);
+
+		            if ( playerPos.x < objectPosition.x ) {
+		                tmpx = -tmpx;
+		            }
+		            if ( playerPos.y > objectPosition.y )
+		                tmpy = -tmpy;
+
+		            arObjectPos.translation = new SFVec3f ( tmpx, tmpy, -3 );
+		            print ('[ AR OBJECT - ' + arObjectName + ' ]: Set TRANSLATION: ' + arObjectPos.translation);
+		            setDistanceToPlayer();
+		        }
+
+		        function setDistanceToPlayer() {
+		            distance = haversine_m(objectPosition.x, objectPosition.y, playerPos.x, playerPos.y).toFixed();
+		            arObjDistanceString.string = new MFString(distance + ' m');
+		            print ('[ AR OBJECT - ' + arObjectName + ' ]: Set DISTANCE to PLAYER: ' + distance + ' m');
+		            arObjDistanceTranslation.rotation = new SFRotation( 0, 1, 0, markerPlayerAngle(objectPosition.x, objectPosition.y, playerPos.x, playerPos.y));
+		        }
+
+		        function markerPlayerAngle(markerLat, markerLong, playerLat, playerLong) {
+		            dy      = markerLat - playerLat;
+		            dx      = Math.cos(Math.PI/180*playerLat)*(markerLong - playerLong);
+		                    #   return Math.atan2(dy, dx)+1.57;
+		            return Math.atan2(dy, dx);
+		        }
+
+		        function arObjectIsVisible() {
+		            return arObject.whichChoice == 0;
+		        }
+
+		        function vec2fUndefined(pos) {
+		            return ((pos.x == 0) && (pos.y == 0));
+		        }
+
+		        function haversine_m(lat1, long1, lat2, long2) {
+		            d2r     = Math.PI / 180;
+		            d_latt  = (lat2 - lat1) * d2r;
+		            d_long  = (long2 - long1) * d2r;
+		            a       = Math.sin(d_latt/2)*Math.sin(d_latt/2) + Math.cos(lat1 * d2r) * Math.cos(lat2 * d2r) * Math.sin(d_long/2)*Math.sin(d_long/2);
+		            c       = 2 * Math.atan2(Math.sqrt(a),  Math.sqrt(1-a));
+		            return 6371 * 1000 * c;
+		        }
+
+		        function calcmetdistance(lat1, lon1, lat2, lon2) {
+		            R       = 6371000;
+		            lat1    *=Math.PI/180;
+		            lon1    *=Math.PI/180;
+		            lat2    *=Math.PI/180;
+		            lon2    *=Math.PI/180;
+		            d       = Math.acos (
+		                Math.sin(lat1)*Math.sin(lat2) +
+		                Math.cos(lat1)*Math.cos(lat2) *
+		                Math.cos(lon2-lon1)
+		            ) * R;
+		            return d;
+		        }
+		        "
+		        ]
+		    }
+		]
+	}
+
+    ROUTE AR_OBJECT_TS.fraction_changed     TO AR_OBJECT_SI.set_fraction
+    ROUTE AR_OBJECT_SI.value_changed        TO OBJECT.rotation
+    ROUTE AR_OBJECT_TouchSensor.isActive    TO AR_OBJECT_SCRIPT.arObjectClicked
+}
+
+PROTO AR_VIEW [
+    exposedField SFVec2f    translation     0 0
+exposedField SFVec2f    layerSize       480 800
+exposedField SFVec2f    rectangleSize   800 480
+exposedField SFVec3f    cameraTrans     0 0 -900
+exposedField MFNode     ar_objects      []
+eventIn      SFVec2f    setPlayerPosition
+eventIn      SFNode     addObject
+eventIn      SFBool     openCamera
+]
+{
+    Transform2D {
+    translation IS translation
+    children [
+        OrderedGroup {
+        children [
+            Group {
+            children [
+                Layer3D {
+                size IS layerSize
+                navigationInfo NavigationInfo {
+                    type ["NONE"]
+                }
+                viewpoint Viewpoint {
+                    jump FALSE
+                    description "AR View"
+                    position 0 0 0
+                    fieldOfView 0.78
+                }
+                children [
+                    Transform {
+                    rotation 0 0 1 -1.57
+                    translation IS cameraTrans
+                    children [
+                        Shape {
+                        appearance Appearance {
+                            texture DEF MT MovieTexture {
+                                url [""]
+                            }
+                            material Material2D {
+                                lineProps LineProperties {
+                                    width 0
+                                }
+                            }
+                        }
+                        geometry Rectangle {
+                            size IS rectangleSize
+                        }
+                    }
+                ]
+                }
+                DEF AR_TRANSFORM Transform {
+                #
+                # Tablet: rotation 0 0 1 3.14 # AR View displayed correct only while holding the tablet horizontally
+                                        # Phone: rotation 0 0 1 -1.57 # AR View works no matter how the phone device is hold
+                                        #
+                                        rotation 0 0 1 -1.57
+                    children [
+                        DEF OBJ_CONTAINER Transform {
+                        children IS ar_objects
+                    }
+
+                ]
+                }
+            ]
+            }
+        ]
+        }
+    ]
+    }
+]
+}
+    DEF SCRIPT Script {
+    eventIn SFVec3f     updateOrientation
+    eventIn SFVec2f     updatePlayerPos IS setPlayerPosition
+    eventIn SFNode      addARObject     IS addObject
+    eventIn SFBool      openCamera      IS openCamera
+    field   SFNode      movieTexture    USE MT
+    field   SFNode      objects         USE OBJ_CONTAINER
+    field   SFNode      arTransform     USE AR_TRANSFORM
+
+    url ["javascript:
+    function initialize() {
+        prevOrientation = new SFVec3f (0,0,0);
+        deviceOrientationPortrait = gpac.get_option('General', 'DeviceOrientationPortrait');
+        if (deviceOrientationPortrait == 1) {
+            arTransform.rotation = new SFRotation (0, 0, 1, -1.57);
+        }
+        else {
+            arTransform.rotation = new SFRotation (0, 0, 1, 3.14);
+        }
+    }
+
+    function openCamera(val) {
+        if (val) {
+            if (movieTexture.url[0] == '') {
+                movieTexture.url[0] = 'hw://camera';
+            }
+        }
+    }
+
+    function addARObject(arObjNode) {
+        if (arObjNode == null) return;
+        print ('[ AR VIEW ]: Add new AR Object instance to the AR View: ' + arObjNode.name);
+        objects.addChildren = new MFNode(arObjNode);
+    }
+
+    function updatePlayerPos(pos) {
+        if (pos.x == 0 && pos.y == 0) return;
+        print ('[ AR VIEW ]: UPDATE PLAYER POSITION: ' + pos);
+        for ( i = 0; i < objects.children.length; i++ ) {
+            objects.children[i].playerPosition = new SFVec2f (pos.x, pos.y);
+        }
+    }
+
+    function updateOrientation(rot)
+    {
+        if ( objects.children.length == 0 ) { return;}
+        if ((Math.abs(prevOrientation.x - rot.x) < 5) && (Math.abs(prevOrientation.y - rot.y) < 5) && (Math.abs(prevOrientation.z - rot.z) < 5)) return;
+
+        prevOrientation.x = rot.x;
+        prevOrientation.y = rot.y;
+        prevOrientation.z = rot.z;
+
+        Azimuth = rot.x;
+        Pitch   = rot.y;
+        Roll    = rot.z;
+        conv    = 3.14/180/2;
+        c1      = Math.cos(Azimuth  * conv);
+        s1      = Math.sin(Azimuth  * conv);
+        c2      = Math.cos(Pitch    * conv);
+        s2      = Math.sin(Pitch    * conv);
+        c3      = Math.cos(Roll     * conv);
+        s3      = Math.sin(Roll     * conv);
+
+        c1c2    = c1*c2;
+        s1s2    = s1*s2;
+
+        w       = c1c2*c3 - s1s2*s3;
+        x       = c1c2*s3 + s1s2*c3;
+        y       = s1*c2*c3 + c1*s2*s3;
+        z       = c1*s2*c3 - s1*c2*s3;
+
+        angle   = 2 * Math.acos(w);
+        norm    = x*x + y*y + z*z;
+
+        if ( norm < 0.001 ) {
+            x = 1;
+            y = z = 0;
+        }
+        else {
+            norm = Math.sqrt(norm);
+            x /= norm;
+            y /= norm;
+            z /= norm;
+        }
+        objects.rotation = new SFRotation( x, z, y, angle );
+    }
+    "
+    ]
+}
+    DEF ORIENT_SENS InputSensor {
+    url "4"
+    buffer {
+        REPLACE SCRIPT.updateOrientation BY 0 0 0
+    }
+}
+}
+
+PROTO PLAYER_PIECE [
+    exposedField SFVec2f rectangleTranslation   0 0
+exposedField SFVec2f rectangleSize      	5 5
+exposedField SFColor playerColor        	1 0 0
+exposedField SFFloat rotationAngle      	0.0
+]
+{
+    Transform2D {
+    translation     IS rectangleTranslation
+    rotationAngle   IS rotationAngle
+    children [
+        Shape {
+        appearance Appearance {
+            material Material2D {
+                emissiveColor IS playerColor
+                filled TRUE
+            }
+        }
+        geometry Rectangle {
+            size IS rectangleSize
+        }
+    }
+]
+}
+}
+
+PROTO MapPlayer [
+    exposedField    SFString    name                "playerName"
+exposedField    SFVec2f     position            0 0
+exposedField    SFBool      visible             TRUE
+exposedField    MFNode      playerShape         []
+eventIn         SFInt32     setMapZoomLevel
+eventIn         SFVec2f     setMapGPSCenter
+    # 'arrow_navigator': for testing -> use arrow navigator proto to change player position
+    # through the 'arrow_navigator' event (up, down, left, right mapped to 0, 1, 2, 3)
+eventIn         SFInt32     arrow_navigator
+]
+{
+
+    DEF PLAYER Transform2D {
+    children IS playerShape
+}
+
+    DEF UI_PLAYER_SCRIPT Script {
+    field       SFNode      player              USE PLAYER
+    field       SFVec2f 	playerPositionTest  PLAYER_POSITION
+    field		MFNode		playerNode 			IS playerShape
+    eventOut    SFVec2f     playerPosition      IS position
+    eventIn     SFVec2f 	setMapGPSCenter     IS setMapGPSCenter
+    eventIn     SFInt32 	updateMapZoomLevel  IS setMapZoomLevel
+        # 'arrow_navigator': for testing
+        eventIn     SFInt32 	arrow_navigator     IS arrow_navigator
+    eventIn     SFInt32     keyPress
+    eventIn     SFVec3f     updatePlayerGPSPosition
+
+    url ["javascript:
+    function initialize() {
+    # Equatorial radius (m)
+        eqRadius            = 6378137;
+        playerLat           = playerPositionTest.x;
+        playerLon           = playerPositionTest.y;
+        tileSize            = 256;
+        originShift         = 2 * Math.PI * eqRadius / 2.0;
+        initialResolution   = 2 * Math.PI * eqRadius / tileSize;
+        mapZoomLevel        = 19;
+        playerCoord         = new Array(0, 0);
+        mapCenterCoord      = new Array(0, 0);
+        mapGPSCenter        = new SFVec2f (0, 0);
+    }
+
+    function updatePlayerPosition() {
+    # update playerCoord and mapCenterCoord (if it's the case: the playerCoord or mapCenterCoord may be the same
+                # but compute it anyways just to be sure everything has been updated with the last values)
+        mapCenterCoord  = LatLonToPixels(mapGPSCenter.x, mapGPSCenter.y);
+        playerCoord     = LatLonToPixels(playerLat, playerLon);
+        updatePlayerPositionOnMap();
+    }
+
+    function updatePlayerGPSPosition(gps) {
+        print ('[ PLAYER ]: UPDATE PLAYER GPS POSITION: (Latitude: ' + gps.y + '), (Longitude: ' + gps.x + ')');
+        setPlayerMarkerGreen();
+        playerLat = gps.y;
+        playerLon = gps.x;
+        playerPosition = new SFVec2f (playerLat, playerLon);
+        playerCoord     = LatLonToPixels(playerLat, playerLon);
+        updatePlayerPositionOnMap();
+    }
+
+    function setPlayerMarkerGreen() {
+        playerNode[0].children[0].playerColor = new SFColor (0,1,0);
+        playerNode[0].children[1].playerColor = new SFColor (0,1,0);
+        playerNode[0].children[2].playerColor = new SFColor (0,1,0);
+        playerNode[0].children[3].playerColor = new SFColor (0,1,0);
+    }
+
+    function updateMapZoomLevel(mapZoom) {
+        print ('[ PLAYER ]: SET MAP ZOOM LEVEL: ' + mapZoom);
+        mapZoomLevel = mapZoom;
+        updatePlayerPosition();
+    }
+
+    function setMapGPSCenter(mapGPS) {
+        if (mapGPS.x == 0 && mapGPS.y ==0) return;
+        print ('[ PLAYER ]: SET MAP GPS CENTER: ' + mapGPS);
+        mapGPSCenter    = new SFVec2f (mapGPS.x, mapGPS.y);
+        updatePlayerPosition();
+    }
+
+    function keyPress(value)
+    {
+        if (value == 0) return;
+        playerCoord = LatLonToPixels(playerLat, playerLon);
+        switch (value)
+        {
+            # Right Key
+            case 68:
+            {
+                player.translation.x += 8;
+                playerCoord[0] += 8;
+                break;
+            }
+                    # Left Key
+            case 65:
+            {
+                player.translation.x -= 8;
+                playerCoord[0] -= 8;
+                break;
+            }
+                    # Up Key
+            case 87:
+            {
+                player.translation.y += 8;
+                playerCoord[1] += 8;
+                break;
+            }
+                    # Down Key
+            case 83:
+            {
+                player.translation.y -= 8;
+                playerCoord[1] -= 8;
+                break;
+            }
+        }
+        playerPositionArr = PixelsToLatLon(playerCoord[0], playerCoord[1]);
+        playerLat = playerPositionArr[0];
+        playerLon = playerPositionArr[1];
+        playerPosition = new SFVec2f (playerPositionArr[0], playerPositionArr[1]);
+    }
+
+    function updatePlayerPositionOnMap() {
+    # if playerCoord OR mapCenterCoord has not been set yet, return
+        if ((playerCoord[0] == Number.POSITIVE_INFINITY && playerCoord[1] == Number.POSITIVE_INFINITY) ||
+            (mapCenterCoord[0] == Number.POSITIVE_INFINITY && mapCenterCoord[1] == Number.POSITIVE_INFINITY)) {
+            return;
+        }
+        player.translation  = new SFVec2f (playerCoord[0] - mapCenterCoord[0], playerCoord[1] - mapCenterCoord[1]);
+        print ('[ PLAYER ]: SET NEW TRANSLATION ON MAP: ' + player.translation);
+    }
+
+            # testing: keyboard arrows "wrapper"
+    function arrow_navigator(direction) {
+        print ('[ PLAYER ]: MOVE PLAYER: ' + direction);
+        if (direction == -1) return;
+                # up
+        if (direction == 0) {
+            keyPress(87);
+        }
+                # down
+    else if (direction == 1) {
+            keyPress(83);
+        }
+                # left
+    else if (direction == 2) {
+            keyPress(65);
+        }
+                # right
+    else if (direction == 3) {
+            keyPress(68);
+        }
+        return;
+    }
+
+    function LatLonToPixels(lat, lon) {
+        ll2p    = LatLonToMeters(lat, lon);
+        m2p     = MetersToPixels(ll2p[0], ll2p[1]);
+        return new Array(m2p[0], m2p[1]);
+    }
+    function LatLonToMeters(lat, lon) {
+        mx      = lon * originShift / 180.0;
+        my      = Math.log( Math.tan((90 + lat) * Math.PI / 360.0 )) / (Math.PI / 180.0);
+        my      = my * originShift / 180.0;
+        return new Array(mx, my);
+    }
+    function MetersToPixels(mx, my) {
+        res     = Resolution();
+        px      = (mx + originShift) / res;
+        py      = (my + originShift) / res;
+        return new Array(px, py);
+    }
+    function PixelsToLatLon(px, py) {
+        mp2m    = PixelsToMeters(px, py);
+        mmtll   = MetersToLatLon(mp2m[0], mp2m[1]);
+        return new Array(mmtll[0], mmtll[1]);
+    }
+    function MetersToLatLon(mx, my ) {
+        lon     = (mx / originShift) * 180.0;
+        lat     = (my / originShift) * 180.0;
+        lat     = 180 / Math.PI * (2 * Math.atan( Math.exp( lat * Math.PI / 180.0)) - Math.PI / 2.0);
+        return new Array(lat, lon);
+    }
+    function PixelsToMeters(px, py) {
+        res     = Resolution();
+        mx      = px * res - originShift;
+        my      = py * res - originShift;
+        return new Array(mx, my);
+    }
+    function Resolution() {
+        return initialResolution / (Math.pow(2,mapZoomLevel));
+    }
+    "
+    ]
+}
+    DEF UI_MAP_KEY_SENS InputSensor {
+    url "1"
+    buffer {
+        REPLACE UI_PLAYER_SCRIPT.keyPress BY 0
+    }
+}
+    DEF UI_PLAYER_GPS_SENS InputSensor {
+    url "5"
+    buffer {
+        REPLACE UI_PLAYER_SCRIPT.updatePlayerGPSPosition BY 0 0 0
+    }
+}
+}
+
+PROTO MapOverlay [
+    exposedField    SFString    name        ""
+exposedField    SFBool      visible     TRUE
+exposedField    SFBool      enabled     TRUE
+exposedField    SFBool      clickable   TRUE
+exposedField    MFNode      children    []
+exposedField    MFString    keywords    [""]
+eventIn         MFNode      addOverlayItems
+eventIn         MFNode      removeOverlayItems
+]
+{
+    DEF MapOverlaySW Switch {
+    whichChoice 0
+    choice [
+        DEF MapOverlayOG OrderedGroup {
+        children IS children
+    }
+]
+}
+
+    DEF UI_MapOverlay_SCRIPT Script {
+    field SFNode og     USE MapOverlayOG
+    field SFNode sw USE MapOverlaySW
+        #
+# DO NOT CHANGE THE ORDER OF THE INPUT EVENTS!
+        # 'name' should be first in the eventIn list
+        #
+        eventIn SFString    setOverlayName      IS name
+    eventIn SFBool  setVisible          IS visible
+    eventIn SFBool      setClickable        IS clickable
+    eventIn SFBool      setEnable           IS enabled
+    eventIn MFNode  addOverlayItems     IS addOverlayItems
+    eventIn MFNode  removeOverlayItems  IS removeOverlayItems
+
+    url ["
+    javascript:
+        function initialize() {
+            mapOverlayName  = 'mo_'+Math.random().toString(36).substr(2, 5);
+        }
+
+    function setOverlayName(name) {
+        if (name == '') return;
+        print ('[ MapOverlay ] - ' + mapOverlayName + ': UPDATE NAME to ' + name);
+        mapOverlayName  = name;
+    }
+
+    function setEnable(val) {
+        if (val) {
+            for (i = 0; i < og.children.length; i++) {
+                og.children[i].enabled = true;
+            }
+            print ('[ MapOverlay ] - ' + mapOverlayName + ': SET ENABLE ');
+        }
+        else {
+            for (i = 0; i < og.children.length; i++) {
+                og.children[i].enabled = false;
+            }
+            print ('[ MapOverlay ] - ' + mapOverlayName + ': SET DISABLE ');
+        }
+        isEnabled = val;
+    }
+
+    function setVisible(val) {
+        if (val) {
+            print ('[ MapOverlay ] - ' + mapOverlayName + ': SET VISIBLE');
+                    #   sw.whichChoice = 0;
+            for (i = 0; i < og.children.length; i++) {
+                og.children[i].visible = true;
+            }
+        }
+        else {
+            print ('[ MapOverlay ] - ' + mapOverlayName + ': SET INVISIBLE');
+                    #   sw.whichChoice = -1;
+            for (i = 0; i < og.children.length; i++) {
+                og.children[i].visible = false;
+            }
+        }
+        isVisible = val;
+    }
+
+    function setClickable(val) {
+        if (val) {
+            for (i = 0; i < og.children.length; i++) {
+                og.children[i].clickable = true;
+            }
+            enabled = true;
+            print ('[ MapOverlay ] - ' + mapOverlayName + ': SET CLICKABLE');
+        }
+        else {
+            for (i = 0; i < og.children.length; i++) {
+                og.children[i].clickable = false;
+            }
+            enabled = false;
+            print ('[ MapOverlay ] - ' + mapOverlayName + ': SET UNCLICKABLE');
+        }
+        isClickable = val;
+    }
+
+    function addOverlayItems(marker) {
+        if (marker == null) return;
+        if (marker.length == 0) return;
+        og.addChildren  = new MFNode(marker[0]);
+        print ('[ MapOverlay ] - ' + mapOverlayName + ': ADD new overlay item \\"' +  marker[0].name + '\\"');
+    }
+
+    function removeOverlayItems(marker) {
+        if (marker == null) return;
+        if (marker.length == 0) return;
+        for (i = 0; i < og.children.length; i++) {
+            if (og.children[i].name == marker.name) {
+                og.removeChildren = new MFNode(og.children[i]);
+                print ('[ MapOverlay ] - ' + mapOverlayName + ': REMOVE overlay item \\"' + marker.name + '\\"');
+                return;
+            }
+        }
+        print ('[ MapOverlay ] - ' + mapOverlayName + ': COULD NOT FIND Overlay item \\"' + marker.name + '\\"!');
+    }
+    "
+    ]
+}
+}
+
+PROTO MAP_TILE [
+    exposedField SFVec2f    tileTranslation     0 0
+exposedField MFString   tileURL             [""]
+exposedField SFVec2f    tileCenterCoord     0 0
+exposedField SFVec2f    tileSize            256 256
+]
+{
+    Transform2D {
+    translation IS tileTranslation
+    children [
+        Shape {
+        appearance Appearance {
+            texture ImageTexture {
+                url IS tileURL
+            }
+            material Material2D {
+                emissiveColor   0 0 0
+                filled          true
+                lineProps LineProperties {
+                    width 0
+                }
+            }
+        }
+        geometry Rectangle {
+            size IS tileSize
+        }
+    }
+]
+}
+}
+
+PROTO MAP [
+    exposedField SFString   name                ""
+exposedField SFVec2f    mapTranslation      0 0
+exposedField SFVec2f    mapSize             768 768
+exposedField SFVec2f    mapLayoutSize       768 768
+exposedField SFVec2f    mapGPSCenter        0 0
+exposedField SFInt32    zoomLevel           18
+exposedField MFNode     overlays            []
+exposedField MFString   mode                ["SATELLITE"]
+exposedField MFString   provider            ["GOOGLE"]
+eventIn     MFNode      addOverlays
+eventIn     MFNode      removeOverlays
+eventIn     SFBool      zoomIn
+eventIn     SFBool      zoomOut
+]
+{
+    Transform2D {
+    children [
+        Transform2D {
+        children [
+            DEF UI_MAP_TS TouchSensor {}
+        DEF UI_MAP_LAY_ITEMS_VIEW Layer2D {
+            viewport DEF UI_MAP_MAP_VIEW Viewport {
+                alignment [0 0]
+                fit 1
+            }
+            size IS mapLayoutSize
+            children [
+                Background2D {
+                backColor 0 0 0
+            }
+            DEF UI_MAP_CONTAINER Transform2D {
+                translation IS mapTranslation
+                children [
+                    DEF UI_MAP_TILE_CONTAINER Transform2D {
+                    children []
+                }
+                DEF UI_MAP_MAP_OVERLAYS Transform2D {
+                    children IS overlays
+                }
+            ]
+            }
+        ]
+        }
+    ]
+    }
+    DEF UI_MAP_ZOOM_BUTTONS Transform2D {
+        children [
+            DEF UI_MAP_BTN_ZOOM_IN BUTTON {
+            translation 200 320
+            size            70 70
+            backImage   "30"
+            overImage   "32"
+        }
+        DEF UI_MAP_BTN_ZOOM_OUT BUTTON {
+            translation -200 320
+            size            70 70
+            backImage   "31"
+            overImage   "33"
+        }
+    ]
+    }
+]
+}
+    DEF INITIALIZE_TS TimeSensor {
+    cycleInterval 1
+    loop false
+    enabled TRUE
+}
+    DEF UI_MAP_SCRIPT Script {
+    field   SFNode  script              USE UI_MAP_SCRIPT
+    field   SFNode  zoomInBtn           USE UI_MAP_BTN_ZOOM_IN
+    field   SFNode  zoomOutBtn          USE UI_MAP_BTN_ZOOM_OUT
+    field   SFNode  tileContainer       USE UI_MAP_TILE_CONTAINER
+    field   SFNode  mapContainer        USE UI_MAP_CONTAINER
+    field   SFNode  overlayContainer    USE UI_MAP_MAP_OVERLAYS
+    field  SFString mapName             IS name
+    field   SFBool  mapTouched          false
+    field   SFInt32     down_x              -10000
+    field   SFInt32     down_y              -1
+    field   SFBool  scrolling           false
+    field   SFBool      initialized         false
+    eventIn SFVec2f     set_coord
+    eventIn SFBool  ZoomIn
+    eventIn SFBool  ZoomOut
+    eventIn SFBool  OnActive
+    eventIn MFNode  addOverlays         IS addOverlays
+    eventIn MFNode      removeOverlays      IS removeOverlays
+    eventIn SFInt32     setZoomLevel        IS zoomLevel
+    eventIn SFVec2f     setMapGPSCenter     IS mapGPSCenter
+    eventIn SFVec2f     setMapTranslation   IS mapTranslation
+    eventIn SFVec2f     setMapSize          IS mapSize
+    eventIn SFTime      mapPropertiesInit
+    eventOut SFVec2f    mapGPSCenter        IS mapGPSCenter
+    eventOut SFInt32    zoomLevel           IS zoomLevel
+    eventOut SFVec2f    mapTranslation      IS mapTranslation
+    eventOut SFVec2f    js_mapSize              IS mapSize
+
+    url ["javascript:
+    function initialize() {
+    # Equatorial radius (m)
+        eqRadius            = 6378137;
+        tiles               = new Array();
+        tilesNr             = 9;
+        tileSize            = 256;
+        originShift         = 2 * Math.PI * eqRadius / 2.0;
+        initialResolution   = 2 * Math.PI * eqRadius / tileSize;
+        magicShift          = 256;
+                # https://developers.google.com/maps/documentation/javascript/maptypes#WorldCoordinates
+            googleMercator      = 256;
+        addMap2OverlayItemRoutes(false);
+        addPlayerMarkerRoutes();
+    }
+
+            # the function is triggered by a timesensor
+            # its purpose is to RE SET the eventIn (reinitialize them with the same values that were already set)
+# in order for the routes to recieve the correct values of the "mapSize", "mapZoom" and "mapGPSCenter"
+            # which are created AFTER the corresponding eventIns are set => the new values are not routed
+    function mapPropertiesInit() {
+        print ('[ MAP ]: REINITILIZE MAP PROPERTIES');
+        setMapTranslation(mapTranslation);
+        setMapSize(js_mapSize);
+        setZoomLevel(zoomLevel);
+        setMapGPSCenter(mapGPSCenter);
+    }
+
+    function setMapTranslation(mapTrans) {
+        print ('[ MAP TRANSLATION ]: SET MAP TRANSLATION: ' + mapTrans);
+        mapTranslation = new SFVec2f (mapTrans.x, mapTrans.y);
+    }
+
+    function setMapSize(mSize) {
+        if (mSize.x == 0 || mSize.y == 0) return;
+        print ('[ MAP SIZE ]: SET MAP SIZE: ' + mSize);
+        js_mapSize = mSize;
+
+        if (js_mapSize.y >= js_mapSize.x) {
+            tileSize        = Math.floor(js_mapSize.y/3);
+            magicShift      = Math.pow(js_mapSize.y, 2) / (googleMercator * tilesNr);
+        }
+        else {
+            tileSize        = Math.floor(js_mapSize.x/3);
+            magicShift      = Math.pow(js_mapSize.x, 2) / (googleMercator * tilesNr);
+        }
+        initialResolution   = 2 * Math.PI * eqRadius / tileSize;
+    }
+
+    function setMapGPSCenter(gpsCenter) {
+        if (gpsCenter.x == 0 && gpsCenter.y == 0) {
+            return;
+        }
+        print ('[ MAP GPS ]: SET MAP GPS CENTER: ' + gpsCenter);
+        mapGPSCenter = new SFVec2f (gpsCenter.x, gpsCenter.y);
+        addTileContainers();
+    }
+
+    function setZoomLevel(lvl) {
+        print ('[ MAP ZOOM ]: Set ZOOM LEVEL ' + lvl);
+        zoomLevel   = lvl;
+    }
+
+    function addOverlays(ovrls) {
+        if (typeof(ovrls) == 'undefined') return;
+        if (ovrls.length == 0 ) return;
+        for (ovrls_idx = 0; ovrls_idx < ovrls.length; ovrls_idx++) {
+            overlayContainer.addChildren = new MFNode(ovrls[ovrls_idx]);
+            print ('[ MAP ]: New overlay added: ' + ovrls[ovrls_idx].name);
+            addMapOverlayRoutes(ovrls[ovrls_idx]);
+            addPlayerMarkerRoutes();
+        }
+    }
+
+            # if the 'anOveralay' parameter is empty, add map routes to
+            # all existing overlays (all the existing items)
+# OR add map routes to a specific overlay if the parameter is specified
+    function addMap2OverlayItemRoutes(anOveralay) {
+        if (!anOveralay) {
+            for (i = 0; i < overlayContainer.children.length; i++) {
+                addMapOverlayRoutes(overlayContainer.children[i]);
+            }
+        }
+        else {
+            addMapOverlayRoutes(anOveralay);
+        }
+    }
+
+            # add MAP Routes to a specific OVERLAY (all its items)
+    function addMapOverlayRoutes(overlayY) {
+        print ('[ MAP ]: Add MAP-OVERLAY Routes for Overlay: ' + overlayY.name);
+        for (j = 0; j < overlayY.children.length; j++) {
+            marker = overlayY.children[j];
+            Browser.addRoute(script, 'mapGPSCenter',    marker, 'setMapGPSCenter');
+            Browser.addRoute(script, 'zoomLevel',       marker, 'setMapZoomLevel');
+            print ('[ MAP ]: MAP routes (GPS, ZOOM, SIZE) to MARKER ' + marker.name + ' has been added.');
+        }
+    }
+
+    function addTileContainers() {
+        for ( i = 0; i < 3; i++ ) {
+            tiles[i] = new Array();
+            for ( j = 0; j < 3; j++ ) {
+                tiles[i][j]                     = new SFNode ('MAP_TILE');
+                tiles[i][j].tileSize            = new SFVec2f (tileSize, tileSize);
+                tiles[i][j].tileTranslation.x   = (i-1) * tileSize;
+                tiles[i][j].tileTranslation.y   = (j-1) * tileSize;
+                tileContainer.children[i*3+j]   = tiles[i][j];
+            }
+        }
+        calcTilesUrl(mapGPSCenter);
+    }
+
+    function addPlayerMarkerRoutes() {
+        print ('[ MAP ]: Trying to add PLAYER-MARKERS ROUTES...');
+        playerNode = findPlayer();
+        if (!playerNode) return;
+        addPlayerRoute4EachOveralyItem(playerNode);
+    }
+
+    function findPlayer() {
+    # search for the player overlay (should have a marker "player" attached)
+        for (i = 0; i < overlayContainer.children.length; i++) {
+        # found the overlay of the player
+            if (overlayContainer.children[i].name == 'player_overlay') {
+                print ('[ MAP - OVERLAY ]: The PLAYER OVERLAY has been found. Searching for the player marker...');
+                        # check if it has one and only one children
+                if (overlayContainer.children[i].children[0].name != 'player') {
+                    print ('[ MAP - MARKER ]: THE FIRST MARKER OF THE PLAYER OVERLAY IS NOT player.');
+                }
+                else {
+                    print ('[ MAP - MARKER ]: player marker has been found.');
+                    playerItem = overlayContainer.children[i].children[0];
+                    return playerItem;
+                }
+            }
+        }
+        print ('[ MAP - OVERLAY ]: PLAYER OVERLAY NOT FOUND. The player has not been added yet.');
+        return false;
+    }
+
+    function addPlayerRoute4EachOveralyItem(playerNode) {
+        print ('[ MAP ]: Adding PLAYER-MARKER Routes...');
+        for (i = 0; i < overlayContainer.children.length; i++) {
+            currentOverlay = overlayContainer.children[i];
+            if (currentOverlay.name == 'player') {
+                continue;
+            }
+            print ('[ MAP ]: Adding PLAYER-MARKER Routes for OVERLAY ' + currentOverlay.name);
+            for (j = 0; j < currentOverlay.children.length; j++) {
+                marker = currentOverlay.children[j];
+                Browser.addRoute(playerNode, 'position',    marker, 'setPlayerGPS');
+                print ('[ MAP ]: Adding PLAYER-MARKER Routes for marker ' + marker.name);
+            }
+        }
+    }
+
+    function calcTilesCoords(center) {
+    #   Get pixel coordinates of the current map center
+        m2p         = LatLonToPixels(center[0], center[1], zoomLevel);
+                #   Compute the lat, lon of the bottom left and top right tiles.
+                #   The coordinates for the middle tile are already known (map center)
+    #   therefore combining these coordinates will provide the gps coord
+                #   for all the tiles.
+            coordTR     = PixelsToLatLon(m2p[0]+magicShift, m2p[1]+magicShift, zoomLevel);
+        coordBL     = PixelsToLatLon(m2p[0]-magicShift, m2p[1]-magicShift, zoomLevel);
+                #   Add the coordinates to an array:
+            #       - 3 lat coords
+                #       - 3 lon coords
+        coord       = new Array();
+        coord[0]    = coordBL[0];
+        coord[1]    = center[0];
+        coord[2]    = coordTR[0];
+        coord[3+0]  = coordBL[1];
+        coord[3+1]  = center[1];
+        coord[3+2]  = coordTR[1];
+        return coord;
+    }
+
+            #   Request a google map of tileSize X tileSize from (x,y) lat lon coord
+            #   and fill the corresponding tile with the image result
+    function setTileCoord(i, j, lat, lon) {
+        print ('[ Google ] Getting images...');
+        tiles[j][i].tileURL[0]      = 'http://maps.google.com/maps/api/staticmap?center='
+            + lat + ',' + lon
+            + '&zoom=' + zoomLevel
+            + '&size=' + tileSize + 'x' + tileSize
+            + '&maptype=satellite&sensor=true&format=jpg';
+        tiles[j][i].tileCenterCoord[0]  = lat;
+        tiles[j][i].tileCenterCoord[1]  = lon;
+    }
+
+            #   Iterate the tiles and set the corresponding image for each of them
+        function calcTilesUrl(center) {
+            coord = calcTilesCoords(center);
+            for ( i =0; i < 3; i++ ) {
+                for ( j = 0; j < 3; j++ ) {
+                    setTileCoord( i, j, coord[i], coord[3+j] );
+                }
+            }
+        }
+
+    function OnActive(value) {
+        mapTouched = value;
+    }
+
+    function ZoomIn(value) {
+        if ( zoomLevel < 21 ) {
+            zoomLevel++;
+            mapGPSCenter = tiles[1][1].tileCenterCoord;
+            calcTilesUrl(mapGPSCenter);
+            resetMapOverlayTranslation();
+        }
+    }
+
+    function ZoomOut(value) {
+        if ( zoomLevel > 1 ) {
+            zoomLevel--;
+            mapGPSCenter = tiles[1][1].tileCenterCoord;
+            calcTilesUrl(mapGPSCenter);
+            resetMapOverlayTranslation();
+        }
+    }
+
+    function resetMapOverlayTranslation() {
+        overlayContainer.translation.y = 0;
+        overlayContainer.translation.x = 0;
+    }
+
+    function swapPos(xx, yy) {
+        t   = xx.x;
+        xx.x = yy.x;
+        yy.x = t;
+        t   = xx.y;
+        xx.y = yy.y;
+        yy.y = t;
+    }
+
+    function swapTiles(x1, y1, x2, y2) {
+        t               = tiles[x1][y1];
+        tiles[x1][y1]   = tiles[x2][y2];
+        tiles[x2][y2]   = t;
+    }
+
+    function shiftLeft() {
+        for ( i = 0; i < 3; i++ )
+        {
+            swapTiles(1, i, 2, i);
+            swapTiles(0, i, 1, i);
+
+            swapPos(tiles[0][i].tileTranslation, tiles[1][i].tileTranslation);
+            swapPos(tiles[1][i].tileTranslation, tiles[2][i].tileTranslation);
+        }
+
+        coord           = calcTilesCoords(mapGPSCenter);
+        setTileCoord( 0, 0, coord[0], coord[3+0]) ;
+        setTileCoord( 1, 0, coord[1], coord[3+0]) ;
+        setTileCoord( 2, 0, coord[2], coord[3+0]) ;
+        overlayContainer.translation.x  += tileSize;
+    }
+
+    function shiftRight() {
+        for ( i = 0; i < 3; i++ )
+        {
+            swapTiles(0, i, 1, i);
+            swapTiles(1, i, 2, i);
+
+            swapPos(tiles[1][i].tileTranslation, tiles[2][i].tileTranslation);
+            swapPos(tiles[0][i].tileTranslation, tiles[1][i].tileTranslation);
+        }
+
+        coord           = calcTilesCoords(mapGPSCenter);
+        setTileCoord( 0, 2, coord[0], coord[3+2]) ;
+        setTileCoord( 1, 2, coord[1], coord[3+2]) ;
+        setTileCoord( 2, 2, coord[2], coord[3+2]) ;
+        overlayContainer.translation.x  -= tileSize;
+    }
+
+    function shiftUp() {
+        for ( i = 0; i < 3; i++ )
+        {
+            swapTiles(i, 0, i, 1);
+            swapTiles(i, 1, i, 2);
+
+            swapPos(tiles[i][1].tileTranslation, tiles[i][2].tileTranslation);
+            swapPos(tiles[i][0].tileTranslation, tiles[i][1].tileTranslation);
+        }
+        coord           = calcTilesCoords(mapGPSCenter);
+        setTileCoord( 2, 0, coord[2], coord[3+0]) ;
+        setTileCoord( 2, 1, coord[2], coord[3+1]) ;
+        setTileCoord( 2, 2, coord[2], coord[3+2]) ;
+        overlayContainer.translation.y  -= tileSize;
+    }
+
+    function shiftDown() {
+        for ( i = 0; i < 3; i++ )
+        {
+            swapTiles(i, 1, i, 2);
+            swapTiles(i, 0, i, 1);
+
+            swapPos(tiles[i][0].tileTranslation, tiles[i][1].tileTranslation);
+            swapPos(tiles[i][1].tileTranslation, tiles[i][2].tileTranslation);
+        }
+
+        coord           = calcTilesCoords(mapGPSCenter);
+        setTileCoord( 0, 0, coord[0], coord[3+0]) ;
+        setTileCoord( 0, 1, coord[0], coord[3+1]) ;
+        setTileCoord( 0, 2, coord[0], coord[3+2]) ;
+        overlayContainer.translation.y  += tileSize;
+    }
+
+    function Scroll(diffx, diffy) {
+    #
+    # Calculate the offset of the new mapGPSCenter (latitude, longitude)
+                #
+                mapContainer.translation.x  -= diffx;
+        mapContainer.translation.y  -= diffy;
+        mapTranslation = new SFVec2f (mapContainer.translation.x, mapContainer.translation.y);
+
+        if (mapContainer.translation.x > tileSize) {
+            mapContainer.translation.x  -= tileSize;
+            down_x                      -= tileSize;
+
+            m2p                         = LatLonToPixels(mapGPSCenter[0], mapGPSCenter[1], zoomLevel);
+            mapGPSCenter        = PixelsToLatLon(m2p[0]-magicShift, m2p[1]+0, zoomLevel);
+            shiftLeft();
+        }
+        else
+        if (mapContainer.translation.x < -tileSize) {
+            mapContainer.translation.x  += tileSize;
+            down_x                      += tileSize;
+
+            m2p                         = LatLonToPixels(mapGPSCenter[0], mapGPSCenter[1], zoomLevel);
+            mapGPSCenter                = PixelsToLatLon(m2p[0]+magicShift, m2p[1]-0, zoomLevel);
+            shiftRight();
+        }
+
+        if (mapContainer.translation.y > tileSize) {
+            mapContainer.translation.y  -= tileSize;
+            down_y                      -= tileSize;
+
+            m2p                         = LatLonToPixels(mapGPSCenter[0], mapGPSCenter[1], zoomLevel);
+            mapGPSCenter                = PixelsToLatLon(m2p[0]-0, m2p[1]-magicShift, zoomLevel);
+            shiftDown();
+        }
+        else
+        if (mapContainer.translation.y < -tileSize) {
+            print ('mapContainer.translation.y = ' + mapContainer.translation.y);
+            mapContainer.translation.y  += tileSize;
+            down_y                      += tileSize;
+
+            m2p                         = LatLonToPixels(mapGPSCenter[0], mapGPSCenter[1], zoomLevel);
+            mapGPSCenter                = PixelsToLatLon(m2p[0]+0, m2p[1]+magicShift, zoomLevel);
+            shiftUp();
+        }
+    }
+
+    function set_coord(val) {
+        m_x = val.x | 0;
+        m_y = val.y | 0;
+        if ( mapTouched ) {
+            if (down_x == -10000) {
+                down_x  = m_x;
+                down_y  = m_y;
+            }
+            diffx = down_x - m_x;
+            diffy = down_y - m_y;
+            if ( !scrolling ) {
+                scrolling = true;
+            }
+            if (scrolling) {
+                Scroll(diffx, diffy);
+                down_x  = m_x;
+                down_y  = m_y;
+            }
+        }
+        else {
+            down_x      = -10000;
+            scrolling   = false;
+        }
+    }
+
+    function LatLonToMeters(lat, lon ) {
+        mx      = lon * originShift / 180.0;
+        my      = Math.log( Math.tan((90 + lat) * Math.PI / 360.0 )) / (Math.PI / 180.0);
+        my      = my * originShift / 180.0;
+        return new Array(mx, my);
+    }
+    function LatLonToPixels(lat, lon) {
+        ll2p    = LatLonToMeters(lat, lon);
+        m2p     = MetersToPixels(ll2p[0], ll2p[1]);
+        return new Array(m2p[0], m2p[1]);
+    }
+    function MetersToLatLon(mx, my ) {
+        lon     = (mx / originShift) * 180.0;
+        lat     = (my / originShift) * 180.0;
+        lat     = 180 / Math.PI * (2 * Math.atan( Math.exp( lat * Math.PI / 180.0)) - Math.PI / 2.0);
+        return new Array(lat, lon);
+    }
+    function PixelsToLatLon(px, py) {
+        mp2m    = PixelsToMeters(px, py);
+        mmtll   = MetersToLatLon(mp2m[0], mp2m[1]);
+        return new Array(mmtll[0], mmtll[1]);
+    }
+    function PixelsToMeters(px, py) {
+        res     = Resolution();
+        mx      = px * res - originShift;
+        my      = py * res - originShift;
+        return new Array(mx, my);
+    }
+    function MetersToPixels(mx, my) {
+        res     = Resolution();
+        px      = (mx + originShift) / res;
+        py      = (my + originShift) / res;
+        return new Array(px, py);
+    }
+    function Resolution() {
+        return initialResolution / (Math.pow(2,zoomLevel));
+    }
+
+    "
+    ]
+}
+
+    DEF UI_MAP_MOUSE_SENS InputSensor {
+    url "2"
+    buffer {
+        REPLACE UI_MAP_SCRIPT.set_coord     BY 0 0
+    }
+}
+    ROUTE UI_MAP_TS.isActive            TO UI_MAP_SCRIPT.OnActive
+    ROUTE UI_MAP_BTN_ZOOM_IN.onClick    TO UI_MAP_SCRIPT.ZoomIn
+    ROUTE UI_MAP_BTN_ZOOM_OUT.onClick   TO UI_MAP_SCRIPT.ZoomOut
+    ROUTE INITIALIZE_TS.cycleTime       TO UI_MAP_SCRIPT.mapPropertiesInit
+}
+
+PROTO MapMarker [
+    exposedField SFString   name            ""
+exposedField SFVec2f    position        0 0
+exposedField SFFloat    radius          0
+exposedField SFBool     clickable       TRUE
+exposedField SFBool     visible         TRUE
+exposedField SFBool     enabled         TRUE
+exposedField MFNode     markerShape     []
+eventIn     SFBool      doClick
+eventIn     SFVec2f     setPlayerGPS
+eventIn     SFVec2f     setMapGPSCenter
+eventIn     SFInt32     setMapZoomLevel
+eventOut    SFBool      onClick
+eventOut    SFString    onPlayerAround
+eventOut    SFString    onPlayerLeft
+]
+{
+    DEF MARKER_SW Switch {
+    whichChoice 0
+    choice [
+        Transform2D {
+        children [
+            DEF TS TouchSensor {}
+        DEF MARKER_NODE Transform2D {
+            translation 0 0
+            children IS markerShape
+        }
+    ]
+    }
+]
+}
+
+    DEF UI_MARKER_SCRIPT Script {
+    field       SFNode  script              USE UI_MARKER_SCRIPT
+    field       SFNode  main_sw             USE MARKER_SW
+    field       SFNode  markerNode          USE MARKER_NODE
+    field       SFNode      ts                  USE TS
+        #
+# DO NOT CHANGE THE ORDER OF THE INPUT EVENTS!
+        # 'name' should be first in the eventIn list
+        #
+        eventIn     SFString    setName             IS name
+    eventIn     SFVec2f     setPosition         IS position
+    eventIn     SFFloat     setRadius           IS radius
+    eventIn     SFBool      setVisible          IS visible
+    eventIn     SFBool      setClickable        IS clickable
+    eventIn     SFBool      setEnable           IS enabled
+    eventIn     MFNode      setMarkerShape      IS markerShape
+    eventIn     SFInt32     updateZoomLevel     IS setMapZoomLevel
+    eventIn     SFVec2f     updateMapGPSCenter  IS setMapGPSCenter
+    eventIn     SFVec2f     updatePlayerGPS     IS setPlayerGPS
+    eventIn     SFBool      fakeClick           IS doClick
+    eventIn     SFBool      clicked
+    eventOut    SFBool      onClick             IS onClick
+    eventOut    SFString    playerAround        IS onPlayerAround
+    eventOut    SFString    playerLeft          IS onPlayerLeft
+
+    url ["
+    javascript:
+
+        function initialize() {
+        # Equatorial radius (m)
+            eqRadius            = 6378137;
+            tileSize            = 256;
+            playerAround        = false;
+            originShift         = 2 * Math.PI * eqRadius / 2.0;
+            initialResolution   = 2 * Math.PI * eqRadius / tileSize;
+            mapGPSCenter        = new SFVec2f ();
+            mapZoomLevel        = 0;
+            isEnabled           = false;
+            isClickable         = false;
+            isVisible           = false;
+            markerName          = 'm_'+Math.random().toString(36).substr(2, 5);
+            markerPos           = new SFVec2f ();
+            markerRadius        = 0;
+        }
+
+    function fakeClick(val) {
+        clicked(val);
+    }
+
+    function setMarkerPositionOnMap() {
+        if (!mapGPSCenter) return;
+        markerCoord     = LatLonToPixels(markerPos[0], markerPos[1]);
+        mapCenterCoord  = LatLonToPixels(mapGPSCenter[0], mapGPSCenter[1]);
+        markerNode.translation[0] = markerCoord[0] - mapCenterCoord[0];
+        markerNode.translation[1] = markerCoord[1] - mapCenterCoord[1];
+        print ('[ MARKER ] - ' + markerName + ': UPDATE POSITION ON MAP : ' + markerNode.translation);
+    }
+
+    function setName(name) {
+        if (name == '') return;
+        print ('[---------------------------------------------------------]');
+        print ('[ MARKER ] - ' + markerName + ': UPDATE NAME to ' + name);
+        markerName  = name;
+    }
+
+    function clicked(val) {
+        if (!val) return;
+        print ('[ MARKER ] - ' + markerName + ': CLICKED!');
+        onClick = true;
+    }
+
+    function setEnable(val) {
+        isEnabled = val;
+        if (val) {
+            print ('[ MARKER ] - ' + markerName + ': SET ENABLED');
+        }
+        else {
+            print ('[ MARKER ] - ' + markerName + ': SET DISABLED');
+        }
+    }
+
+    function setClickable(val) {
+        ts.enabled  = val;
+        isClickable = val;
+        if (val) {
+            print ('[ MARKER ] - ' + markerName + ': SET CLICKABLE');
+        }
+        else {
+            print ('[ MARKER ] - ' + markerName + ': SET UNCLICKABLE');
+        }
+    }
+
+    function setPosition(gpsPos) {
+        if ( (gpsPos.x == 0) && (gpsPos.y == 0) ) {
+            return;
+        }
+        print ('[ MARKER ] - ' + markerName + ': SET POSITION: ' + gpsPos);
+        markerPos           = gpsPos;
+        setMarkerPositionOnMap();
+    }
+
+    function setRadius(mRadius) {
+        if (mRadius == 0) {
+            return;
+        }
+        markerRadius = mRadius;
+        print ('[ MARKER ] - ' + markerName + ': SET RADIUS: ' + markerRadius);
+    }
+
+    function setMarkerShape(markerShape) {
+        if (typeof(markerShape) == 'undefined') return;
+        if (markerShape.length == 0) {
+            print ('[ MARKER ] - ' + markerName + ': markerShape is empty!');
+            print ('[ MARKER ] - ' + markerName + ': Returning...');
+            return;
+        }
+        print ('[ MARKER ] - ' + markerName + ': SET NEW MARKER SHAPE');
+    }
+
+    function setVisible(val) {
+        if (val) {
+            main_sw.whichChoice = 0;
+            print ('[ MARKER ] - ' + markerName + ': SET VISIBLE');
+        }
+        else {
+            main_sw.whichChoice = -1;
+            print ('[ MARKER ] - ' + markerName + ': SET INVISIBLE');
+        }
+        isVisible       = val;
+    }
+
+    function updatePlayerGPS(playerPos) {
+        if (playerPos.x == 0 || playerPos.y == 0) return;
+        distance = haversine_km(markerPos[0], markerPos[1], playerPos[0], playerPos[1]);
+                # to meters
+        distance *= 1000;
+        print ('[ MARKER ] - ' + markerName + ': DISTANCE TO PLAYER = ' + distance + '. Limit to reach: ' + markerRadius);
+        if (!playerAround && (distance <= markerRadius) && isEnabled) {
+            print ('[ MARKER ] - ' + markerName + ': Player around!');
+            playerAround    = markerName;
+        }
+        else if (playerAround && (distance > markerRadius) && isEnabled) {
+            print ('[ MARKER ] - ' + markerName + ': Player left!');
+            playerLeft      = markerName;
+            playerAround    = false;
+        }
+    }
+
+    function updateZoomLevel(zoomLevel) {
+        if (zoomLevel <= 0) return;
+        print ('[ MARKER ] - ' + markerName + ': MAP ZOOM LEVEL: ' + zoomLevel);
+        mapZoomLevel = zoomLevel;
+        setMarkerPositionOnMap();
+    }
+
+    function updateMapGPSCenter(gpsCenter) {
+        if (gpsCenter[0] == 0.0 && gpsCenter[1] == 0.0) return;
+        print ('[ MARKER ] - ' + markerName + ': Update MAP GPS CENTER: ' + gpsCenter);
+        mapGPSCenter = gpsCenter;
+        setMarkerPositionOnMap();
+    }
+
+            #
+# START COMP_FUNCTIONS
+            #
+# The following functions are used to compute distances between 2 GPS positions
+            # and converting GPS position to coordinates and vice-versa.
+            # These should not be changed
+            #
+
+#
+# Calculates distance between 2 points (lat1, long1) & (lat2, long2)
+            # http://en.wikipedia.org/wiki/Haversine_formula
+        # http://stackoverflow.com/questions/365826/calculate-distance-between-2-gps-coordinates
+        #
+    function haversine_km(lat1, long1, lat2, long2) {
+        d2r     = Math.PI / 180;
+        d_latt  = (lat2 - lat1) * d2r;
+        d_long  = (long2 - long1) * d2r;
+        a       = Math.sin(d_latt/2)*Math.sin(d_latt/2) + Math.cos(lat1 * d2r) * Math.cos(lat2 * d2r) * Math.sin(d_long/2)*Math.sin(d_long/2);
+        c       = 2 * Math.atan2(Math.sqrt(a),  Math.sqrt(1-a));
+        return 6371 * c;
+    }
+
+    function LatLonToMeters(lat, lon ) {
+        mx      = lon * originShift / 180.0;
+        my      = Math.log( Math.tan((90 + lat) * Math.PI / 360.0 )) / (Math.PI / 180.0);
+        my      = my * originShift / 180.0;
+        return new Array(mx, my);
+    }
+
+    function LatLonToPixels(lat, lon) {
+        ll2p    = LatLonToMeters(lat, lon);
+        m2p     = MetersToPixels(ll2p[0], ll2p[1], mapZoomLevel);
+        return new Array(m2p[0], m2p[1]);
+    }
+
+    function MetersToPixels(mx, my) {
+        res     = Resolution();
+        px      = (mx + originShift) / res;
+        py      = (my + originShift) / res;
+        return new Array(px, py);
+    }
+
+    function Resolution() {
+        return initialResolution / (Math.pow(2,mapZoomLevel));
+    }
+
+            #
+# END COMP_FUNCTIONS
+            #
+        "
+        ]
+}
+    ROUTE TS.isActive TO UI_MARKER_SCRIPT.clicked
+}
+
+PROTO UI_TAB_BUTTON [
+    exposedField SFVec2f    Pos                 0 0
+exposedField SFVec2f    Size                80 30
+exposedField MFString   BackImage           [""]
+exposedField MFString   BackImageSelected   [""]
+exposedField MFString   IconImage           [""]
+exposedField MFString   IconImageSelected   [""]
+exposedField MFString   Text                [""]
+exposedField SFColor    TextColor           1 0 0
+exposedField SFColor    TextColorSelected   0.7 0 0
+exposedField SFFloat    TextSize            18
+exposedField SFBool     isSelected          FALSE
+exposedField SFInt32    TabIndex            -1
+exposedField SFBool     tsEnabled           TRUE
+eventIn SFBool          Deselect
+eventIn SFBool          Select
+eventOut SFInt32        SelectedTab
+]
+{
+    DEF BUTTON_TRANSFORM Transform2D {
+    translation IS Pos
+    children [
+        Shape {
+        appearance DEF UI_TAB_BUTTON_APP_BACK Appearance {
+            texture ImageTexture {
+                url IS BackImage
+            }
+            material DEF UI_TAB_BUTTON_MAT_LINE Material2D {
+                lineProps LineProperties {
+                    width 0
+                }
+            }
+        }
+    }
+    Shape {
+        appearance DEF UI_TAB_BUTTON_APP_OVER Appearance {
+            texture ImageTexture {
+                url IS BackImageSelected
+            }
+            material USE UI_TAB_BUTTON_MAT_LINE
+        }
+    }
+    Shape {
+        appearance DEF UI_TAB_BUTTON_T_COLOR Appearance {
+            material Material2D {
+                emissiveColor IS TextColor
+                filled true
+            }
+        }
+    }
+    Shape {
+        appearance DEF UI_TAB_BUTTON_T_COLOR_SEL Appearance {
+            material Material2D {
+                emissiveColor IS TextColorSelected
+                filled true
+            }
+        }
+    }
+    DEF TAB_CHANGE_SOUND AUDIO {
+        url "800"
+    }
+    DEF UI_TAB_BUTTON_TS TouchSensor {
+        enabled IS tsEnabled
+    }
+    DEF UI_TAB_BUTTON_SR Shape {
+        geometry Rectangle {
+            size IS Size
+        }
+        appearance USE UI_TAB_BUTTON_APP_BACK
+    }
+    DEF UI_TAB_BUTTON_ST Shape {
+        geometry DEF UI_TAB_BUTTON_TX Text {
+            string IS Text
+            fontStyle FontStyle {
+                justify ["MIDDLE" "MIDDLE"]
+                size IS TextSize
+            }
+        }
+        appearance USE UI_TAB_BUTTON_T_COLOR
+    }
+    DEF UI_TAB_BUTTON_SCRIPT Script {
+        field SFNode        rect            USE UI_TAB_BUTTON_SR
+        field SFNode        app_back_sel    USE UI_TAB_BUTTON_APP_OVER
+        field SFNode        app_back        USE UI_TAB_BUTTON_APP_BACK
+        field SFNode        st              USE UI_TAB_BUTTON_ST
+        field SFNode        t_color         USE UI_TAB_BUTTON_T_COLOR
+        field SFNode        t_color_sel     USE UI_TAB_BUTTON_T_COLOR_SEL
+        field SFNode        buttonTransform USE BUTTON_TRANSFORM
+        field SFInt32       TabIndex -1
+        field SFNode        tabChangeSound  USE TAB_CHANGE_SOUND
+        eventIn SFInt32     setTabIndex     IS TabIndex
+        eventIn SFBool      OnSelect        IS Select
+        eventIn SFBool      OnActive
+        eventIn SFVec3f     updateOrientation
+        eventIn SFBool      OnDeselect      IS Deselect
+        eventOut SFBool     DoSelect        IS isSelected
+        eventOut SFInt32    SelectedTab     IS SelectedTab
+
+        url ["javascript:
+        function initialize() {
+            defaultOrientation = true;
+        }
+        function setTabIndex(value) {
+            TabIndex = value;
+        }
+        function OnActive(value) {
+            if ( value ) {
+                rect.appearance = app_back_sel;
+                st.appearance = t_color_sel;
+                DoSelect = true;
+                SelectedTab = TabIndex;
+                tabChangeSound.startTime = gpac.get_scene_time();
+            }
+        }
+        function OnDeselect(value) {
+            if (!value) return;
+            rect.appearance = app_back;
+            st.appearance = t_color;
+            DoSelect = false;
+        }
+        function OnSelect(value) {
+            if (!value) return;
+            OnActive(value);
+        }
+        function updateOrientation(rot) {
+        }
+        "
+        ]
+    }
+]
+}
+    ROUTE UI_TAB_BUTTON_TS.isActive TO UI_TAB_BUTTON_SCRIPT.OnActive
+}
+
+PROTO UI_TAB_LAYER [
+    exposedField SFVec2f    Pos             0 0
+exposedField SFVec2f    BackImgTrans    0 0
+exposedField SFVec2f    Size            480 650
+exposedField MFString   BackImg         [""]
+exposedField MFNode     children        []
+]
+{
+    Transform2D {
+    translation IS Pos
+    children [
+        Transform2D {
+        translation IS BackImgTrans
+        children [
+            Shape {
+            geometry Rectangle {
+                size IS Size
+            }
+            appearance DEF UI_TAB_BUTTON_TAB_LAYER_IMAGE Appearance {
+                texture ImageTexture {
+                    url IS BackImg
+                }
+                material DEF UI_TAB_BUTTON_MAT_LINE Material2D {
+                    lineProps LineProperties {
+                        width 0
+                    }
+                }
+            }
+        }
+    ]
+    }
+    OrderedGroup {
+        children IS children
+    }
+]
+}
+}
+
+PROTO UI_TAB_PROTO [
+    exposedField SFVec2f    Pos                 0 0
+exposedField SFVec2f    Size                480 800
+exposedField SFVec2f    LAYER_BUTTON_SIZE   480 81
+exposedField SFVec2f    LAYER_TABS_SIZE     480 719
+exposedField SFInt32    ButtonHeight        81
+exposedField MFNode     tabButtons          []
+exposedField MFNode     tabLayers           []
+exposedField SFBool     tabButtonAutosize   FALSE
+exposedField SFInt32    tabButtonLocation   0
+exposedField SFInt32    CurrentTab          0
+]
+{
+    Transform2D {
+    translation IS Pos
+    children [
+        DEF UI_TAB_PROTO_MAIN_LAYOUT Layout {
+        topToBottom FALSE
+        horizontal FALSE
+        size IS Size
+        justify ["BEGIN" "BEGIN"]
+        children [
+            DEF UI_TAB_PROTO_SWITCH Switch {
+            whichChoice IS CurrentTab
+            children IS tabLayers
+        }
+        DEF UI_TAB_PROTO_LAYER_BUTTONS Layer2D {
+            size IS LAYER_BUTTON_SIZE
+            children IS tabButtons
+        }
+
+    ]
+    }
+    DEF UI_TAB_PROTO_SCRIPT Script {
+        field MFNode items IS tabButtons
+        field SFNode scr USE UI_TAB_PROTO_SCRIPT
+        field SFNode selected USE UI_TAB_PROTO_SWITCH
+        field SFNode ml USE UI_TAB_PROTO_MAIN_LAYOUT
+        field SFNode lb USE UI_TAB_PROTO_LAYER_BUTTONS
+
+                # field SFNode lt USE LAYER_TABS
+        field SFInt32 bh IS ButtonHeight
+        field SFBool auto IS tabButtonAutosize
+
+        eventIn SFInt32 SetBtnLoc IS tabButtonLocation
+        eventIn SFVec2f setSize IS Size
+
+        field SFInt32 prevBtnLoc 0
+
+        url ["javascript:
+        function initialize()
+        {
+            for ( i = 0; i < items.length; i++ )
+                for ( j = 0; j < items.length; j++ )
+                {
+                    if ( i == j)
+                    {
+                        items[i].TabIndex = i;
+                        Browser.addRoute(items[i], 'SelectedTab', selected, 'whichChoice');
+                    }
+                    else
+                    {
+                        Browser.addRoute(items[i], 'isSelected', items[j], 'Deselect');
+                    }
+                }
+        }
+
+        function setSize ( value )
+        {
+            lb.size = new SFVec2f ( value.x, bh );
+            if ( auto )
+            {
+
+                buttonWidth = value.x / items.length;
+                for ( i = 0; i < items.length; i++ )
+                {
+                    items[i].Pos = new SFVec2f ( - value.x/2 + buttonWidth/2 + buttonWidth * i, 0 );
+                    items[i].Size = new SFVec2f ( buttonWidth, bh );
+                }
+            }
+        }
+
+        function SetBtnLoc(value)
+        {
+            if ( prevBtnLoc == value )
+                return;
+            prevBtnLoc = value;
+            t = ml.children[0];
+            ml.children[0] = ml.children[1];
+            ml.children[1] = t;
+        }
+        "
+        ]
+    }
+]
+}
+}
+
+PROTO HINT_PAGE [
+    exposedField MFNode     children    []
+exposedField SFVec2f    Size        480 700
+eventIn      SFInt32    activeHint
+eventOut     SFInt32    showQuestion
+]
+{
+    Layer2D {
+    size IS Size
+    background Background2D { backColor 0 0 0 }
+    children [
+        OrderedGroup {
+        children [
+            Background2D { backColor 0 0 0 }
+        IMAGE {
+            url "35"
+            translation 0 0
+            size IS Size
+        }
+        Transform2D {
+            children [
+                Switch {
+                whichChoice IS activeHint
+                children IS children
+            }
+        ]
+        }
+        DEF HINT_NR TEXT {
+            translation 140 270
+            layoutSize 390 100
+            String ""
+            FontStyle_size 32
+            emissiveColor $422A10
+            FontStyle_justify  ["MIDDLE"]
+            FontStyle_style     "ITALIC"
+        }
+        DEF HINT_PAGE_HINT BUTTON {
+            size 200 200
+            translation -150 -290
+            backImage "36"
+            overImage "50"
+            textSize 32
+            textColor $412405
+        }
+    ]
+    }
+]
+}
+    DEF HINT_PAGE_SCRIPT Script {
+    eventIn SFBool showQuestionView
+    eventOut SFInt32 showQuestion IS showQuestion
+    eventIn SFInt32 activeHint IS activeHint
+    field SFNode hint_display USE HINT_NR
+
+    url ["javascript:
+    function showQuestionView(val) {
+        if (val) {
+            showQuestion = 1;
+        }
+        else {
+            showQuestion = 0;
+        }
+    }
+    function activeHint(val) {
+        switch(val) {
+            case 0: hRoman = 'I'; break;
+            case 1: hRoman = 'II'; break;
+            case 2: hRoman = 'III'; break;
+            case 3: hRoman = 'IV'; break;
+            case 4: hRoman = 'V'; break;
+            default: hRoman = 'I';
+        }
+        hint_display.String = 'Hint -'+hRoman+'-';
+    }
+
+    "
+    ]
+}
+
+    ROUTE HINT_PAGE_HINT.onClick TO HINT_PAGE_SCRIPT.showQuestionView
+}
+
+PROTO QUESTION_PAGE [
+    exposedField    MFNode      children        []
+exposedField    SFFloat     quizTime        10
+exposedField    SFInt32     activeQuestion  0
+exposedField    SFVec2f     Size            480 700
+eventIn         SFFloat     currentScore
+eventOut        SFBool      timeUP
+eventOut        SFFloat     secondsLeft
+]
+{
+    Layer2D {
+    size IS Size
+    children [
+        OrderedGroup {
+        children [
+            DEF QUESTION_PAGE_TIMER TimeSensor {
+            cycleInterval 1
+            loop TRUE
+            enabled FALSE
+        }
+
+        DEF QUESTION_PAGE_SCORE_TIMER TimeSensor {
+            cycleInterval 5
+            loop TRUE
+            enabled FALSE
+        }
+        Transform2D {
+            children [
+                DEF SW Switch {
+                whichChoice IS activeQuestion
+                children IS children
+            }
+        ]
+        }
+        Transform2D {
+            translation 0 -320
+            children [
+                Shape {
+                appearance Appearance {
+                    material Material2D {
+                        lineProps LineProperties {
+                            width 0
+                        }
+                    }
+                    texture DEF QUESTION_PAGE_GL LinearGradient {
+                        key [0 0.4 0.6 1]
+                        keyValue [0 1 0    1 0 0   1 0 0    0 1 0]
+                        startPoint 0 0
+                        spreadMethod 2
+                    }
+                }
+                geometry DEF QUESTION_PAGE_R Rectangle {
+                    size 480 5
+                }
+            }
+        ]
+        }
+        Transform2D {
+            translation 0 -305
+            children [
+                Shape {
+                appearance Appearance {
+                    texture ImageTexture {
+                        url "25"
+                    }
+                    material Material2D {
+                        lineProps LineProperties {
+                            width 0
+                        }
+                    }
+                }
+                geometry DEF QUESTION_PAGE_HEART Rectangle {
+                    size 25 25
+                }
+            }
+        ]
+        }
+        DEF QNR TEXT {
+            translation 0 265
+            layoutSize 390 100
+            Layout_wrap TRUE
+            String "Question I"
+            FontStyle_size 28
+            FontStyle_family "Arial"
+            emissiveColor $422A10
+        }
+        TEXT {
+            translation     -90 -282
+            layoutSize              200 100
+            String                  "Score: "
+            emissiveColor   $412405
+            FontStyle_size              26
+            FontStyle_family            ["Comic Sans MS"]
+        }
+        Transform2D {
+            translation -80 -262
+            children [
+                Shape {
+                geometry DEF QUESTION_PAGE_SCORE_TEXT Text {
+                    string  ["0"]
+                    fontStyle FontStyle {
+                        family       ["Comic Sans MS"]
+                        justify      ["MIDDLE"]
+                        size         30
+                    }
+                }
+                appearance Appearance {
+                    material Material2D {
+                        emissiveColor   $422A10
+                        filled          true
+                    }
+                }
+            }
+        ]
+        }
+        DEF QUESTION_PAGE_HURRY Switch {
+            whichChoice 0
+            children [
+                Transform2D {}
+            Transform2D {
+                children [
+                    TEXT {
+                    translation     -120 -335
+                    layoutSize              200 100
+                    String                  "seconds left: "
+                    emissiveColor   1 0 0
+                    FontStyle_size              20
+                    FontStyle_family            ["Comic Sans MS"]
+                }
+                DEF QUESTION_PAGE_HURRY_TEXT TEXT {
+                    translation     10 -335
+                    layoutSize              200 100
+                    String                  ""
+                    emissiveColor   1 0 0
+                    FontStyle_size              20
+                    FontStyle_family            ["Comic Sans MS"]
+                }
+            ]
+            }
+        ]
+        }
+    ]
+    }
+]
+}
+
+    DEF QUESTION_PAGE_SC Script {
+    eventIn SFTime set_frac
+    eventIn SFTime increaseCnt
+    eventIn SFFloat currentScoreEvent IS currentScore
+    eventIn SFFloat emphasizeScore
+    eventIn SFFloat set_heart
+    eventIn SFInt32 activeQuestion IS activeQuestion
+
+    field SFFloat quizTime IS quizTime
+    field SFNode heart USE QUESTION_PAGE_HEART
+    field SFNode r USE QUESTION_PAGE_R
+    field SFNode grad USE QUESTION_PAGE_GL
+    field SFBool isDown FALSE
+    field SFNode timer USE QUESTION_PAGE_TIMER
+    field SFNode score_text USE QUESTION_PAGE_SCORE_TEXT
+    field SFNode score_timer USE QUESTION_PAGE_SCORE_TIMER
+    field SFNode hurry USE QUESTION_PAGE_HURRY
+    field SFNode hurryTxt USE QUESTION_PAGE_HURRY_TEXT
+    field SFNode qNrText USE QNR
+
+    eventOut SFBool timeUP IS timeUP
+    eventOut SFFloat secondsLeft IS secondsLeft
+
+    url ["javascript:
+    function initialize() {
+        timer.enabled = true;
+        timeUP = false;
+        linearGradientKeyDiff = grad.key[1]-grad.key[0];
+        shrinkFraction = r.size.x/quizTime;
+        colorGradFraction = linearGradientKeyDiff/quizTime;
+        oddEven = -7;
+        grow = true;
+        secondsLeft = quizTime;
+        smallHeart = true;
+        qRoman = 'I';
+    }
+
+    function activeQuestion(qnr) {
+        switch(qnr) {
+            case 0: qRoman = 'I'; break;
+            case 1: qRoman = 'II'; break;
+            case 2: qRoman = 'III'; break;
+            case 3: qRoman = 'IV'; break;
+            case 4: qRoman = 'V'; break;
+            default: qRoman = 'I';
+        }
+        qNrText.String = new MFString ('Question ' + qRoman);
+    }
+
+    function currentScoreEvent(val) {
+        if (score_text.string[0] != ''+val) {
+            score_text.string = new MFString(''+val);
+            score_timer.enabled = true;
+        }
+    }
+
+    function emphasizeScore(val) {
+        if (grow) {
+            if (score_text.fontStyle.size < 40) {
+                score_text.fontStyle.size += 1;
+            }
+            else {
+                grow = false;
+            }
+        }
+        else {
+            if (score_text.fontStyle.size > 30) {
+                score_text.fontStyle.size -= 1;
+            }
+            else {
+                score_timer.enabled = false;
+                grow = true;
+            }
+        }
+    }
+
+    function set_frac(val) {
+        secondsLeft -= 1;
+        if (r.size.x - shrinkFraction < 0) {
+            timeUP = true;
+            timer.enabled = false;
+        }
+        else {
+            r.size.x -= shrinkFraction;
+            grad.key[1] -= colorGradFraction;
+            grad.key[2] += colorGradFraction;
+        }
+        if (secondsLeft < 30) {
+            hurryTxt.String = secondsLeft+ ' ';
+            hurry.whichChoice = 1;
+        }
+    }
+
+    function set_heart(value) {
+        if ((value < 0.8) && (smallHeart)) {
+            heart.size.x = heart.size.x + oddEven;
+            heart.size.y = heart.size.y + oddEven;
+            smallHeart = false;
+        }
+        else if ((value > 0.8) && (!smallHeart)) {
+            smallHeart = true;
+            heart.size.x = heart.size.x - oddEven;
+            heart.size.y = heart.size.y - oddEven;
+        }
+    }
+
+    "
+    ]
+}
+    ROUTE QUESTION_PAGE_TIMER.cycleTime TO QUESTION_PAGE_SC.set_frac
+    ROUTE QUESTION_PAGE_TIMER.fraction_changed TO QUESTION_PAGE_SC.set_heart
+    ROUTE QUESTION_PAGE_SCORE_TIMER.fraction_changed TO QUESTION_PAGE_SC.emphasizeScore
+
+}
+
+PROTO QUESTION_TEXT [
+    exposedField    SFColor     questionColor       1 1 1
+eventIn         MFString    questionText
+eventIn         SFVec2f     questionTrans
+eventIn         SFFloat     questionSize
+]
+{
+    Transform2D {
+    translation IS questionTrans
+    children [
+        Shape {
+        appearance Appearance {
+            material Material2D {
+                emissiveColor IS questionColor
+                filled TRUE
+            }
+        }
+        geometry Text {
+            string IS questionText
+            fontStyle FontStyle {
+                family ["SERIF"]
+                justify ["LEFT" "MIDDLE"]
+                size IS questionSize
+            }
+        }
+    }
+]
+}
+}
+
+PROTO ANSWER_TEXT [
+    exposedField SFColor    answerColor     0.25, 0.25, 0.05
+exposedField MFString   answerText      "defautl answer"
+exposedField SFVec2f    answerTrans     0 0
+exposedField SFVec2f    rectangleSize   200 100
+exposedField SFFloat    answerSize      14
+]
+{
+    Transform2D {
+    translation IS answerTrans
+    children [
+        Transform2D {
+        translation 200 0
+        children [
+            Shape {
+            appearance Appearance {
+                material Material2D {
+                    transparency 1
+                }
+            }
+            geometry Rectangle {
+                size IS rectangleSize
+            }
+        }
+    ]
+    }
+    Shape {
+        appearance Appearance {
+            material Material2D {
+                emissiveColor IS answerColor
+                filled TRUE
+            }
+        }
+        geometry Text {
+            string IS answerText
+            fontStyle FontStyle {
+                family ["SERIF"]
+                justify ["LEFT" "MIDDLE"]
+                size IS answerSize
+            }
+        }
+    }
+]
+}
+}
+
+PROTO ANSWER_IMAGE [
+    exposedField SFVec2f    rectangleSize       200 150
+exposedField MFString   url                 [""]
+exposedField SFVec2f    translation         0 0
+exposedField SFColor    descriptionColor    0 0 0
+exposedField MFString   descriptionText     [""]
+exposedField SFFloat    textSize            22
+]
+{
+    Transform2D {
+    translation IS translation
+    children [
+        Transform2D {
+        children [
+            Shape {
+            appearance Appearance {
+                texture ImageTexture {
+                    url IS url
+                }
+            }
+            geometry Rectangle {
+                size IS rectangleSize
+            }
+        }
+    ]
+    }
+    Transform2D {
+        translation 0 -85
+        children [
+            Shape {
+            appearance Appearance {
+                material Material2D {
+                    emissiveColor IS descriptionColor
+                    filled TRUE
+                }
+            }
+            geometry Text {
+                string IS descriptionText
+                fontStyle FontStyle {
+                    family ["SERIF"]
+                    justify ["MIDDLE" "LEFT"]
+                    size IS textSize
+                }
+            }
+        }
+    ]
+    }
+]
+}
+}
+
+PROTO QUESTION [
+    exposedField SFString   q           "Default question"
+exposedField SFString   a1          "Default answer 1"
+exposedField SFString   a2          "Default answer 2"
+exposedField SFString   a3          "Default answer 3"
+exposedField SFString   a4          "Default answer 4"
+exposedField SFInt32    correctAns  -1
+eventIn      MFString   initialize
+eventOut     SFInt32    score
+]
+{
+    Transform2D {
+    children [
+
+        DEF QUESTION_Q Transform2D {
+        children []
+    }
+    DEF QUESTION_ANSWERS Transform2D {
+        children [
+            DEF QUESTION_A1 Transform2D {
+            children [
+                DEF QUESTION_TS_ANS1 TouchSensor { }
+        ]
+        }
+        DEF QUESTION_A2 Transform2D {
+            children [
+                DEF QUESTION_TS_ANS2 TouchSensor { }
+        ]
+        }
+        DEF QUESTION_A3 Transform2D {
+            children [
+                DEF QUESTION_TS_ANS3 TouchSensor { }
+        ]
+        }
+        DEF QUESTION_A4 Transform2D {
+            children [
+                DEF QUESTION_TS_ANS4 TouchSensor { }
+        ]
+        }
+    ]
+    }
+    DEF QUESTION_SW Switch {
+        whichChoice 0
+        children [
+            Transform2D {
+        }
+        DEF QUESTION_ALERT CONFIRMATION_ALERT {
+            trans       190 -215
+            Pos         175 15
+            Size        160 45
+            BackImage   "37"
+            OverImage   "38"
+            TextColor   $E7CBA2
+            TextSize    28
+            Family      ["Arial"]
+        }
+    ]
+    }
+]
+}
+    DEF QUESTION_SCRIPT Script {
+    eventIn SFBool answered1
+    eventIn SFBool answered2
+    eventIn SFBool answered3
+    eventIn SFBool answered4
+    eventIn SFBool addResult
+    eventIn MFString initialize IS initialize
+    field SFNode    q           USE QUESTION_Q
+    field SFNode    a1          USE QUESTION_A1
+    field SFNode    a2          USE QUESTION_A2
+    field SFNode    a3          USE QUESTION_A3
+    field SFNode    a4          USE QUESTION_A4
+    field SFNode    sw          USE QUESTION_SW
+    field SFNode    alert       USE QUESTION_ALERT
+    field SFFloat   answer_fontSize     26
+    field SFFloat   question_fontSize   28
+    field SFInt32   correct         IS correctAns
+    field SFString  answer1         IS a1
+    field SFString  answer2         IS a2
+    field SFString  answer3         IS a3
+    field SFString  answer4         IS a4
+    field SFString  question        IS q
+    field SFNode    answers         USE QUESTION_ANSWERS
+    field SFInt32   nrOfCharactersPerLine 26
+    eventIn SFTime  currentTime
+    eventOut SFInt32    score   IS score
+    url ["javascript:
+
+    function currentTime(val) {
+    }
+
+    function addValus2Fields(vals) {
+        question    = vals[0];
+        answer1     = vals[1];
+        answer2     = vals[2];
+        answer3     = vals[3];
+        answer4     = vals[4];
+        correct     = vals[5];
+    }
+
+    function initialize(qParams) {
+        if (( typeof (qParams) == 'undefined') || (qParams.length==0)) {
+            return;
+        }
+        addValus2Fields(qParams);
+        prevLines = 0;
+        prevAnswerLines = 0;
+        currentAnswerNr = 0;
+        addQuestion();
+
+        if (answer1.indexOf(';') != -1) {
+            addImageAnswer(a1, ''+answer1.split(';')[0], answer1.split(';')[1], 'A');
+            addImageAnswer(a2, ''+answer2.split(';')[0], answer2.split(';')[1], 'B');
+            addImageAnswer(a3, ''+answer3.split(';')[0], answer3.split(';')[1], 'C');
+            addImageAnswer(a4, ''+answer4.split(';')[0], answer4.split(';')[1], 'D');
+        }
+        else {
+            addTextAnswer(a1, answer1, 'A');
+            addTextAnswer(a2, answer2, 'B');
+            addTextAnswer(a3, answer3, 'C');
+            addTextAnswer(a4, answer4, 'D');
+        }
+    }
+
+    function addQuestion() {
+        moreLinesQ = new splitText(question, false);
+        q.children[0] = new SFNode ('QUESTION_TEXT');
+        q.children[0].questionColor = new SFColor(0.25, 0.15, 0.05);
+        q.children[0].questionSize = question_fontSize;
+        q.children[0].questionTrans[0] = -200;
+        q.children[0].questionTrans[1] = 240 - (moreLinesQ.lines.length*answer_fontSize)/2;
+
+        for (textIndex = 0; textIndex < moreLinesQ.lines.length; textIndex++) {
+            if (textIndex) {
+                q.children[0].questionText[textIndex] = '   ' + moreLinesQ.lines[textIndex];
+            }
+            else {
+                q.children[0].questionText[textIndex] = 'Q. '+moreLinesQ.lines[textIndex];
+            }
+        }
+    }
+
+    function addTextAnswer(node, text, tag) {
+        moreLinesQ = new splitText(text, true);
+
+        node.children[1] = new SFNode ('ANSWER_TEXT');
+        node.children[1].answerTrans[0] = -180;
+        node.children[1].answerTrans[1] = 130 - (prevAnswerLines+currentAnswerNr) * (answer_fontSize+5) - (moreLinesQ.lines.length*answer_fontSize)/2;
+        node.children[1].answerSize = answer_fontSize;
+        node.children[1].answerColor = new SFColor(0.25, 0.15, 0.05);
+        node.children[1].rectangleSize[0] = 400;
+        node.children[1].rectangleSize[1] = answer_fontSize*moreLinesQ.lines.length;
+
+        for (textIndex = 0; textIndex < moreLinesQ.lines.length; textIndex++) {
+            if (textIndex) {
+                node.children[1].answerText[textIndex] = '  '+moreLinesQ.lines[textIndex];
+            }
+            else {
+                node.children[1].answerText[textIndex] = tag +'. ' + moreLinesQ.lines[textIndex];
+            }
+        }
+        prevAnswerLines += moreLinesQ.lines.length;
+        currentAnswerNr++;
+    }
+
+    function getImgCoords(nr) {
+        switch(nr) {
+            case 1: return new SFVec2f (-100,  90);
+            case 2: return new SFVec2f ( 100,  90);
+            case 3: return new SFVec2f (-100, -80);
+            case 4: return new SFVec2f ( 100, -80);
+            default: return new SFVec2f (0, 0);
+        }
+    }
+
+    function addImageAnswer(node, url, description, tag) {
+        currentAnswerNr++;
+        node.children[1] = new SFNode ('ANSWER_IMAGE');
+        node.children[1].url = ''+url;
+        node.children[1].rectangleSize = new SFVec2f (180, 120);
+        node.children[1].translation = getImgCoords(currentAnswerNr);
+        node.children[1].descriptionText = '' + description;
+        node.children[1].descriptionColor = new SFColor(0.25, 0.25, 0.05);
+        node.children[1].textSize = answer_fontSize;
+    }
+
+    function firstSpaceBeforeEndOfLine(textToFind, linesC, nrChars) {
+        beforeIndex = linesC*nrChars;
+
+        for (aTemp = beforeIndex; aTemp > 0; aTemp--) {
+            if (textToFind[aTemp] == ' ') {
+                return aTemp;
+            }
+        }
+        return - 1;
+    }
+
+    function splitText(textToSplit, answers) {
+        if (typeof(textToSplit) == 'undefined') { return; }
+        this.lines = new Array();
+        linesCnt = 0;
+        startIndex = 0;
+        endIndex = textToSplit.length;
+
+        if (!answers) {
+            charsPerLine = nrOfCharactersPerLine;
+        }
+        else {
+            charsPerLine = nrOfCharactersPerLine - 3;
+        }
+
+        while (textToSplit.substring(startIndex, endIndex).length > charsPerLine) {
+            endIndex = firstSpaceBeforeEndOfLine(textToSplit, (linesCnt + 1), charsPerLine);
+            this.lines[linesCnt] = textToSplit.substring(startIndex, endIndex);
+            startIndex = endIndex + 1;
+            endIndex = textToSplit.length;
+            linesCnt = linesCnt + 1;
+        }
+        if (!linesCnt) {
+            this.lines[linesCnt] = textToSplit;
+        }
+        else {
+            this.lines[linesCnt] = textToSplit.substring(startIndex, endIndex);
+        }
+    }
+
+    function answered1(val) {
+        answerColors(a1);
+        if (val) {
+            alert.Text = new MFString('Validate A');
+            sw.whichChoice = 1;
+            if (correct == 1) {
+                scoreBuffer = 10;
+            }
+            else {
+            #wSound.startTime = timeSensor.time;
+                scoreBuffer = 0;
+            }
+        }
+    }
+
+    function answered2(val) {
+        answerColors(a2);
+        if (val) {
+            alert.Text = new MFString('Validate B');
+            sw.whichChoice = 1;
+            if (correct == 2) {
+                scoreBuffer = 10;
+            }
+            else {
+            #wSound.startTime = timeSensor.time;
+                scoreBuffer = 0;
+            }
+        }
+    }
+
+    function answered3(val) {
+        answerColors(a3);
+        if (val) {
+            alert.Text = new MFString('Validate C');
+            sw.whichChoice = 1;
+            if (correct == 3) {
+                scoreBuffer = 10;
+            }
+            else {
+                scoreBuffer = 0;
+            }
+        }
+    }
+
+    function answered4(val) {
+        answerColors(a4);
+        if (val) {
+            alert.Text = new MFString('Validate D');
+            sw.whichChoice = 1;
+            if (correct == 4) {
+                scoreBuffer = 10;
+            }
+            else {
+                scoreBuffer = 0;
+            }
+        }
+    }
+
+    function answerColors(node) {
+        for (i = 0; i < answers.children.length; i++) {
+            if (answers.children[i].children[1] == 'ANSWER_TEXT') {
+                answers.children[i].children[1].answerColor = new SFColor(0.25, 0.25, 0.05);
+                answers.children[i].children[1].answerSize = answer_fontSize;
+            }
+            else if (answers.children[i].children[1] == 'ANSWER_IMAGE') {
+                answers.children[i].children[1].descriptionColor = new SFColor(0.25, 0.25, 0.05);
+                answers.children[i].children[1].textSize = answer_fontSize;
+            }
+        }
+
+        if (node.children[1] == 'ANSWER_TEXT') {
+            node.children[1].answerColor = new SFColor(0.65, 0.25, 0.05);
+            node.children[1].answerSize = answer_fontSize+1;
+        }
+        else if (node.children[1] == 'ANSWER_IMAGE') {
+            node.children[1].descriptionColor = new SFColor(0.65, 0.25, 0.05);
+            node.children[1].textSize = answer_fontSize+1;
+        }
+    }
+
+    function addResult(val) {
+        sw.whichChoice = 0;
+        if (val) {
+            score = scoreBuffer;
+        }
+    }
+    "
+    ]
+}
+    ROUTE QUESTION_TS_ANS1.isActive TO QUESTION_SCRIPT.answered1
+    ROUTE QUESTION_TS_ANS2.isActive TO QUESTION_SCRIPT.answered2
+    ROUTE QUESTION_TS_ANS3.isActive TO QUESTION_SCRIPT.answered3
+    ROUTE QUESTION_TS_ANS4.isActive TO QUESTION_SCRIPT.answered4
+    ROUTE QUESTION_ALERT.alertConfirmed TO QUESTION_SCRIPT.addResult
+
+}
+
+
+# ########################## ARAF Scene ###############################
+OrderedGroup {
+    children [
+        Background2D { backColor 0 0 0 }
+        DEF NAV NavigationInfo { type ["NONE"] }
+        DEF CORRECT_SOUND AUDIO { url "23" }
+        DEF WRONG_SOUND AUDIO { url "22" }
+        DEF INTRO_MS MediaSensor { url "26" }
+        DEF MAIN_TS TimeSensor {
+            cycleInterval   1
+            enabled         TRUE
+            loop            TRUE
+            startTime       0
+            stopTime        -1
+        }
+
+        ################################################# GAME MENU ##########################################################
+        DEF MENU Switch {
+            whichChoice -1
+            choice [
+                #################### SPLASHSCREEN           #################
+                Group {
+                    children [
+                        Shape {
+                            appearance Appearance {
+                                texture ImageTexture {
+                                    url "26"
+                                }
+                            }
+                            geometry Rectangle {
+                                size 480 800
+                            }
+                        }
+                    ]
+                }
+                #################### INTRO                  #################
+                Group {
+                    children [
+                        IMAGE {
+                        url "19"
+                        translation 0 0
+                        size 480 800
+                        }
+
+                        DEF ADVANCE2Help BUTTON {
+                            layoutSize 200 37
+                            size 200 80
+                            translation -130 -300
+                            textColor $345253
+                            textSize 22
+                            buttonText "How to play.."
+                            backImage "39"
+                            overImage "39"
+                            fonstSyleFamily "Arial"
+                        }
+
+                        DEF ADVANCE2Game BUTTON {
+                            layoutSize 200 53
+                            size 200 80
+                            translation 130 -300
+                            textColor $345253
+                            textSize 32
+                            buttonText "Start!"
+                            backImage "39"
+                            overImage "39"
+                            fonstSyleFamily "Arial"
+                        }
+                    ]
+                }
+                #################### PLAYING THE GAME       #################
+                OrderedGroup {
+                    children [
+                        DEF TIME TimeSensor {
+                        cycleInterval 2
+                        enabled FALSE
+                        loop TRUE
+                        }
+                        DEF BKG1 Shape {
+                            appearance Appearance {
+                                material Material2D {
+                                    emissiveColor 0 0 0
+                                    filled true
+                                }
+                            }
+                            geometry Rectangle {
+                                size 480 800
+                            }
+                        }
+
+						Transform {
+                                                    children [
+                                                        Shape {
+                                                            geometry Box {
+                                                                size 1 1 1
+                                                            }
+                                                            appearance Appearance {
+                                                                material Material2D {
+                                                                    emissiveColor 1 1 1
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+
+
+                        DEF TABS UI_TAB_PROTO {
+                            ButtonHeight 81
+                            LAYER_BUTTON_SIZE 480 81
+                            LAYER_TABS_SIZE 480 719
+                            tabButtons [
+                                DEF QUIZ UI_TAB_BUTTON {
+                                Size 108 81
+                                Pos -180 0
+                                BackImage           "10"
+                                BackImageSelected   "11"
+                                }
+                                DEF MAP UI_TAB_BUTTON {
+                                    Size 108 81
+                                    Pos -60 0
+                                    BackImage           "12"
+                                    BackImageSelected   "13"
+                                }
+                                DEF CAMERA UI_TAB_BUTTON {
+                                    Size 108 81
+                                    Pos 60 0
+                                    BackImage           "14"
+                                    BackImageSelected   "15"
+                                }
+                                DEF HELP UI_TAB_BUTTON {
+                                    Size 108 81
+                                    Pos 180 0
+                                    BackImage           "16"
+                                    BackImageSelected   "17"
+                                }
+                            ]
+                            tabLayers [
+                                # view.whichChoice == 0 - QUIZ VIEW
+                                Group {
+                                    children [
+                                        UI_TAB_LAYER {
+                                            Size 480 670
+                                            BackImg "27"
+                                            BackImgTrans 0 20
+                                            children [
+                                                DEF QUIZ_SW Switch {
+                                                whichChoice 0
+                                                choice [
+                                                    DEF Q_PAGE QUESTION_PAGE {
+                                                    activeQuestion 0
+                                                    quizTime 300
+                                                    Size 480 650
+                                                    children []
+                                                    }
+                                                    DEF H_PAGE HINT_PAGE {
+                                                        activeHint 0
+                                                        Size 480 720
+                                                        children []
+                                                    }
+                                                ]
+                                            }
+                                            ]
+                                        }
+                                    ]
+                                }
+
+                                # view.whichChoice == 1 - MAP VIEW
+                                Group {
+                                    children [
+                                        UI_TAB_LAYER {
+                                        Size 480 700
+                                        children [
+                                            DEF GMAP MAP {
+                                            name "Map1"
+                                            mapTranslation 0 0
+                                            mapLayoutSize 480 700
+                                            mapSize 1536 1536
+                                            mapGPSCenter MAP_CENTER
+                                            zoomLevel 19
+                                        }
+                                        DEF PLAYER_SWITCH Switch {
+                                            whichChoice -1
+                                            choice [
+                                                DEF PLAYER MapPlayer {
+                                                name "player"
+                                                playerShape [
+                                                    DEF PLAYER_SHAPE Transform2D {
+                                                    children [
+                                                        PLAYER_PIECE {
+                                                        rectangleTranslation 0 6
+                                                    }
+                                                    PLAYER_PIECE {
+                                                        rectangleTranslation 0 -6
+                                                    }
+                                                    PLAYER_PIECE {
+                                                        rectangleTranslation 6 0
+                                                    }
+                                                    PLAYER_PIECE {
+                                                        rectangleTranslation -6 0
+                                                    }
+                                                ]
+                                                }
+                                            ]
+                                            }
+                                        ]
+                                        }
+                                        DEF GPS_INSTANCE GPS_SIGNAL {
+                                            iconSize 30 30
+                                            image_on ["43"]
+                                            image_off ["42"]
+                                        }
+                                        DEF INTERNET_INSTANCE INTERNET_CONNECTION {}
+                                        DEF ARR_NAV ARROW_NAVIGATOR {
+                                            translation 0 -330
+                                        }
+                                    ]
+                                    }
+                                ]
+                                }
+
+                                # view.whichChoice == 2 - CAMERA VIEW
+                                Group {
+                                    children [
+                                        UI_TAB_LAYER {
+                                        Size 480 800
+                                        children [
+                                            Group {
+                                            children [
+                                                DEF AR_VIEW_INSTANCE AR_VIEW {
+                                                translation 0 40
+                                                layerSize 480 730
+                                                rectangleSize 730 490
+                                                setPlayerPosition PLAYER_POSITION
+                                            }
+                                        ]
+                                        }
+                                    ]
+                                    }
+                                ]
+                                }
+
+                                # view.whichChoice == 3 - HELP VIEW
+                                Group {
+                                    children [
+                                        UI_TAB_LAYER {
+                                        Size 480 670
+                                        BackImg "20"
+                                        BackImgTrans 0 20
+                                        children [
+                                            TEXT {
+                                            translation 0 265
+                                            layoutSize 390 100
+                                            Layout_wrap TRUE
+                                            String "Instructions"
+                                            FontStyle_size 28
+                                            FontStyle_family "Arial"
+                                            emissiveColor $422A10
+                                        }
+                                        TEXT {
+                                            translation 0 180
+                                            layoutSize 390 120
+                                            Layout_wrap TRUE
+                                            String " ~ AR Quiz is meant to challenge the players about their knowledge on a certain topic."
+                                            FontStyle_size 20
+                                            FontStyle_family "Arial"
+                                            emissiveColor $412405
+                                        }
+                                        TEXT {
+                                            translation 0 130
+                                            layoutSize 390 80
+                                            Layout_wrap TRUE
+                                            String " ~ In order to succeed you have to answer all the questions within 5 minutes."
+                                            FontStyle_size 20
+                                            FontStyle_family "Arial"
+                                            emissiveColor $412405
+                                        }
+                                        TEXT {
+                                            translation 0 55
+                                            layoutSize 390 120
+                                            Layout_wrap TRUE
+                                            String " ~ To answer the questions you will have to look for the hints that float over the game area."
+                                            FontStyle_size 20
+                                            FontStyle_family "Arial"
+                                            emissiveColor $412405
+                                        }
+                                        TEXT {
+                                            translation 0 -45
+                                            layoutSize 390 180
+                                            Layout_wrap TRUE
+                                            String " ~ You can see the location of these hint points in the Map view or see them through the Camera view. Note that only in the camera view you know which hint corresponds to which question!"
+                                            FontStyle_size 20
+                                            FontStyle_family "Arial"
+                                            emissiveColor $412405
+                                        }
+                                        TEXT {
+                                            translation -55 -170
+                                            layoutSize 285 200
+                                            Layout_wrap TRUE
+                                            String " ~ Once you are close enough to the hint point the related story will pop up."
+                                            FontStyle_size 20
+                                            FontStyle_family "Arial"
+                                            emissiveColor $412405
+                                        }
+                                        TEXT {
+                                            translation -55 -240
+                                            layoutSize 285 200
+                                            Layout_wrap TRUE
+                                            String " ~ When you finish the quiz you can choose to share your astonishing results!"
+                                            FontStyle_size 20
+                                            FontStyle_family "Arial"
+                                            emissiveColor $412405
+                                        }
+
+                                    ]
+                                    }
+                                ]
+                                }
+
+                                # view.whichChoice == 4 - SCORE VIEW
+                                Group {
+                                    children [
+                                        UI_TAB_LAYER {
+                                        Size 480 670
+                                        BackImg "21"
+                                        BackImgTrans 0 20
+                                        children [
+                                            Transform2D {
+                                            children [
+                                                TEXT {
+                                                translation 20 175
+                                                layoutSize 400 100
+                                                Layout_wrap TRUE
+                                                String "You've scored "
+                                                FontStyle_size 26
+                                                FontStyle_family "Arial"
+                                                emissiveColor   $412405
+                                            }
+                                            DEF YOUR_SCORE TEXT {
+                                                translation 20 180
+                                                layoutSize 50 100
+                                                Layout_justify "MIDDLE"
+                                                Layout_wrap TRUE
+                                                String ""
+                                                FontStyle_size 32
+                                                FontStyle_family "Arial"
+                                                emissiveColor   1 0 0
+                                            }
+                                            DEF SCORE_OUT_OF TEXT {
+                                                translation 255 175
+                                                layoutSize 400 100
+                                                Layout_wrap TRUE
+                                                String " out of 100!"
+                                                FontStyle_size 26
+                                                FontStyle_family "Arial"
+                                                emissiveColor   $412405
+                                            }
+                                            DEF SCORE_SW Switch {
+                                                whichChoice -1
+                                                children [
+                                                    TEXT {
+                                                    translation 20 120
+                                                    layoutSize 400 100
+                                                    Layout_wrap TRUE
+                                                    String "It seems that you are not familiar with this topic."
+                                                    FontStyle_size 26
+                                                    FontStyle_family "Arial"
+                                                    emissiveColor $FF0000
+                                                }
+                                                TEXT {
+                                                    translation 20 100
+                                                    layoutSize 400 100
+                                                    Layout_wrap TRUE
+                                                    String "Hmm, you should give it another try!"
+                                                    FontStyle_size 26
+                                                    FontStyle_family "Arial"
+                                                    emissiveColor $640003
+                                                }
+                                                TEXT {
+                                                    translation 20 100
+                                                    layoutSize 400 100
+                                                    Layout_wrap TRUE
+                                                    String "Almost there! You still need to learn more about this topic."
+                                                    FontStyle_size 26
+                                                    FontStyle_family "Arial"
+                                                    emissiveColor $0F4F7C
+                                                }
+                                                TEXT {
+                                                    translation 20 100
+                                                    layoutSize 400 100
+                                                    Layout_wrap TRUE
+                                                    String "Congratulations! You are a true expert!!"
+                                                    FontStyle_size 26
+                                                    FontStyle_family "Arial"
+                                                    emissiveColor $00A035
+                                                }
+                                            ]
+                                            }
+
+                                            DEF INPUT_INITIALS Switch {
+                                                whichChoice 0
+                                                children [
+                                                    Transform2D {
+                                                    children [
+                                                        TEXT {
+                                                        translation 20 0
+                                                        layoutSize 400 100
+                                                        Layout_wrap TRUE
+                                                        String "Input your initials: "
+                                                        FontStyle_size 22
+                                                        FontStyle_family "Arial"
+                                                        emissiveColor   $412405
+                                                    }
+                                                    DEF USER_INPUT UI_TEXT_INPUT {
+                                                        Size 70 40
+                                                        Pos 65 40
+                                                        TextSize 28
+                                                        TextColor $412405
+                                                                                            # TextAlign "Middle"
+                                                        BackImage "24"
+                                                        BackImageSel "46"
+                                                        KeySensorUrl ["1"]
+                                                        StringSensorUrl ["3"]
+                                                    }
+                                                ]
+                                                }
+                                            ]
+                                            }
+                                            DEF SHARE_SW Switch {
+                                                whichChoice 0
+                                                children [
+                                                    DEF SHARE_RESULT_BUTTON BUTTON {
+                                                    size 160 60
+                                                    layoutSize  160 40
+                                                    translation -100 -20
+                                                    textColor $E7CBA2
+                                                    textSize 22
+                                                    buttonText "Share result!"
+                                                    backImage   "38"
+                                                    overImage   "37"
+                                                    fonstSyleFamily "Arial"
+                                                }
+                                            ]
+                                            }
+
+                                            DEF ERROR_MSG TEXT {
+                                                translation 20 -110
+                                                layoutSize 400 100
+                                                Layout_wrap TRUE
+                                                String "Input your initials and share!"
+                                                FontStyle_size 22
+                                                FontStyle_family "Arial"
+                                                emissiveColor   $FF0000
+                                            }
+
+                                            DEF RANK TEXT {
+                                                translation 20 260
+                                                layoutSize 400 100
+                                                Layout_wrap TRUE
+                                                String ""
+                                                FontStyle_size 26
+                                                FontStyle_family "Arial"
+                                                emissiveColor   $412405
+                                            }
+
+                                            DEF RESULT_ALERT_SW Switch {
+                                                whichChoice -1
+                                                children [
+                                                    DEF RESULT_ALERT TEXT {
+                                                    String ""
+                                                    translation 20 -120
+                                                    layoutSize 400 150
+                                                    emissiveColor $412405
+                                                    FontStyle_size 26
+                                                    FontStyle_family    "Arial"
+                                                }
+                                            ]
+                                            }
+                                            DEF EXIT_BUTTON_SW Switch {
+                                                whichChoice -1
+                                                choice [
+                                                    DEF EXIT_BUTTON BUTTON {
+                                                    layoutSize 170 53
+                                                    size 150 60
+                                                    translation 0 -180
+                                                    textColor $FF0000
+                                                    textSize 32
+                                                    buttonText "EXIT"
+                                                    backImage "38"
+                                                    overImage "37"
+                                                    fonstSyleFamily "Arial"
+                                                }
+                                            ]
+                                            }
+                                        ]
+                                        }
+                                    ]
+                                    }
+                                ]
+                                }
+                            ]
+                        }
+                    ]
+				}
+            ]
+        }
+
+        DEF TMR TimeSensor {
+            cycleInterval 30
+            loop TRUE
+            enabled TRUE
+        }
+
+        DEF SCRIPT Script {
+	        field SFNode script             USE SCRIPT
+	        field SFNode gmap               USE GMAP
+	        field SFNode menu               USE MENU
+	        field SFNode q_page             USE Q_PAGE
+	        field SFNode h_page             USE H_PAGE
+	        field SFNode quiz_sw            USE QUIZ_SW
+	        field SFNode tabs               USE TABS
+	        field SFNode map_tab            USE MAP
+	        field SFNode quiz_tab           USE QUIZ
+	        field SFNode help_tab           USE HELP
+	        field SFNode yourScore          USE YOUR_SCORE
+	        field SFNode correct            USE CORRECT_SOUND
+	        field SFNode wrong              USE WRONG_SOUND
+	        field SFNode ar_view            USE AR_VIEW_INSTANCE
+	        field SFNode score_sw           USE SCORE_SW
+	        field SFNode player             USE PLAYER
+	        field SFNode user_initials      USE USER_INPUT
+	        field SFNode result_alert_sw    USE RESULT_ALERT_SW
+	        field SFNode result_alert       USE RESULT_ALERT
+	        field SFNode share_result_sw    USE SHARE_SW
+	        field SFNode error_msg          USE ERROR_MSG
+	        field SFNode input_initials     USE INPUT_INITIALS
+	        field SFNode share_button       USE SHARE_RESULT_BUTTON
+	        field SFNode rank_text          USE RANK
+	        field SFNode out_of             USE SCORE_OUT_OF
+	        field SFNode tmr                USE TMR
+	        field SFNode internet           USE INTERNET_INSTANCE
+	        field SFNode exit_button_sw	    USE EXIT_BUTTON_SW
+	        field SFVec2f playerPos         PLAYER_POSITION
+	        # field SFVec2f mapGPSCenter    MAP_CENTER
+
+	        eventIn SFInt32     showMapView
+	        eventIn SFInt32     showQuestionView
+	        eventIn SFString    showMarkerStory
+	        eventIn SFInt32     addScore
+	        eventIn SFTime      currentTime
+	        eventIn SFBool      timeIsUP
+	        eventIn SFBool      showQuiz
+	        eventIn SFBool      showHelp
+	        eventIn SFBool      sendResult
+	        eventIn SFBool      openResultPage
+	        eventIn SFInt32     tabChanged
+	        eventIn SFFloat     timeLeft
+	        eventIn SFTime      setIntroDuration
+	        eventIn SFTime      checkInternetConnection
+	        eventIn SFBool		 exitGame
+
+	####################################################################################################################
+
+	        field SFInt32 totalNrOfQ 5
+
+	        field SFInt32 nrOfDisplayedQ 5
+	        field MFString question0 ["Who was the roman general defeating the Parisii in 52 BC?
+	        ", "Titus Labienus", "Quintus Aponius", "Lucius Minucius Basilus", "Decimus Junius Brutus Albinus", "1", ]
+	        field MFString question1 ["Whose name was erased from the Meridian of Paris Monument?
+	        ", "509;Cesar", "510;Mitterrand", "511;Napoleon", "512;Louis XIV", "3", ]
+	        field MFString question2 ["When did Clovis the Frank install the capital of the first Franck kingdom in Paris?
+	        ", "356", "508", "534", "426", "2", ]
+	        field MFString question3 ["When was the construction of Notre Dame started?
+	        ", "1200", "999", "1163", "1056", "3", ]
+	        field MFString question4 ["Which monument located in the park was created by Jules-Felix Coutan?
+	        ", "521;Shipwrecked", "522;Armed Peace", "523;Lion’s death", "524;Desert drama", "2", ]
+	        field MFVec2f gpsPos [48.8223268105 2.33874917739, 48.8227259152 2.33890474551, 48.8231320802 2.33855605834, 48.8221961296 2.34015733712, 48.8224716188 2.33930439466, ]
+	        field MFString hint ["He commanded the winter quarters in Vesontio in 58 BC. He also had full command of the legions in Gaul during Caesar’s absence
+	        ", "The Meridian of Paris was defined by French astronomers in 1667 and used as the zero point for longitude on all French maps until 1884.
+	        The name of a French Emperior was erased from the monument after the Restoration of the Monarchy.
+	        ", "The last digit corresponds to the distance, in meters, between the door of the restaurant “Le pavillon Montsouris” and the main gate
+	        ", "If you took the bus to arrive here, divide the bus number by 8 and you will get the first two digits out of four.
+	        ", "This work, dominating the park entrance originally stood in the Square d'Anvers. It replaced a bronze statue symbolizing the French Revolution melted down by the Germans in 1942
+	        ", ]
+
+	        url [
+	            "javascript:
+	            function initialize() {
+	                gpac.set_orientation_portrait();
+	                currentQuestionIndex = 0;
+	                maxScore            = nrOfDisplayedQ*10*2;
+	                out_of.String       = 'out of '+maxScore;
+	                introDuration       = 5;
+	                myScore             = 0;
+	                secondsLeft         = -1;
+	                coorectAnsNr        = 0;
+	                quizTime            = 60*nrOfDisplayedQ;
+	                q_page.quizTime     = quizTime;
+
+	                generateQuestionIndexes();
+	                addQuestions();
+	                addMarkers();
+	                addPlayer();
+	                addHints();
+	                createMarkerRoutes();
+	                addARObjects();
+	                addPlayerGPS2ARView();
+	                routeQuestionsToScore();
+	            }
+
+	            function generateQuestionIndexes() {
+	                allIndexes = new Array();
+	                qIndexes = new Array();
+	                for (i = 0; i < totalNrOfQ; i++) {
+	                    allIndexes[i] = i;
+	                }
+	                for (i = 0; i < nrOfDisplayedQ; i++) {
+	                    nextIndex = allIndexes[Math.floor(Math.random()*allIndexes.length)];
+	                    qIndexes[i] = nextIndex;
+	                    index = allIndexes.indexOf(nextIndex );
+	                    allIndexes.splice(index ,1);
+	                }
+	            }
+
+	            function addQuestions() {
+	                for (i = 0; i < nrOfDisplayedQ; i++) {
+	                    q_page.children[i] = new SFNode ('QUESTION');
+	                    q_page.children[i].initialize = eval('question'+qIndexes[i]);
+	                }
+	            }
+
+	            function addMarkers() {
+	            # in order to add markers to map we need to create an overlay
+	                markerOverlay = new SFNode ('MapOverlay');
+	                markerOverlay.name = 'markers';
+	                for (i = 0; i < nrOfDisplayedQ; i++) {
+	                # create a new MapMarker instance
+	                    marker                          = new SFNode ('MapMarker');
+	                    marker.name                     = ''+i;
+	                    marker.visible                  = true;
+	                    marker.enabled                  = true;
+	                            # create a new shape for the current marker
+	                    markerShape                     = new SFNode ('IMAGE');
+	                    markerShape.size                = new SFVec2f (35, 35);
+	                    markerShape.url                 = new MFString('28');
+	                            # set the shape to the marker
+	                    marker.markerShape              = new MFNode(markerShape);
+	                    marker.position                 = new SFVec2f (gpsPos[qIndexes[i]].x, gpsPos[qIndexes[i]].y);
+	                    marker.radius                   = 5.0;
+
+	                            # add the marker to the already defined overlay (first of the map)
+	                    markerOverlay.addOverlayItems = new MFNode(marker);
+	                }
+	                        # add overlay (together with its items) to the map
+	                gmap.addOverlays = new MFNode(markerOverlay);
+	            }
+
+	            function addPlayer() {
+	                playerOverlay = new SFNode ('MapOverlay');
+	                playerOverlay.name = 'player_overlay';
+	                playerOverlay.addOverlayItems = new MFNode(player);
+	                print ('[ GLOBAL SCRIPT ]: Add the PLAYER MARKER to overlay: ' + player.name);
+	                gmap.addOverlays = new MFNode(playerOverlay);
+	                print ('[ GLOBAL SCRIPT ]: Add the PLAYER OVERLAY to map: ' + playerOverlay.name);
+	            }
+
+	            function addHints() {
+	                print ('[ GLOBAL SCRIPT ]: Adding hints...');
+	                for (i = 0; i < nrOfDisplayedQ; i++) {
+	                    h_page.children[i] = new SFNode ('TEXT');
+	                    h_page.children[i].layoutSize = new SFVec2f (400, 700);
+	                    h_page.children[i].Layout_wrap = true;
+	                    h_page.children[i].FontStyle_size = 28;
+	                    h_page.children[i].FontStyle_family = 'Arial';
+	                    h_page.children[i].emissiveColor = new SFColor(0.25, 0.16, 0.06);
+	                    h_page.children[i].translation = new SFVec2f (0, -80);
+	                    h_page.children[i].String = hint[qIndexes[i]];
+	                }
+	            }
+
+	            function createMarkerRoutes() {
+	                print ('[ GLOBAL SCRIPT ]: Adding marker routes for: '  + gmap.overlays[0].name);
+	                for (i = 0; i < gmap.overlays[0].children.length; i++) {
+	                    Browser.addRoute(gmap.overlays[0].children[i], 'onPlayerAround', script, 'showMarkerStory');
+	                    print ('[ GLOBAL SCRIPT ]: Current marker: '  + gmap.overlays[0].children[i].name);
+	                }
+	                print ('[ GLOBAL SCRIPT ]: Adding marker routes for: '  + gmap.overlays[0].name);
+	            }
+
+	            function addARObjects() {
+	                overlayContainer = gmap.overlays;
+	                if (overlayContainer.length == 0) {
+	                    print ('[ GLOBAL SCRIPT ] - ' + gmap.name + ': There are no overlays');
+	                    return;
+	                }
+	                print ('[ GLOBAL SCRIPT ] - ' + gmap.name + ': Adding AR Objects...');
+	                for (i = 0; i < overlayContainer.length; i++) {
+	                    currentOverlay = overlayContainer[i];
+	                    if (currentOverlay.name == 'player_overlay') {
+	                        continue;
+	                    }
+	                    print ('[ GLOBAL SCRIPT ]: ADD AR items for overlay: ' + currentOverlay.name);
+	                    for (j = 0; j < currentOverlay.children.length; j++) {
+	                        marker              = currentOverlay.children[j];
+	                        arNode              = new SFNode ('AR_OBJECT');
+	                        arNode.name         = marker.name;
+	                        arNode.position     = marker.position;
+	                        arNode.objectURL    = ''+(401+parseInt(marker.name));
+	                        arNode.objScale     = new SFVec3f (0.0001, 0.0001, 0.0001);
+	                        arNode.visible      = true;
+	                        ar_view.addObject   = arNode;
+	                                # get the last AR OBJECT of the ar_view which has exactly the same properties as arNode
+	                                # defined above. We must get the instance of the ar_view because when adding a new node
+	                                # another instance is created, therefore arNode instance does not refer to the ar_object of ar_view
+	                                # ex: addObject uses "new MFNode(arNode)" => creates another instance of arNode
+	                            #   print ('ar_view = ' + ar_view.ar_objects.length);
+	                        arObject            = ar_view.ar_objects[ar_view.ar_objects.length-1];
+	                        Browser.addRoute(marker, 'position',    arObject, 'position');
+	                        Browser.addRoute(marker, 'visible',     arObject, 'visible');
+	                    }
+	                }
+	                        # TESTING (when GPS singal is not available)
+	                ar_view.setPlayerPosition = new SFVec2f (playerPos.x, playerPos.y);
+	                        # END TESTING
+	                return;
+	            }
+
+	            function addPlayerGPS2ARView() {
+	                Browser.addRoute(player, 'position', ar_view, 'setPlayerPosition');
+	            }
+
+	            function routeQuestionsToScore() {
+	                for (i=0; i<q_page.children.length; i++) {
+	                    Browser.addRoute(q_page.children[i], 'score', script, 'addScore');
+	                }
+	                Browser.addRoute(q_page, 'secondsLeft', script, 'timeLeft');
+	            }
+
+	            function tabChanged(whichTab) {
+	                print ('[ GLOBAL SCRIPT ]: Tab changed: ' + whichTab);
+	                if (whichTab == 2) {
+	                    ar_view.openCamera = true;
+	                }
+	                else {
+	                    ar_view.openCamera = false;
+	                }
+	            }
+
+	            function setIntroDuration(val) {
+	                if (val != -1) {
+	                    introDuration = val+cTime;
+	                    menu.whichChoice = 0;
+	                }
+	            }
+
+	            function timeLeft(val) {
+	                secondsLeft = val;
+	            }
+
+	            function sendResult(val) {
+	                initials = user_initials.Text[0];
+	                if (initials == '') {
+	                    error_msg.String = 'Please input your initials!';
+	                    return;
+	                }
+	                else {
+	                    myInitials = '';
+	                    for (i = 0; i < user_initials.Text.length; i++) {
+	                        myInitials += user_initials.Text[i] + ' ';
+	                    }
+	                }
+	                if (!internet.internet) {
+	                    share_button.Text = 'Try again!';
+	                    result_alert.translation = new SFVec2f (20, -130);
+	                    result_alert.T_FS_JUSTIFY = 'BEGIN';
+	                    result_alert.String[0] = 'You finished the game, ';
+	                    result_alert.String[1] = 'you can now exit ARAF.';
+	                    result_alert_sw.whichChoice = 0;
+	                    error_msg.FontStyle_size = 24;
+	                    error_msg.String = 'Your internet is down!!';
+	                    error_msg.translation = new SFVec2f (120, -45);
+	                    error_msg.layoutSize[0] = 200;
+	                    return;
+	                }
+	                else {
+	                    error_msg.String = 'Please wait..';
+	                }
+	                xmlhttp=new XMLHttpRequest();
+	                xmlhttp.onreadystatechange = function() {
+	                    if (this.readyState==4 && this.status==200)
+	                    {
+	                        result_alert_sw.whichChoice = 0;
+	                        if (rank = IsNumeric(this.responseText)) {
+	                            if (rank > 0) {
+	                                rank_text.String = 'Rank: ' + this.responseText;
+	                            }
+	                            input_initials.whichChoice = -1;
+	                            error_msg.FontStyle_size = 26;
+	                            error_msg.T_FS_JUSTIFY = 'MIDDLE';
+	                            error_msg.translation = new SFVec2f (75, 0);
+	                            error_msg.String[0] = 'Thanks for sharing!';
+
+	                            result_alert.String[0] = 'You finished the game, ';
+	                            result_alert.String[1] = 'you can now exit ARAF.';
+	                            result_alert.T_FS_JUSTIFY = 'BEGIN';
+	                            result_alert.translation = new SFVec2f (20, -70);
+	                            share_result_sw.whichChoice = -1;
+	                            exit_button_sw.whichChoice = 0;
+	                        }
+	                        else {
+	                            share_button.Text = 'Try again!';
+	                            error_msg.String = '';
+	                            result_alert.T_FS_JUSTIFY = 'BEGIN';
+	                            result_alert.translation = new SFVec2f (20, -130);
+	                            result_alert.String[0] = 'An error occured.';
+	                            result_alert.String[1] = 'Check your internet connection';
+	                            result_alert.String[2] = 'and try again!';
+	                        }
+	                    }
+	                };
+	                xmlhttp.open('GET', 'http://www.mymultimediaworld.com/games/arquiz/addScore/MOOC/'+initials+'/'+myScore+'/', true);
+	                xmlhttp.send();
+	            }
+
+	            function IsNumeric(num) {
+	                return (num >=0 || num < 0);
+	            }
+
+	            function showCustomScoreMessage() {
+	                if (myScore < 0) {
+	                    score_sw.whichChoice = 0;
+	                }
+	                else if (myScore < maxScore*40/100) {
+	                    score_sw.whichChoice = 1;
+	                }
+	                else if (myScore < maxScore*75/100) {
+	                    score_sw.whichChoice = 2;
+	                }
+	                else {
+	                    score_sw.whichChoice = 3;
+	                }
+	            }
+
+	            function disableTabs() {
+	                for (x = 0; x < tabs.tabButtons.length; x++) {
+	                    tabs.tabButtons[x].tsEnabled = false;
+	                }
+	            }
+
+	            function deselectTabs() {
+	                for (x = 0; x < tabs.tabButtons.length; x++) {
+	                    tabs.tabButtons[x].Deselect = true;
+	                }
+	            }
+
+	            function showQuestionView(val) {
+	                if (val == 1) {
+	                # display quiz view and select the tab button
+	                    tabs.CurrentTab = 0;
+	                    quiz_tab.Select = true;
+	                            # display the quiz question view (there is also the quiz hint view in the same SW)
+	                    quiz_sw.whichChoice = 0;
+	                }
+	            }
+
+	            function showQuiz(val) {
+	                if (val) {
+	                    menu.whichChoice = 2;
+	                    quiz_tab.Select = true;
+	                    tabs.CurrentTab = 3;
+	                }
+	            }
+
+	            function showHelp(val) {
+	                if (val) {
+	                    menu.whichChoice = 2;
+	                    deselectTabs();
+	                    tabs.CurrentTab = 3;
+	                    help_tab.Select = true;
+	                }
+	            }
+
+	            function showMarkerStory(storyID) {
+	                idx = parseInt(storyID);
+	                gmap.overlays[0].children[idx].visible = false;
+	                gmap.overlays[0].children[idx].enabled = false;
+	                        # the story view is actually the first view (where the questions are displayed)
+	                tabs.CurrentTab = 0;
+	                quiz_tab.Select = true;
+	                        # switch to story view (the second sub-view of the Quiz view)
+	                    quiz_sw.whichChoice = 1;
+	                        # display the corresponding marker story
+	                    h_page.activeHint   = idx;
+	                }
+
+	            function exitGame() {
+	                gpac.quit_araf();
+	            }
+	            "
+	        ]
+
+    }
+    ]
+}
+
+# ########################## ROUTES ###############################
+ROUTE ARR_NAV.navigate              TO PLAYER.arrow_navigator
+ROUTE MAIN_TS.time                  TO SCRIPT.currentTime
+ROUTE Q_PAGE.timeUP                 TO SCRIPT.timeIsUP
+ROUTE H_PAGE.showQuestion           TO SCRIPT.showQuestionView
+ROUTE ADVANCE2Game.onClick          TO SCRIPT.showQuiz
+ROUTE ADVANCE2Help.onClick          TO SCRIPT.showHelp
+ROUTE SHARE_RESULT_BUTTON.onClick   TO SCRIPT.sendResult
+ROUTE INTRO_MS.mediaDuration        TO SCRIPT.setIntroDuration
+ROUTE TABS.CurrentTab               TO SCRIPT.tabChanged
+ROUTE TMR.cycleTime                 TO SCRIPT.checkInternetConnection
+ROUTE EXIT_BUTTON.onClick 			TO SCRIPT.exitGame
+
+# ########################## MEDIA IMPORTS ###############################
+
+AT 0 {
+    UPDATE OD [
+    ObjectDescriptor {
+        objectDescriptorID 1
+        esDescr [
+            ES_Descriptor {
+            ES_ID 1
+            decConfigDescr DecoderConfigDescriptor {
+                streamType 10
+                decSpecificInfo UIConfig {
+                    deviceName "KeySensor"
+                }
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 2
+        esDescr [
+            ES_Descriptor {
+            ES_ID 2
+            decConfigDescr DecoderConfigDescriptor {
+                streamType 10
+                decSpecificInfo UIConfig {
+                    deviceName "Mouse"
+                }
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 3
+        esDescr [
+            ES_Descriptor {
+            ES_ID 3
+            decConfigDescr DecoderConfigDescriptor {
+                streamType 10
+                decSpecificInfo UIConfig {
+                    deviceName "StringSensor"
+                }
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 4
+        esDescr [
+            ES_Descriptor {
+            ES_ID 4
+            decConfigDescr DecoderConfigDescriptor {
+                streamType 10
+                decSpecificInfo UIConfig {
+                    deviceName "MPEG-V:siv:OrientationSensorType"
+                }
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 5
+        esDescr [
+            ES_Descriptor {
+            ES_ID 5
+            decConfigDescr DecoderConfigDescriptor {
+                streamType 10
+                decSpecificInfo UIConfig {
+                    deviceName "MPEG-V:siv:GlobalPositionSensorType"
+                }
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 201
+        esDescr [
+            ES_Descriptor {
+            ES_ID 201
+            decConfigDescr DecoderConfigDescriptor {
+                streamType 10
+                decSpecificInfo UIConfig {
+                    deviceName "MPEG-V:siv:GlobalPositionSensorType"
+                }
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 202
+        esDescr [
+            ES_Descriptor {
+            ES_ID 202
+            decConfigDescr DecoderConfigDescriptor {
+                streamType 10
+                decSpecificInfo UIConfig {
+                    deviceName "MPEG-V:siv:OrientationSensorType"
+                }
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 8
+        esDescr [
+            ES_Descriptor {
+            ES_ID 8
+            muxInfo MuxInfo {
+                fileName "images/edit_text_field.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 9
+        esDescr [
+            ES_Descriptor {
+            ES_ID 9
+            muxInfo MuxInfo {
+                fileName "images/edit_text_field_sel.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 10
+        esDescr [
+            ES_Descriptor {
+            ES_ID 10
+            muxInfo MuxInfo {
+                fileName "images/tab_quiz_off.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 11
+        esDescr [
+            ES_Descriptor {
+            ES_ID 11
+            muxInfo MuxInfo {
+                fileName "images/tab_quiz_on.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 12
+        esDescr [
+            ES_Descriptor {
+            ES_ID 12
+            muxInfo MuxInfo {
+                fileName "images/tab_map_off.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 13
+        esDescr [
+            ES_Descriptor {
+            ES_ID 13
+            muxInfo MuxInfo {
+                fileName "images/tab_map_on.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 14
+        esDescr [
+            ES_Descriptor {
+            ES_ID 14
+            muxInfo MuxInfo {
+                fileName "images/camera_tab_off.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 15
+        esDescr [
+            ES_Descriptor {
+            ES_ID 15
+            muxInfo MuxInfo {
+                fileName "images/camera_tab_on.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 16
+        esDescr [
+            ES_Descriptor {
+            ES_ID 16
+            muxInfo MuxInfo {
+                fileName "images/help_tab_off.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 17
+        esDescr [
+            ES_Descriptor {
+            ES_ID 17
+            muxInfo MuxInfo {
+                fileName "images/help_tab_on.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 19
+        esDescr [
+            ES_Descriptor {
+            ES_ID 19
+            muxInfo MuxInfo {
+                fileName "images/intro.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 20
+        esDescr [
+            ES_Descriptor {
+            ES_ID 20
+            muxInfo MuxInfo {
+                fileName "images/help_background.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 21
+        esDescr [
+            ES_Descriptor {
+            ES_ID 21
+            muxInfo MuxInfo {
+                fileName "images/result.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 22
+        esDescr [
+            ES_Descriptor {
+            ES_ID 22
+            muxInfo MuxInfo {
+                fileName "sounds/wrong.mp3"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 23
+        esDescr [
+            ES_Descriptor {
+            ES_ID 23
+            muxInfo MuxInfo {
+                fileName "sounds/ding.mp4#1"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 24
+        esDescr [
+            ES_Descriptor {
+            ES_ID 24
+            muxInfo MuxInfo {
+                fileName "images/input_bg.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 25
+        esDescr [
+            ES_Descriptor {
+            ES_ID 25
+            muxInfo MuxInfo {
+                fileName "images/heart.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 26
+        esDescr [
+            ES_Descriptor {
+            ES_ID 26
+            muxInfo MuxInfo {
+                fileName "videos/splashscreen.mp4#1"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 27
+        esDescr [
+            ES_Descriptor {
+            ES_ID 27
+            muxInfo MuxInfo {
+                fileName "images/ancient_scroll.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 28
+        esDescr [
+            ES_Descriptor {
+            ES_ID 28
+            muxInfo MuxInfo {
+                fileName "images/marker_eu.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 29
+        esDescr [
+            ES_Descriptor {
+            ES_ID 29
+            muxInfo MuxInfo {
+                fileName "images/back_ancient_on.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 30
+        esDescr [
+            ES_Descriptor {
+            ES_ID 30
+            muxInfo MuxInfo {
+                fileName "images/plus_off.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 31
+        esDescr [
+            ES_Descriptor {
+            ES_ID 31
+            muxInfo MuxInfo {
+                fileName "images/minus_off.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 32
+        esDescr [
+            ES_Descriptor {
+            ES_ID 32
+            muxInfo MuxInfo {
+                fileName "images/plus_on_v2.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 33
+        esDescr [
+            ES_Descriptor {
+            ES_ID 33
+            muxInfo MuxInfo {
+                fileName "images/minus_on_v2.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 34
+        esDescr [
+            ES_Descriptor {
+            ES_ID 34
+            muxInfo MuxInfo {
+                fileName "images/message_bg.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 35
+        esDescr [
+            ES_Descriptor {
+            ES_ID 35
+            muxInfo MuxInfo {
+                fileName "images/hint_background.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 36
+        esDescr [
+            ES_Descriptor {
+            ES_ID 36
+            muxInfo MuxInfo {
+                fileName "images/back_icon.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 37
+        esDescr [
+            ES_Descriptor {
+            ES_ID 37
+            muxInfo MuxInfo {
+                fileName "images/validate_on.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 38
+        esDescr [
+            ES_Descriptor {
+            ES_ID 38
+            muxInfo MuxInfo {
+                fileName "images/validate.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 39
+        esDescr [
+            ES_Descriptor {
+            ES_ID 39
+            muxInfo MuxInfo {
+                fileName "images/intro_button.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 42
+        esDescr [
+            ES_Descriptor {
+            ES_ID 42
+            muxInfo MuxInfo {
+                fileName "images/gps_off.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 43
+        esDescr [
+            ES_Descriptor {
+            ES_ID 43
+            muxInfo MuxInfo {
+                fileName "images/gps_on.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 46
+        esDescr [
+            ES_Descriptor {
+            ES_ID 46
+            muxInfo MuxInfo {
+                fileName "images/input_bg_on.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 47
+        esDescr [
+            ES_Descriptor {
+            ES_ID 47
+            muxInfo MuxInfo {
+                fileName "images/internet_off.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 48
+        esDescr [
+            ES_Descriptor {
+            ES_ID 48
+            muxInfo MuxInfo {
+                fileName "images/internet_on.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 50
+        esDescr [
+            ES_Descriptor {
+            ES_ID 50
+            muxInfo MuxInfo {
+                fileName "images/back_icon_on.png"
+            }
+        }
+    ]
+    }
+
+    #
+    # NAVIGATOR ICONS
+    #
+    ObjectDescriptor {
+        objectDescriptorID 51
+        esDescr [
+            ES_Descriptor {
+            ES_ID 51
+            muxInfo MuxInfo {
+                fileName "images/arrows/up.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 52
+        esDescr [
+            ES_Descriptor {
+            ES_ID 52
+            muxInfo MuxInfo {
+                fileName "images/arrows/up_over.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 53
+        esDescr [
+            ES_Descriptor {
+            ES_ID 53
+            muxInfo MuxInfo {
+                fileName "images/arrows/down.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 54
+        esDescr [
+            ES_Descriptor {
+            ES_ID 54
+            muxInfo MuxInfo {
+                fileName "images/arrows/down_over.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 55
+        esDescr [
+            ES_Descriptor {
+            ES_ID 55
+            muxInfo MuxInfo {
+                fileName "images/arrows/left.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 56
+        esDescr [
+            ES_Descriptor {
+            ES_ID 56
+            muxInfo MuxInfo {
+                fileName "images/arrows/left_over.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 57
+        esDescr [
+            ES_Descriptor {
+            ES_ID 57
+            muxInfo MuxInfo {
+                fileName "images/arrows/right.png"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 58
+        esDescr [
+            ES_Descriptor {
+            ES_ID 58
+            muxInfo MuxInfo {
+                fileName "images/arrows/right_over.png"
+            }
+        }
+    ]
+    }
+    #
+    # /NAVIGATOR ICONS
+    #
+
+    # # #         # #
+    # 3D Numbers OD #
+    # # #         # #
+    ObjectDescriptor {
+        objectDescriptorID 401
+        esDescr [
+            ES_Descriptor {
+            ES_ID 401
+            muxInfo MuxInfo {
+                fileName "numbers/1.mp4"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 402
+        esDescr [
+            ES_Descriptor {
+            ES_ID 402
+            muxInfo MuxInfo {
+                fileName "numbers/2.mp4"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 403
+        esDescr [
+            ES_Descriptor {
+            ES_ID 403
+            muxInfo MuxInfo {
+                fileName "numbers/3.mp4"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 404
+        esDescr [
+            ES_Descriptor {
+            ES_ID 404
+            muxInfo MuxInfo {
+                fileName "numbers/4.mp4"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 405
+        esDescr [
+            ES_Descriptor {
+            ES_ID 405
+            muxInfo MuxInfo {
+                fileName "numbers/5.mp4"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 406
+        esDescr [
+            ES_Descriptor {
+            ES_ID 406
+            muxInfo MuxInfo {
+                fileName "numbers/6.mp4"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 407
+        esDescr [
+            ES_Descriptor {
+            ES_ID 407
+            muxInfo MuxInfo {
+                fileName "numbers/7.mp4"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 408
+        esDescr [
+            ES_Descriptor {
+            ES_ID 408
+            muxInfo MuxInfo {
+                fileName "numbers/8.mp4"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 409
+        esDescr [
+            ES_Descriptor {
+            ES_ID 409
+            muxInfo MuxInfo {
+                fileName "numbers/9.mp4"
+            }
+        }
+    ]
+    }
+    ObjectDescriptor {
+        objectDescriptorID 410
+        esDescr [
+            ES_Descriptor {
+            ES_ID 410
+            muxInfo MuxInfo {
+                fileName "numbers/10.mp4"
+            }
+        }
+    ]
+    }
+    # ok click
+    ObjectDescriptor {
+        objectDescriptorID 800
+        esDescr [
+            ES_Descriptor {
+            ES_ID 800
+            muxInfo MuxInfo {
+                fileName "sounds/ok.mp3"
+            }
+        }
+    ]
+    }
+    ]
+}
+AT 0 { UPDATE OD [
+    ObjectDescriptor { objectDescriptorID 512 esDescr [ ES_Descriptor { ES_ID 512 muxInfo MuxInfo {fileName "images/questions/LouisXIV628b0194-8bbf-4789-8076-54ab1ba1dce8.jpg"}}]}
+    ObjectDescriptor { objectDescriptorID 521 esDescr [ ES_Descriptor { ES_ID 521 muxInfo MuxInfo {fileName "images/questions/1024px-Parc_Montsouris_statue_113dbb5127-2b5d-444e-9034-ca25ef4d25c1.jpg"}}]}
+    ObjectDescriptor { objectDescriptorID 522 esDescr [ ES_Descriptor { ES_ID 522 muxInfo MuxInfo {fileName "images/questions/P1110707_Paris_XIV_parc_de_Montsouris_rwk29bd1538-4734-4c3a-813d-5814a3d1d14a.jpg"}}]}
+    ObjectDescriptor { objectDescriptorID 523 esDescr [ ES_Descriptor { ES_ID 523 muxInfo MuxInfo {fileName "images/questions/Lion_death94789b81-eacc-43c4-b525-7043af8a7137.png"}}]}
+    ObjectDescriptor { objectDescriptorID 524 esDescr [ ES_Descriptor { ES_ID 524 muxInfo MuxInfo {fileName "images/questions/Desert dramaeebc8b18-e9c1-46ce-b09b-6bee09ae03d7.png"}}]}
+    ObjectDescriptor { objectDescriptorID 509 esDescr [ ES_Descriptor { ES_ID 509 muxInfo MuxInfo {fileName "images/questions/Jules_cesarfa40ed55-71fc-46f7-a90a-d2d822d7cba5.jpg"}}]}
+    ObjectDescriptor { objectDescriptorID 510 esDescr [ ES_Descriptor { ES_ID 510 muxInfo MuxInfo {fileName "images/questions/Mitterrandcfa3df74-cbba-4c67-a670-3c3990b2fc73.jpg"}}]}
+    ObjectDescriptor { objectDescriptorID 511 esDescr [ ES_Descriptor { ES_ID 511 muxInfo MuxInfo {fileName "images/questions/Napoleon_I_of_France_by_Andrea_Appiani0c9ed1c2-d255-41fb-8fb9-7e133765a403.jpg"}}]}
+] }

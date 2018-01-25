@@ -1,0 +1,25 @@
+PROTO PLAYER_PIECE [
+	exposedField SFVec2f rectangleTranslation 	0 0
+	exposedField SFVec2f rectangleSize 		5 5
+	exposedField SFColor playerColor 		0 1 0
+	exposedField SFFloat rotationAngle 		0.0
+]
+{
+    Transform2D {
+        translation 	IS rectangleTranslation
+        rotationAngle 	IS rotationAngle
+        children [
+            Shape {
+                appearance Appearance {
+                    material Material2D {
+                        emissiveColor IS playerColor
+                        filled TRUE
+                    }
+                }
+                geometry Rectangle {
+                    size IS rectangleSize
+                }
+            }
+        ]
+    }
+}
