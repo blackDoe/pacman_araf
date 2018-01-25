@@ -1,207 +1,211 @@
 #define PLAYER_POSITION 48.625200 2.442422
 
 PROTO MapPlayer [
-    	exposedField 	SFString   	name               "playerName"
-    	exposedField 	SFVec2f    	position          	0 0
-		exposedField 	SFBool     	visible         	TRUE
-		exposedField 	MFNode	 	playerShape			[]
-    	eventIn     	SFInt32 	setMapZoomLevel
-    	eventIn     	SFVec2f		setMapGPSCenter
+    exposedField    SFString    name                "playerName"
+	exposedField    SFVec2f     position            0 0
+	exposedField    SFBool      visible             TRUE
+	exposedField    MFNode      playerShape         []
+	eventIn         SFInt32     setMapZoomLevel
+	eventIn         SFVec2f     setMapGPSCenter
+	    # 'arrow_navigator': for testing -> use arrow navigator proto to change player position
+	    # through the 'arrow_navigator' event (up, down, left, right mapped to 0, 1, 2, 3)
+	eventIn         SFInt32     arrow_navigator
 ]
-{	
-	DEF PLAYER Transform2D {
-		children IS playerShape
-	}
-    
-    DEF UI_PLAYER_SCRIPT Script {
-        field       SFNode      player              USE PLAYER
-        field       SFVec2f     playerPositionTest  PLAYER_POSITION
-        eventOut    SFVec2f  	playerPosition      IS position
-        eventIn     SFVec2f 	setMapGPSCenter     IS setMapGPSCenter
-        eventIn     SFInt32 	updateMapZoomLevel  IS setMapZoomLevel
-        eventIn     SFInt32     keyPress
-        eventIn     SFVec3f     updatePlayerGPSPosition
-        
-        url ["javascript:
-            function initialize() {
-                # Equatorial radius (m)
-                eqRadius            = 6378137;
-                playerLat           = playerPositionTest.x;
-                playerLon           = playerPositionTest.y;
-                tileSize            = 256;
-                originShift         = 2 * Math.PI * eqRadius / 2.0;
-                initialResolution   = 2 * Math.PI * eqRadius / tileSize;
-                mapZoomLevel        = 19;
-                playerCoord         = new Array(0, 0);
-                mapCenterCoord      = new Array(0, 0);
-                mapGPSCenter        = new SFVec2f (0, 0);
-            }
-            
-            function updatePlayerPosition() {
-                mapCenterCoord  = LatLonToPixels(mapGPSCenter.x, mapGPSCenter.y);
-                playerCoord     = LatLonToPixels(playerLat, playerLon);
-                updatePlayerPositionOnMap();
-            }
+{
 
-            function updatePlayerGPSPosition(gps) {
-                print ('[ PLAYER ]: UPDATE PLAYER GPS POSITION: (Latitude: ' + gps.y + '), (Longitude: ' + gps.x + ')');
-                playerLat = gps.y;
-                playerLon = gps.x;
-                playerPosition = new SFVec2f (playerLat, playerLon);
-                playerCoord     = LatLonToPixels(playerLat, playerLon);
-                updatePlayerPositionOnMap();
-            }
-            
-            function updateMapZoomLevel(mapZoom) {
-                print ('[ PLAYER ]: SET MAP ZOOM LEVEL: ' + mapZoom);
-                mapZoomLevel = mapZoom;
-                updatePlayerPosition();
-            }
-            
-            function setMapGPSCenter(mapGPS) {
-                if (mapGPS.x == 0 && mapGPS.y ==0) return;
-                print ('[ PLAYER ]: SET MAP GPS CENTER: ' + mapGPS);
-                mapGPSCenter    = new SFVec2f (mapGPS.x, mapGPS.y);
-                updatePlayerPosition();
-            }
-            
-            function keyPress(value)
-            {
-                if (value == 0) return;
-                playerCoord = LatLonToPixels(playerLat, playerLon);
-                switch (value)
-                {
-                    # Right Key
-                    case 68: 
-                    {
-                        player.translation.x += 8;
-                        playerCoord[0] += 8;
-                        break;
-                    }
-                    # Left Key
-                    case 65: 
-                    {
-                        player.translation.x -= 8;
-                        playerCoord[0] -= 8;
-                        break;
-                    }
-                    # Up Key
-                    case 87:
-                    {
-                        player.translation.y += 8;
-                        playerCoord[1] += 8;
-                        break;
-                    }
-                    # Down Key
-                    case 83:
-                    {
-                        player.translation.y -= 8;
-                        playerCoord[1] -= 8;
-                        break;
-                    }
-                }
-                playerPositionArr = PixelsToLatLon(playerCoord[0], playerCoord[1]);
-                playerLat = playerPositionArr[0];
-                playerLon = playerPositionArr[1];
-                
-                playerPosition = new SFVec2f (playerPositionArr[0], playerPositionArr[1]);
-            }
-            
-            function updatePlayerPositionOnMap() {
-                # if playerCoord OR mapCenterCoord has not been set yet, return
-                if ((playerCoord[0] == Number.POSITIVE_INFINITY && playerCoord[1] == Number.POSITIVE_INFINITY) || 
-                    (mapCenterCoord[0] == Number.POSITIVE_INFINITY && mapCenterCoord[1] == Number.POSITIVE_INFINITY)) {
-                    return;
-                }
-                player.translation  = new SFVec2f (playerCoord[0] - mapCenterCoord[0], playerCoord[1] - mapCenterCoord[1]);
-                print ('[ PLAYER ]: SET NEW TRANSLATION ON MAP: ' + player.translation);
-            }
-            
-            # testing: keyboard arrows "wrapper"
-            function arrow_navigator(direction) {
-                print ('[ PLAYER ]: MOVE PLAYER: ' + direction);
-                if (direction == -1) return;
-                # up
-                if (direction == 0) {
-                    keyPress(87);
-                }
-                # down
-                else if (direction == 1) {
-                    keyPress(83);
-                }
-                # left
-                else if (direction == 2) {
-                    keyPress(65);
-                }
-                # right
-                else if (direction == 3) {
-                    keyPress(68);
-                }
-                return;
-            }
-            
-            function LatLonToPixels(lat, lon) {
-                ll2p    = LatLonToMeters(lat, lon);
-                m2p     = MetersToPixels(ll2p[0], ll2p[1]);
-                return new Array(m2p[0], m2p[1]); 
-            }
-            function LatLonToMeters(lat, lon ) {
-                mx      = lon * originShift / 180.0;
-                my      = Math.log( Math.tan((90 + lat) * Math.PI / 360.0 )) / (Math.PI / 180.0);
-                my      = my * originShift / 180.0;
-                return new Array(mx, my);
-            }
-            function MetersToPixels(mx, my) {
-                res     = Resolution();
-                px      = (mx + originShift) / res;
-                py      = (my + originShift) / res;
-                return new Array(px, py);
-            }
-            function PixelsToLatLon(px, py) {
-                mp2m    = PixelsToMeters(px, py);
-                mmtll   = MetersToLatLon(mp2m[0], mp2m[1]);
-                return new Array(mmtll[0], mmtll[1]);
-            }
-            function MetersToLatLon(mx, my ) {
-                lon     = (mx / originShift) * 180.0;
-                lat     = (my / originShift) * 180.0;
-                lat     = 180 / Math.PI * (2 * Math.atan( Math.exp( lat * Math.PI / 180.0)) - Math.PI / 2.0);
-                return new Array(lat, lon);
-            }
-            function PixelsToMeters(px, py) {
-                res     = Resolution();
-                mx      = px * res - originShift;
-                my      = py * res - originShift;
-                return new Array(mx, my);
-            }
-            function Resolution() {
-                return initialResolution / (Math.pow(2,mapZoomLevel));
-            }
-        "]
-    }
-    DEF UI_MAP_KEY_SENS InputSensor {
-        url "61"
-        buffer {
-            REPLACE UI_PLAYER_SCRIPT.keyPress BY 0
-        }
-    }
-    DEF UI_PLAYER_GPS_SENS InputSensor {
-        url "63"
-        buffer {
-            REPLACE UI_PLAYER_SCRIPT.updatePlayerGPSPosition BY 0 0 0
-        }
-    }
+    DEF PLAYER Transform2D {
+    children IS playerShape
 }
 
+    DEF UI_PLAYER_SCRIPT Script {
+    field       SFNode      player              USE PLAYER
+    field       SFVec2f 	playerPositionTest  PLAYER_POSITION
+    field		MFNode		playerNode 			IS playerShape
+    eventOut    SFVec2f     playerPosition      IS position
+    eventIn     SFVec2f 	setMapGPSCenter     IS setMapGPSCenter
+    eventIn     SFInt32 	updateMapZoomLevel  IS setMapZoomLevel
+        # 'arrow_navigator': for testing
+        eventIn     SFInt32 	arrow_navigator     IS arrow_navigator
+    eventIn     SFInt32     keyPress
+    eventIn     SFVec3f     updatePlayerGPSPosition
 
+    url ["javascript:
+    function initialize() {
+    # Equatorial radius (m)
+        eqRadius            = 6378137;
+        playerLat           = playerPositionTest.x;
+        playerLon           = playerPositionTest.y;
+        tileSize            = 256;
+        originShift         = 2 * Math.PI * eqRadius / 2.0;
+        initialResolution   = 2 * Math.PI * eqRadius / tileSize;
+        mapZoomLevel        = 19;
+        playerCoord         = new Array(0, 0);
+        mapCenterCoord      = new Array(0, 0);
+        mapGPSCenter        = new SFVec2f (0, 0);
+    }
 
+    function updatePlayerPosition() {
+    # update playerCoord and mapCenterCoord (if it's the case: the playerCoord or mapCenterCoord may be the same
+                # but compute it anyways just to be sure everything has been updated with the last values)
+        mapCenterCoord  = LatLonToPixels(mapGPSCenter.x, mapGPSCenter.y);
+        playerCoord     = LatLonToPixels(playerLat, playerLon);
+        updatePlayerPositionOnMap();
+    }
 
+    function updatePlayerGPSPosition(gps) {
+        print ('[ PLAYER ]: UPDATE PLAYER GPS POSITION: (Latitude: ' + gps.y + '), (Longitude: ' + gps.x + ')');
+        setPlayerMarkerGreen();
+        playerLat = gps.y;
+        playerLon = gps.x;
+        playerPosition = new SFVec2f (playerLat, playerLon);
+        playerCoord     = LatLonToPixels(playerLat, playerLon);
+        updatePlayerPositionOnMap();
+    }
 
+    function setPlayerMarkerGreen() {
+        playerNode[0].children[0].playerColor = new SFColor (0,1,0);
+        playerNode[0].children[1].playerColor = new SFColor (0,1,0);
+        playerNode[0].children[2].playerColor = new SFColor (0,1,0);
+        playerNode[0].children[3].playerColor = new SFColor (0,1,0);
+    }
 
+    function updateMapZoomLevel(mapZoom) {
+        print ('[ PLAYER ]: SET MAP ZOOM LEVEL: ' + mapZoom);
+        mapZoomLevel = mapZoom;
+        updatePlayerPosition();
+    }
 
+    function setMapGPSCenter(mapGPS) {
+        if (mapGPS.x == 0 && mapGPS.y ==0) return;
+        print ('[ PLAYER ]: SET MAP GPS CENTER: ' + mapGPS);
+        mapGPSCenter    = new SFVec2f (mapGPS.x, mapGPS.y);
+        updatePlayerPosition();
+    }
 
+    function keyPress(value)
+    {
+        if (value == 0) return;
+        playerCoord = LatLonToPixels(playerLat, playerLon);
+        switch (value)
+        {
+            # Right Key
+            case 68:
+            {
+                player.translation.x += 8;
+                playerCoord[0] += 8;
+                break;
+            }
+                    # Left Key
+            case 65:
+            {
+                player.translation.x -= 8;
+                playerCoord[0] -= 8;
+                break;
+            }
+                    # Up Key
+            case 87:
+            {
+                player.translation.y += 8;
+                playerCoord[1] += 8;
+                break;
+            }
+                    # Down Key
+            case 83:
+            {
+                player.translation.y -= 8;
+                playerCoord[1] -= 8;
+                break;
+            }
+        }
+        playerPositionArr = PixelsToLatLon(playerCoord[0], playerCoord[1]);
+        playerLat = playerPositionArr[0];
+        playerLon = playerPositionArr[1];
+        playerPosition = new SFVec2f (playerPositionArr[0], playerPositionArr[1]);
+    }
 
+    function updatePlayerPositionOnMap() {
+    # if playerCoord OR mapCenterCoord has not been set yet, return
+        if ((playerCoord[0] == Number.POSITIVE_INFINITY && playerCoord[1] == Number.POSITIVE_INFINITY) ||
+            (mapCenterCoord[0] == Number.POSITIVE_INFINITY && mapCenterCoord[1] == Number.POSITIVE_INFINITY)) {
+            return;
+        }
+        player.translation  = new SFVec2f (playerCoord[0] - mapCenterCoord[0], playerCoord[1] - mapCenterCoord[1]);
+        print ('[ PLAYER ]: SET NEW TRANSLATION ON MAP: ' + player.translation);
+    }
 
+            # testing: keyboard arrows "wrapper"
+    function arrow_navigator(direction) {
+        print ('[ PLAYER ]: MOVE PLAYER: ' + direction);
+        if (direction == -1) return;
+                # up
+        if (direction == 0) {
+            keyPress(87);
+        }
+                # down
+    else if (direction == 1) {
+            keyPress(83);
+        }
+                # left
+    else if (direction == 2) {
+            keyPress(65);
+        }
+                # right
+    else if (direction == 3) {
+            keyPress(68);
+        }
+        return;
+    }
 
-
-
+    function LatLonToPixels(lat, lon) {
+        ll2p    = LatLonToMeters(lat, lon);
+        m2p     = MetersToPixels(ll2p[0], ll2p[1]);
+        return new Array(m2p[0], m2p[1]);
+    }
+    function LatLonToMeters(lat, lon) {
+        mx      = lon * originShift / 180.0;
+        my      = Math.log( Math.tan((90 + lat) * Math.PI / 360.0 )) / (Math.PI / 180.0);
+        my      = my * originShift / 180.0;
+        return new Array(mx, my);
+    }
+    function MetersToPixels(mx, my) {
+        res     = Resolution();
+        px      = (mx + originShift) / res;
+        py      = (my + originShift) / res;
+        return new Array(px, py);
+    }
+    function PixelsToLatLon(px, py) {
+        mp2m    = PixelsToMeters(px, py);
+        mmtll   = MetersToLatLon(mp2m[0], mp2m[1]);
+        return new Array(mmtll[0], mmtll[1]);
+    }
+    function MetersToLatLon(mx, my ) {
+        lon     = (mx / originShift) * 180.0;
+        lat     = (my / originShift) * 180.0;
+        lat     = 180 / Math.PI * (2 * Math.atan( Math.exp( lat * Math.PI / 180.0)) - Math.PI / 2.0);
+        return new Array(lat, lon);
+    }
+    function PixelsToMeters(px, py) {
+        res     = Resolution();
+        mx      = px * res - originShift;
+        my      = py * res - originShift;
+        return new Array(mx, my);
+    }
+    function Resolution() {
+        return initialResolution / (Math.pow(2,mapZoomLevel));
+    }
+    "
+    ]
+}
+    DEF UI_MAP_KEY_SENS InputSensor {
+    url "1"
+    buffer {
+        REPLACE UI_PLAYER_SCRIPT.keyPress BY 0
+    }
+}
+    DEF UI_PLAYER_GPS_SENS InputSensor {
+    url "5"
+    buffer {
+        REPLACE UI_PLAYER_SCRIPT.updatePlayerGPSPosition BY 0 0 0
+    }
+}
+}
