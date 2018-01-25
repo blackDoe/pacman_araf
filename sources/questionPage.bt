@@ -1,0 +1,260 @@
+PROTO QUESTION_PAGE [
+    exposedField    MFNode      children        []
+exposedField    SFFloat     quizTime        10
+exposedField    SFInt32     activeQuestion  0
+exposedField    SFVec2f     Size            480 700
+eventIn         SFFloat     currentScore
+eventOut        SFBool      timeUP
+eventOut        SFFloat     secondsLeft
+]
+{
+    Layer2D {
+    size IS Size
+    children [
+        OrderedGroup {
+        children [
+            DEF QUESTION_PAGE_TIMER TimeSensor {
+            cycleInterval 1
+            loop TRUE
+            enabled FALSE
+        }
+
+        DEF QUESTION_PAGE_SCORE_TIMER TimeSensor {
+            cycleInterval 5
+            loop TRUE
+            enabled FALSE
+        }
+        Transform2D {
+            children [
+                DEF SW Switch {
+                whichChoice IS activeQuestion
+                children IS children
+            }
+        ]
+        }
+        Transform2D {
+            translation 0 -320
+            children [
+                Shape {
+                appearance Appearance {
+                    material Material2D {
+                        lineProps LineProperties {
+                            width 0
+                        }
+                    }
+                    texture DEF QUESTION_PAGE_GL LinearGradient {
+                        key [0 0.4 0.6 1]
+                        keyValue [0 1 0    1 0 0   1 0 0    0 1 0]
+                        startPoint 0 0
+                        spreadMethod 2
+                    }
+                }
+                geometry DEF QUESTION_PAGE_R Rectangle {
+                    size 480 5
+                }
+            }
+        ]
+        }
+        Transform2D {
+            translation 0 -305
+            children [
+                Shape {
+                appearance Appearance {
+                    texture ImageTexture {
+                        url "25"
+                    }
+                    material Material2D {
+                        lineProps LineProperties {
+                            width 0
+                        }
+                    }
+                }
+                geometry DEF QUESTION_PAGE_HEART Rectangle {
+                    size 25 25
+                }
+            }
+        ]
+        }
+        DEF QNR TEXT {
+            translation 0 265
+            layoutSize 390 100
+            Layout_wrap TRUE
+            String "Question I"
+            FontStyle_size 28
+            FontStyle_family "Arial"
+            emissiveColor $422A10
+        }
+        TEXT {
+            translation     -90 -282
+            layoutSize              200 100
+            String                  "Score: "
+            emissiveColor   $412405
+            FontStyle_size              26
+            FontStyle_family            ["Comic Sans MS"]
+        }
+        Transform2D {
+            translation -80 -262
+            children [
+                Shape {
+                geometry DEF QUESTION_PAGE_SCORE_TEXT Text {
+                    string  ["0"]
+                    fontStyle FontStyle {
+                        family       ["Comic Sans MS"]
+                        justify      ["MIDDLE"]
+                        size         30
+                    }
+                }
+                appearance Appearance {
+                    material Material2D {
+                        emissiveColor   $422A10
+                        filled          true
+                    }
+                }
+            }
+        ]
+        }
+        DEF QUESTION_PAGE_HURRY Switch {
+            whichChoice 0
+            children [
+                Transform2D {}
+            Transform2D {
+                children [
+                    TEXT {
+                    translation     -120 -335
+                    layoutSize              200 100
+                    String                  "seconds left: "
+                    emissiveColor   1 0 0
+                    FontStyle_size              20
+                    FontStyle_family            ["Comic Sans MS"]
+                }
+                DEF QUESTION_PAGE_HURRY_TEXT TEXT {
+                    translation     10 -335
+                    layoutSize              200 100
+                    String                  ""
+                    emissiveColor   1 0 0
+                    FontStyle_size              20
+                    FontStyle_family            ["Comic Sans MS"]
+                }
+            ]
+            }
+        ]
+        }
+    ]
+    }
+]
+}
+
+    DEF QUESTION_PAGE_SC Script {
+    eventIn SFTime set_frac
+    eventIn SFTime increaseCnt
+    eventIn SFFloat currentScoreEvent IS currentScore
+    eventIn SFFloat emphasizeScore
+    eventIn SFFloat set_heart
+    eventIn SFInt32 activeQuestion IS activeQuestion
+
+    field SFFloat quizTime IS quizTime
+    field SFNode heart USE QUESTION_PAGE_HEART
+    field SFNode r USE QUESTION_PAGE_R
+    field SFNode grad USE QUESTION_PAGE_GL
+    field SFBool isDown FALSE
+    field SFNode timer USE QUESTION_PAGE_TIMER
+    field SFNode score_text USE QUESTION_PAGE_SCORE_TEXT
+    field SFNode score_timer USE QUESTION_PAGE_SCORE_TIMER
+    field SFNode hurry USE QUESTION_PAGE_HURRY
+    field SFNode hurryTxt USE QUESTION_PAGE_HURRY_TEXT
+    field SFNode qNrText USE QNR
+
+    eventOut SFBool timeUP IS timeUP
+    eventOut SFFloat secondsLeft IS secondsLeft
+
+    url ["javascript:
+    function initialize() {
+        timer.enabled = true;
+        timeUP = false;
+        linearGradientKeyDiff = grad.key[1]-grad.key[0];
+        shrinkFraction = r.size.x/quizTime;
+        colorGradFraction = linearGradientKeyDiff/quizTime;
+        oddEven = -7;
+        grow = true;
+        secondsLeft = quizTime;
+        smallHeart = true;
+        qRoman = 'I';
+    }
+
+    function activeQuestion(qnr) {
+        switch(qnr) {
+            case 0: qRoman = 'I'; break;
+            case 1: qRoman = 'II'; break;
+            case 2: qRoman = 'III'; break;
+            case 3: qRoman = 'IV'; break;
+            case 4: qRoman = 'V'; break;
+            default: qRoman = 'I';
+        }
+        qNrText.String = new MFString ('Question ' + qRoman);
+    }
+
+    function currentScoreEvent(val) {
+        if (score_text.string[0] != ''+val) {
+            score_text.string = new MFString(''+val);
+            score_timer.enabled = true;
+        }
+    }
+
+    function emphasizeScore(val) {
+        if (grow) {
+            if (score_text.fontStyle.size < 40) {
+                score_text.fontStyle.size += 1;
+            }
+            else {
+                grow = false;
+            }
+        }
+        else {
+            if (score_text.fontStyle.size > 30) {
+                score_text.fontStyle.size -= 1;
+            }
+            else {
+                score_timer.enabled = false;
+                grow = true;
+            }
+        }
+    }
+
+    function set_frac(val) {
+        secondsLeft -= 1;
+        if (r.size.x - shrinkFraction < 0) {
+            timeUP = true;
+            timer.enabled = false;
+        }
+        else {
+            r.size.x -= shrinkFraction;
+            grad.key[1] -= colorGradFraction;
+            grad.key[2] += colorGradFraction;
+        }
+        if (secondsLeft < 30) {
+            hurryTxt.String = secondsLeft+ ' ';
+            hurry.whichChoice = 1;
+        }
+    }
+
+    function set_heart(value) {
+        if ((value < 0.8) && (smallHeart)) {
+            heart.size.x = heart.size.x + oddEven;
+            heart.size.y = heart.size.y + oddEven;
+            smallHeart = false;
+        }
+        else if ((value > 0.8) && (!smallHeart)) {
+            smallHeart = true;
+            heart.size.x = heart.size.x - oddEven;
+            heart.size.y = heart.size.y - oddEven;
+        }
+    }
+
+    "
+    ]
+}
+    ROUTE QUESTION_PAGE_TIMER.cycleTime TO QUESTION_PAGE_SC.set_frac
+    ROUTE QUESTION_PAGE_TIMER.fraction_changed TO QUESTION_PAGE_SC.set_heart
+    ROUTE QUESTION_PAGE_SCORE_TIMER.fraction_changed TO QUESTION_PAGE_SC.emphasizeScore
+
+}
