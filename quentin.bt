@@ -150,10 +150,6 @@ EXTERNPROTO MAP [
 	eventIn   	SFBool 	    zoomOut
 ]"map.bt"
 
-
-# GPS_SIGNAL peut-être dans PROTO MAP ?
-# Internet connection idem
-
 EXTERNPROTO ARROW_NAVIGATOR [
     exposedField    SFVec2f translation         0 0
 	eventOut        SFInt32 navigate
@@ -999,7 +995,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 8
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/edit_text_field.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/edit_text_field.png"
             }
         }
     ]
@@ -1010,7 +1006,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 9
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/edit_text_field_sel.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/edit_text_field_sel.png"
             }
         }
     ]
@@ -1021,7 +1017,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 10
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/tab_quiz_off.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/tab_quiz_off.png"
             }
         }
     ]
@@ -1032,7 +1028,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 11
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/tab_quiz_on.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/tab_quiz_on.png"
             }
         }
     ]
@@ -1043,7 +1039,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 12
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/tab_map_off.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/tab_map_off.png"
             }
         }
     ]
@@ -1054,7 +1050,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 13
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/tab_map_on.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/tab_map_on.png"
             }
         }
     ]
@@ -1065,7 +1061,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 14
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/camera_tab_off.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/camera_tab_off.png"
             }
         }
     ]
@@ -1076,7 +1072,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 15
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/camera_tab_on.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/camera_tab_on.png"
             }
         }
     ]
@@ -1087,7 +1083,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 16
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/help_tab_off.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/help_tab_off.png"
             }
         }
     ]
@@ -1098,7 +1094,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 17
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/help_tab_on.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/help_tab_on.png"
             }
         }
     ]
@@ -1109,7 +1105,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 19
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/intro.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/intro.png"
             }
         }
     ]
@@ -1120,7 +1116,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 20
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/help_background.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/help_background.png"
             }
         }
     ]
@@ -1131,7 +1127,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 21
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/result.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/result.png"
             }
         }
     ]
@@ -1142,7 +1138,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 24
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/input_bg.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/input_bg.png"
             }
         }
     ]
@@ -1153,7 +1149,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 25
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/heart.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/heart.png"
             }
         }
     ]
@@ -1164,7 +1160,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 26
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/videos/splashscreen.mp4#1"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/videos/splashscreen.mp4#1"
             }
         }
     ]
@@ -1175,7 +1171,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 27
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/ancient_scroll.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/ancient_scroll.png"
             }
         }
     ]
@@ -1186,7 +1182,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 28
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/marker_eu.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/marker_eu.png"
             }
         }
     ]
@@ -1197,7 +1193,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 29
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/back_ancient_on.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/back_ancient_on.png"
             }
         }
     ]
@@ -1208,7 +1204,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 30
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/plus_off.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/plus_off.png"
             }
         }
     ]
@@ -1219,7 +1215,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 31
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/minus_off.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/minus_off.png"
             }
         }
     ]
@@ -1230,7 +1226,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 32
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/plus_on_v2.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/plus_on_v2.png"
             }
         }
     ]
@@ -1241,7 +1237,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 33
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/minus_on_v2.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/minus_on_v2.png"
             }
         }
     ]
@@ -1252,7 +1248,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 34
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/message_bg.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/message_bg.png"
             }
         }
     ]
@@ -1263,7 +1259,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 35
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/hint_background.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/hint_background.png"
             }
         }
     ]
@@ -1274,7 +1270,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 36
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/back_icon.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/back_icon.png"
             }
         }
     ]
@@ -1285,7 +1281,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 37
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/validate_on.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/validate_on.png"
             }
         }
     ]
@@ -1296,7 +1292,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 38
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/validate.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/validate.png"
             }
         }
     ]
@@ -1307,7 +1303,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 39
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/intro_button.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/intro_button.png"
             }
         }
     ]
@@ -1318,7 +1314,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 42
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/gps_off.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/gps_off.png"
             }
         }
     ]
@@ -1329,7 +1325,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 43
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/gps_on.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/gps_on.png"
             }
         }
     ]
@@ -1340,7 +1336,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 46
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/input_bg_on.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/input_bg_on.png"
             }
         }
     ]
@@ -1351,7 +1347,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 47
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/internet_off.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/internet_off.png"
             }
         }
     ]
@@ -1362,7 +1358,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 48
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/internet_on.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/internet_on.png"
             }
         }
     ]
@@ -1373,7 +1369,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 50
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/back_icon_on.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/back_icon_on.png"
             }
         }
     ]
@@ -1388,7 +1384,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 51
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/arrows/up.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/arrows/up.png"
             }
         }
     ]
@@ -1399,7 +1395,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 52
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/arrows/up_over.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/arrows/up_over.png"
             }
         }
     ]
@@ -1410,7 +1406,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 53
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/arrows/down.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/arrows/down.png"
             }
         }
     ]
@@ -1421,7 +1417,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 54
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/arrows/down_over.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/arrows/down_over.png"
             }
         }
     ]
@@ -1432,7 +1428,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 55
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/arrows/left.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/arrows/left.png"
             }
         }
     ]
@@ -1443,7 +1439,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 56
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/arrows/left_over.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/arrows/left_over.png"
             }
         }
     ]
@@ -1454,7 +1450,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 57
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/arrows/right.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/arrows/right.png"
             }
         }
     ]
@@ -1465,7 +1461,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 58
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/arrows/right_over.png"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/arrows/right_over.png"
             }
         }
     ]
@@ -1483,7 +1479,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 401
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/numbers/1.mp4"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/numbers/1.mp4"
             }
         }
     ]
@@ -1494,7 +1490,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 402
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/numbers/2.mp4"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/numbers/2.mp4"
             }
         }
     ]
@@ -1505,7 +1501,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 403
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/numbers/3.mp4"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/numbers/3.mp4"
             }
         }
     ]
@@ -1516,7 +1512,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 404
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/numbers/4.mp4"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/numbers/4.mp4"
             }
         }
     ]
@@ -1527,7 +1523,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 405
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/numbers/5.mp4"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/numbers/5.mp4"
             }
         }
     ]
@@ -1538,7 +1534,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 406
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/numbers/6.mp4"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/numbers/6.mp4"
             }
         }
     ]
@@ -1549,7 +1545,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 407
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/numbers/7.mp4"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/numbers/7.mp4"
             }
         }
     ]
@@ -1560,7 +1556,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 408
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/numbers/8.mp4"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/numbers/8.mp4"
             }
         }
     ]
@@ -1571,7 +1567,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 409
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/numbers/9.mp4"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/numbers/9.mp4"
             }
         }
     ]
@@ -1582,7 +1578,7 @@ AT 0 {
             ES_Descriptor {
             ES_ID 410
             muxInfo MuxInfo {
-                fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/numbers/10.mp4"
+                fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/numbers/10.mp4"
             }
         }
     ]
@@ -1593,12 +1589,12 @@ AT 0 {
     ]
 }
 AT 0 { UPDATE OD [
-    ObjectDescriptor { objectDescriptorID 512 esDescr [ ES_Descriptor { ES_ID 512 muxInfo MuxInfo {fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/questions/LouisXIV628b0194-8bbf-4789-8076-54ab1ba1dce8.jpg"}}]}
-    ObjectDescriptor { objectDescriptorID 521 esDescr [ ES_Descriptor { ES_ID 521 muxInfo MuxInfo {fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/questions/1024px-Parc_Montsouris_statue_113dbb5127-2b5d-444e-9034-ca25ef4d25c1.jpg"}}]}
-    ObjectDescriptor { objectDescriptorID 522 esDescr [ ES_Descriptor { ES_ID 522 muxInfo MuxInfo {fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/questions/P1110707_Paris_XIV_parc_de_Montsouris_rwk29bd1538-4734-4c3a-813d-5814a3d1d14a.jpg"}}]}
-ObjectDescriptor { objectDescriptorID 523 esDescr [ ES_Descriptor { ES_ID 523 muxInfo MuxInfo {fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/questions/Lion_death94789b81-eacc-43c4-b525-7043af8a7137.png"}}]}
-    ObjectDescriptor { objectDescriptorID 524 esDescr [ ES_Descriptor { ES_ID 524 muxInfo MuxInfo {fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/questions/Desert dramaeebc8b18-e9c1-46ce-b09b-6bee09ae03d7.png"}}]}
-    ObjectDescriptor { objectDescriptorID 509 esDescr [ ES_Descriptor { ES_ID 509 muxInfo MuxInfo {fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/questions/Jules_cesarfa40ed55-71fc-46f7-a90a-d2d822d7cba5.jpg"}}]}
-    ObjectDescriptor { objectDescriptorID 510 esDescr [ ES_Descriptor { ES_ID 510 muxInfo MuxInfo {fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/questions/Mitterrandcfa3df74-cbba-4c67-a670-3c3990b2fc73.jpg"}}]}
-ObjectDescriptor { objectDescriptorID 511 esDescr [ ES_Descriptor { ES_ID 511 muxInfo MuxInfo {fileName "C:/Users/Quentin/Downloads/pacman_main_and_protos/images/questions/Napoleon_I_of_France_by_Andrea_Appiani0c9ed1c2-d255-41fb-8fb9-7e133765a403.jpg"}}]}
+    ObjectDescriptor { objectDescriptorID 512 esDescr [ ES_Descriptor { ES_ID 512 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/questions/LouisXIV628b0194-8bbf-4789-8076-54ab1ba1dce8.jpg"}}]}
+    ObjectDescriptor { objectDescriptorID 521 esDescr [ ES_Descriptor { ES_ID 521 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/questions/1024px-Parc_Montsouris_statue_113dbb5127-2b5d-444e-9034-ca25ef4d25c1.jpg"}}]}
+    ObjectDescriptor { objectDescriptorID 522 esDescr [ ES_Descriptor { ES_ID 522 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/questions/P1110707_Paris_XIV_parc_de_Montsouris_rwk29bd1538-4734-4c3a-813d-5814a3d1d14a.jpg"}}]}
+ObjectDescriptor { objectDescriptorID 523 esDescr [ ES_Descriptor { ES_ID 523 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/questions/Lion_death94789b81-eacc-43c4-b525-7043af8a7137.png"}}]}
+    ObjectDescriptor { objectDescriptorID 524 esDescr [ ES_Descriptor { ES_ID 524 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/questions/Desert dramaeebc8b18-e9c1-46ce-b09b-6bee09ae03d7.png"}}]}
+    ObjectDescriptor { objectDescriptorID 509 esDescr [ ES_Descriptor { ES_ID 509 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/questions/Jules_cesarfa40ed55-71fc-46f7-a90a-d2d822d7cba5.jpg"}}]}
+    ObjectDescriptor { objectDescriptorID 510 esDescr [ ES_Descriptor { ES_ID 510 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/questions/Mitterrandcfa3df74-cbba-4c67-a670-3c3990b2fc73.jpg"}}]}
+ObjectDescriptor { objectDescriptorID 511 esDescr [ ES_Descriptor { ES_ID 511 muxInfo MuxInfo {fileName "/home/blackdoe/Dropbox/TSP/HTI/augmented_reality_5004/pacman_araf/images/questions/Napoleon_I_of_France_by_Andrea_Appiani0c9ed1c2-d255-41fb-8fb9-7e133765a403.jpg"}}]}
 ] }
