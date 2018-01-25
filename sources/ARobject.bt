@@ -1,0 +1,214 @@
+PROTO AR_OBJECT [
+    exposedField    SFString        name                ""
+exposedField    SFVec2f         position            0 0
+exposedField    SFVec2f         playerPosition      0.0 0.0
+exposedField    SFBool          visible             FALSE
+exposedField    SFBool          clickable           FALSE
+exposedField    MFString        objectURL           ["401"]
+exposedField    SFVec3f         objTrans            0 0 0
+exposedField    SFVec3f         objScale            0.003 0.003 0.003
+exposedField    SFRotation      objRotation         0 0 0 0
+eventOut        SFString        onClick
+]
+{
+    Group {
+	    children [
+	        DEF AR_OBJECT_TS TimeSensor {
+	        cycleInterval   3
+	        loop            TRUE
+	        enabled         TRUE
+	    }
+		    DEF AR_OBJECT_SI OrientationInterpolator  {
+		        key              [0 0.25 0.5 0.75 1]
+		        keyValue         [0 1 0 0, 0 1 0 1.57, 0 1 0 3.14, 0 1 0 4.71, 0 1 0 6.28]
+		    }
+		    DEF AR_OBJECT_TouchSensor TouchSensor {}
+		    DEF AR_OBJECT Switch {
+		        whichChoice     0
+		        children [
+		            DEF AR_OBJECT_TR Transform {
+		                rotation        1 0 0 1.57
+		                scale           0.5 0.5 0.5
+		                children [
+		                    DEF OBJECT Transform {
+				                translation IS objTrans
+				                scale       IS objScale
+				                rotation    IS objRotation
+				                children [
+				                    Inline {
+				                    url IS objectURL
+				                    }
+				                ]
+		                    }
+		                    Switch {
+		                whichChoice 0
+		                children [
+		                    DEF AR_OBJECT_DISTANCE_TRANSLATION Transform {
+		                    translation 0 1.2 0
+		                    children [
+		                        Shape {
+		                        geometry DEF AR_OBJECT_DISTANCE_STRING Text {
+		                            string []
+		                            fontStyle FontStyle {
+		                                family      ["Verdana" "SERIF" "Arial"]
+		                                justify     ["MIDDLE"]
+		                                size        0.6
+		                            }
+		                        }
+		                        appearance Appearance {
+		                            material Material2D {
+		                                emissiveColor   0 0 1
+		                                filled          TRUE
+		                            }
+		                        }
+		                    }
+		                ]
+		                }
+		            ]
+		            }
+		                ]
+		            }
+		        ]
+		    }
+		    DEF AR_OBJECT_SCRIPT Script {
+		        field       SFNode  arObject                    USE AR_OBJECT
+		        field       SFNode  arObjectTouch               USE AR_OBJECT_TouchSensor
+		        field       SFNode  arObjectPos                 USE AR_OBJECT_TR
+		        field       SFNode      arObjDistanceString         USE AR_OBJECT_DISTANCE_STRING
+		        field       SFNode      arObjDistanceTranslation    USE AR_OBJECT_DISTANCE_TRANSLATION
+		        eventIn     SFString    setName         IS name
+		        eventIn     SFVec2f     setPosition     IS position
+		        eventIn     SFVec2f     setPlayerPos    IS playerPosition
+		        eventIn     SFBool      setVisible      IS visible
+		        eventIn     SFBool      setClickable    IS clickable
+		        eventIn     SFBool      arObjectClicked
+		        eventOut    SFString    onClick         IS onClick
+
+		        url ["javascript:
+		        function initialize() {
+		            playerPos       = new SFVec2f (0,0);
+		            objectPosition  = new SFVec2f (0,0);
+		            arObjectName    = 'notSet';
+		        }
+
+		        function setName(name) {
+		            if (name == '') return;
+		            arObjectName = name;
+		            print ('[ AR OBJECT - ' + arObjectName + ' ]: Set NAME to ' + name);
+		        }
+
+		        function setPosition(pos) {
+		            if (vec2fUndefined(pos)) return;
+		                    #   print ('[ AR OBJECT - ' + arObjectName + ' ]: Set POSITION: ' + pos);
+		            objectPosition = pos;
+		            setObjTranslation();
+		        }
+
+		        function setPlayerPos(pos) {
+		            if (vec2fUndefined(pos)) return;
+		            print ('[ AR OBJECT - ' + arObjectName + ' ]: Set PLAYER POSITION: ' + pos);
+		            playerPos = pos;
+		            setObjTranslation();
+		        }
+
+		        function setVisible(val) {
+		        #   if (vec2fUndefined(objectPosition)) return;
+		            if (val) {
+		                arObject.whichChoice = 0;
+		                print ('[ AR OBJECT - ' + arObjectName + ' ]: Set VISIBLE');
+		            }
+		            else {
+		                arObject.whichChoice = -1;
+		                print ('[ AR OBJECT - ' + arObjectName + ' ]: Set INVISIBLE');
+		            }
+		            setObjTranslation();
+		        }
+
+		        function setClickable(val) {
+		            if (val) {
+		                arObjectTouch.enabled = true;
+		                print ('[ AR OBJECT - ' + arObjectName + ' ]: Set CLICKABLE');
+		            }
+		            else {
+		                arObjectTouch.enabled = false;
+		                print ('[ AR OBJECT - ' + arObjectName + ' ]: Set UNCLICKABLE');
+		            }
+		        }
+
+		        function arObjectClicked(val) {
+		            if (val) {
+		                onClick = arObjectName;
+		            }
+		        }
+
+		        function setObjTranslation() {
+		            if (!arObjectIsVisible() || vec2fUndefined(playerPos) || vec2fUndefined(objectPosition)) return;
+		            tmpx = calcmetdistance(playerPos.x, playerPos.y, objectPosition.x, playerPos.y);
+		            tmpy = calcmetdistance(playerPos.x, playerPos.y, playerPos.x, objectPosition.y);
+
+		            if ( playerPos.x < objectPosition.x ) {
+		                tmpx = -tmpx;
+		            }
+		            if ( playerPos.y > objectPosition.y )
+		                tmpy = -tmpy;
+
+		            arObjectPos.translation = new SFVec3f ( tmpx, tmpy, -3 );
+		            print ('[ AR OBJECT - ' + arObjectName + ' ]: Set TRANSLATION: ' + arObjectPos.translation);
+		            setDistanceToPlayer();
+		        }
+
+		        function setDistanceToPlayer() {
+		            distance = haversine_m(objectPosition.x, objectPosition.y, playerPos.x, playerPos.y).toFixed();
+		            arObjDistanceString.string = new MFString(distance + ' m');
+		            print ('[ AR OBJECT - ' + arObjectName + ' ]: Set DISTANCE to PLAYER: ' + distance + ' m');
+		            arObjDistanceTranslation.rotation = new SFRotation( 0, 1, 0, markerPlayerAngle(objectPosition.x, objectPosition.y, playerPos.x, playerPos.y));
+		        }
+
+		        function markerPlayerAngle(markerLat, markerLong, playerLat, playerLong) {
+		            dy      = markerLat - playerLat;
+		            dx      = Math.cos(Math.PI/180*playerLat)*(markerLong - playerLong);
+		                    #   return Math.atan2(dy, dx)+1.57;
+		            return Math.atan2(dy, dx);
+		        }
+
+		        function arObjectIsVisible() {
+		            return arObject.whichChoice == 0;
+		        }
+
+		        function vec2fUndefined(pos) {
+		            return ((pos.x == 0) && (pos.y == 0));
+		        }
+
+		        function haversine_m(lat1, long1, lat2, long2) {
+		            d2r     = Math.PI / 180;
+		            d_latt  = (lat2 - lat1) * d2r;
+		            d_long  = (long2 - long1) * d2r;
+		            a       = Math.sin(d_latt/2)*Math.sin(d_latt/2) + Math.cos(lat1 * d2r) * Math.cos(lat2 * d2r) * Math.sin(d_long/2)*Math.sin(d_long/2);
+		            c       = 2 * Math.atan2(Math.sqrt(a),  Math.sqrt(1-a));
+		            return 6371 * 1000 * c;
+		        }
+
+		        function calcmetdistance(lat1, lon1, lat2, lon2) {
+		            R       = 6371000;
+		            lat1    *=Math.PI/180;
+		            lon1    *=Math.PI/180;
+		            lat2    *=Math.PI/180;
+		            lon2    *=Math.PI/180;
+		            d       = Math.acos (
+		                Math.sin(lat1)*Math.sin(lat2) +
+		                Math.cos(lat1)*Math.cos(lat2) *
+		                Math.cos(lon2-lon1)
+		            ) * R;
+		            return d;
+		        }
+		        "
+		        ]
+		    }
+		]
+	}
+
+    ROUTE AR_OBJECT_TS.fraction_changed     TO AR_OBJECT_SI.set_fraction
+    ROUTE AR_OBJECT_SI.value_changed        TO OBJECT.rotation
+    ROUTE AR_OBJECT_TouchSensor.isActive    TO AR_OBJECT_SCRIPT.arObjectClicked
+}
+
