@@ -293,23 +293,10 @@ OrderedGroup {
                         translation 0 0
                         size 480 800
                         }
-
-                        DEF ADVANCE2Help BUTTON {
-                            layoutSize 200 37
-                            size 200 80
-                            translation -130 -300
-                            textColor $345253
-                            textSize 22
-                            buttonText "How to play.."
-                            backImage "39"
-                            overImage "39"
-                            fonstSyleFamily "Arial"
-                        }
-
                         DEF ADVANCE2Game BUTTON {
                             layoutSize 200 53
                             size 200 80
-                            translation 130 -300
+                            translation 0 -300
                             textColor $345253
                             textSize 32
                             buttonText "Start!"
@@ -347,12 +334,6 @@ OrderedGroup {
                             LAYER_BUTTON_SIZE 480 81
                             LAYER_TABS_SIZE 480 719
                             tabButtons [
-                                DEF QUIZ UI_TAB_BUTTON {
-                                Size 108 81
-                                Pos -180 0
-                                BackImage           "10"
-                                BackImageSelected   "11"
-                                }
                                 DEF MAP UI_TAB_BUTTON {
                                     Size 108 81
                                     Pos -60 0
@@ -487,10 +468,8 @@ OrderedGroup {
 	        field SFNode gmap               USE GMAP
 	        field SFNode menu               USE MENU
 	        field SFNode q_page             USE Q_PAGE
-	        field SFNode quiz_sw            USE QUIZ_SW
 	        field SFNode tabs               USE TABS
 	        field SFNode map_tab            USE MAP
-	        field SFNode quiz_tab           USE QUIZ
 	        field SFNode ar_view            USE AR_VIEW_INSTANCE
 	        field SFNode player             USE PLAYER
 	        field SFNode tmr                USE TMR
@@ -908,7 +887,6 @@ ROUTE ARR_NAV.navigate              TO PLAYER.arrow_navigator
 ROUTE MAIN_TS.time                  TO SCRIPT.currentTime
 ROUTE Q_PAGE.timeUP                 TO SCRIPT.timeIsUP
 ROUTE ADVANCE2Game.onClick          TO SCRIPT.showQuiz
-ROUTE ADVANCE2Help.onClick          TO SCRIPT.showHelp
 ROUTE INTRO_MS.mediaDuration        TO SCRIPT.setIntroDuration
 ROUTE TABS.CurrentTab               TO SCRIPT.tabChanged
 ROUTE TMR.cycleTime                 TO SCRIPT.checkInternetConnection
